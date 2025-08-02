@@ -6,7 +6,7 @@ import { WeatherDetails } from "@/components/WeatherDetails";
 import { DailyForecast } from "@/components/DailyForecast";
 import { SearchLocation } from "@/components/SearchLocation";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 
 const Index = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -99,11 +99,21 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-weather">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Weather Forecast</h1>
-          <p className="text-muted-foreground">Stay updated with the latest weather conditions</p>
+    <div className="min-h-screen bg-gradient-weather relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      </div>
+      
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        <div className="mb-8 text-center animate-fade-in">
+          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-3 bg-gradient-to-r from-foreground via-primary/30 to-foreground bg-clip-text">
+            Weather Forecast
+          </h1>
+          <p className="text-muted-foreground text-lg">Stay updated with the latest weather conditions worldwide</p>
+          <div className="w-24 h-1 bg-gradient-to-r from-primary to-blue-500 mx-auto mt-4 rounded-full" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -123,13 +133,18 @@ const Index = () => {
           )}
 
           {!weather && !loading && (
-            <div className="col-span-full text-center py-12">
-              <h2 className="text-xl font-semibold text-foreground mb-2">
-                Search for Weather
-              </h2>
-              <p className="text-muted-foreground">
-                Enter a city name or use your current location to get started
-              </p>
+            <div className="col-span-full text-center py-16 animate-fade-in">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-500/20 rounded-full flex items-center justify-center">
+                  <Search className="w-12 h-12 text-primary" />
+                </div>
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  Discover Weather Anywhere
+                </h2>
+                <p className="text-muted-foreground text-lg">
+                  Enter a city name or use your current location to get started with detailed weather insights
+                </p>
+              </div>
             </div>
           )}
         </div>

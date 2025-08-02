@@ -1,5 +1,5 @@
 const WEATHER_API_KEY = "424a0fbacc0b4291bdd40124250208";
-const BASE_URL = "http://api.weatherapi.com/v1";
+const BASE_URL = "https://api.weatherapi.com/v1";
 
 export interface WeatherData {
   location: {
