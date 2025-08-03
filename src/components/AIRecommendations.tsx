@@ -212,10 +212,20 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
         <Button 
           onClick={generateRecommendations}
           disabled={loading}
-          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+          variant="default"
+          className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium px-6 py-2 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg"
         >
-          {loading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Brain className="mr-2" size={16} />}
-          Get AI Advice
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin mr-2" size={16} />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Brain className="mr-2" size={16} />
+              Get AI Advice
+            </>
+          )}
         </Button>
       </div>
 

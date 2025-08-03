@@ -73,8 +73,8 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        filter: 'blur(8px) brightness(0.3)',
-        transform: 'scale(1.1)', // Slight scale to avoid blur edge artifacts
+        filter: 'blur(2px) brightness(0.4)',
+        transform: 'scale(1.05)', // Reduced scale to minimize blur artifacts
       }}
     />
   );

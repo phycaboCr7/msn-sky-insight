@@ -35,10 +35,10 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
     );
 
   return (
-    <WeatherCard className="p-6 col-span-full">
+    <WeatherCard className="p-6 col-span-full animate-slide-left">
       <h3 className="text-lg font-semibold text-foreground mb-4">Hourly Forecast</h3>
-      <ScrollArea className="w-full">
-        <div className="flex gap-4 pb-4">
+      <ScrollArea className="w-full whitespace-nowrap">
+        <div className="flex gap-4 pb-4 w-max min-w-full">
           {hourlyData.map((hour, index) => {
             const time = new Date(hour.time);
             const isNow = index === 0;
@@ -46,9 +46,9 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
             return (
               <div
                 key={hour.time}
-                className={`flex-shrink-0 flex flex-col items-center gap-2 p-3 rounded-lg transition-all ${
+                className={`flex-shrink-0 w-20 flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:scale-105 ${
                   isNow 
-                    ? 'bg-primary/20 border border-primary/30' 
+                    ? 'bg-primary/20 border border-primary/30 shadow-glow' 
                     : 'hover:bg-muted/50'
                 }`}
               >

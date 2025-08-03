@@ -1,4 +1,5 @@
 import { WeatherCard } from "./WeatherCard";
+import { LocationBackground } from "./LocationBackground";
 import { WeatherData } from "@/lib/weather";
 import { Cloud, Sun, CloudRain, CloudSnow } from "lucide-react";
 
@@ -28,10 +29,16 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
   const isDay = current.is_day === 1;
 
   return (
-    <WeatherCard className="p-8 col-span-full lg:col-span-2 relative overflow-hidden">
+    <WeatherCard className="p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
+      {/* Location background image */}
+      <LocationBackground weather={weather} />
+      
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none z-5" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-3xl pointer-events-none z-5" />
+      
+      {/* Blur separator for location image */}
+      <div className="absolute inset-0 bg-background/20 backdrop-blur-[1px] z-5" />
       
       <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div className="flex items-center gap-6">
