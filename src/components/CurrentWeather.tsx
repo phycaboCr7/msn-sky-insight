@@ -2,34 +2,32 @@ import { WeatherCard } from "./WeatherCard";
 import { LocationBackground } from "./LocationBackground";
 import { WeatherData } from "@/lib/weather";
 import { Cloud, Sun, CloudRain, CloudSnow } from "lucide-react";
-
 interface CurrentWeatherProps {
   weather: WeatherData;
 }
-
 const getWeatherIcon = (condition: string, isDay: boolean) => {
   const iconSize = 80;
   const iconColor = isDay ? "#fb923c" : "#60a5fa";
-  
   if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
     return <Sun size={iconSize} color={iconColor} className="drop-shadow-lg" />;
   } else if (condition.toLowerCase().includes('rain')) {
-    return <CloudRain size={iconSize} color="#60a5fa" className="drop-shadow-lg" />;
+    return <CloudRain size={iconSize} color="#60a5fa" className="-bottom-0 " />;
   } else if (condition.toLowerCase().includes('snow')) {
     return <CloudSnow size={iconSize} color="#e2e8f0" className="drop-shadow-lg" />;
   } else if (condition.toLowerCase().includes('cloud')) {
     return <Cloud size={iconSize} color="#94a3b8" className="drop-shadow-lg" />;
   }
-  
   return <Sun size={iconSize} color={iconColor} className="drop-shadow-lg" />;
 };
-
-export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
-  const { current, location } = weather;
+export const CurrentWeather = ({
+  weather
+}: CurrentWeatherProps) => {
+  const {
+    current,
+    location
+  } = weather;
   const isDay = current.is_day === 1;
-
-  return (
-    <WeatherCard className="p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
+  return <WeatherCard className="p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
       {/* Location background image */}
       <LocationBackground weather={weather} />
       
@@ -70,6 +68,5 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
           </div>
         </div>
       </div>
-    </WeatherCard>
-  );
+    </WeatherCard>;
 };
