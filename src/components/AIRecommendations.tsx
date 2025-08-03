@@ -58,11 +58,10 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
       
       Format your response as a JSON array with objects containing: category, advice, priority (low/medium/high). Be specific and practical.`;
 
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey,
         },
         body: JSON.stringify({
           contents: [{

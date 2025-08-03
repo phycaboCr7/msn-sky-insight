@@ -9,15 +9,17 @@ interface HumidityChartProps {
 export const HumidityChart = ({ weather }: HumidityChartProps) => {
   if (!weather.forecast?.forecastday[0]?.hour) return null;
 
+  const currentHour = new Date().getHours();
   const humidityData = weather.forecast.forecastday[0].hour
-    .filter((_, index) => index % 3 === 0) // Show every 3rd hour
+    .slice(currentHour, currentHour + 12) // Show next 12 hours
+    .filter((_, index) => index % 2 === 0) // Show every 2nd hour
     .map((hour) => ({
       time: new Date(hour.time).toLocaleTimeString('en-US', { 
         hour: 'numeric',
         hour12: true 
       }),
       humidity: hour.humidity,
-      precipitation: hour.chance_of_rain,
+      precipitation: hour.chance_of_rain || hour.chance_of_snow || 0,
     }));
 
   return (
