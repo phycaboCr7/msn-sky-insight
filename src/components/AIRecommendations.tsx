@@ -4,7 +4,8 @@ import { WeatherData } from "@/lib/weather";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, Loader2, Shirt, Umbrella, Sun, AlertTriangle } from "lucide-react";
+import { AIAskBar } from "./AIAskBar";
+import { Brain, Loader2, Shirt, Umbrella, Sun, AlertTriangle, Utensils, Bed } from "lucide-react";
 
 interface AIRecommendationsProps {
   weather: WeatherData;
@@ -17,13 +18,24 @@ interface Recommendation {
   priority: 'low' | 'medium' | 'high';
 }
 
-const GEMINI_API_KEY = "AIzaSyAZwsGltX9rq0GpjKh3ExYvOO9BExHhxCg";
+const GEMINI_API_KEY = "";
 
 export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState(GEMINI_API_KEY);
+  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('gemini_api_key') || GEMINI_API_KEY);
   const { toast } = useToast();
+
+  const saveApiKey = () => {
+    if (apiKey.trim()) {
+      try {
+        localStorage.setItem('gemini_api_key', apiKey.trim());
+        toast({ title: "API key saved", description: "Your Gemini API key is stored locally." });
+      } catch {}
+    } else {
+      localStorage.removeItem('gemini_api_key');
+    }
+  };
 
   const generateRecommendations = async () => {
     if (!apiKey.trim()) {
@@ -49,14 +61,7 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
         location: weather.location.name
       };
 
-      const prompt = `Based on this weather data: ${JSON.stringify(weatherInfo)}, provide specific recommendations in the following categories:
-      1. Clothing recommendations (what to wear)
-      2. Outdoor activity advice (should go outside or not)
-      3. Health and safety precautions
-      4. Umbrella/rain gear necessity
-      5. Sun protection needs
-      
-      Format your response as a JSON array with objects containing: category, advice, priority (low/medium/high). Be specific and practical.`;
+      const prompt = `Using this weather data: ${JSON.stringify(weatherInfo)}, return actionable recommendations for these exact categories: ["Clothing","Diet","Sleep","Umbrella"]. For each, provide: category, advice, priority (low|medium|high). Keep advice concise and specific to the location \"${weatherInfo.location}\". Return ONLY a valid JSON array.`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -84,7 +89,7 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
 
       const data = await response.json();
       const aiResponse = data.candidates[0].content.parts[0].text;
-      
+
       // Parse AI response and create recommendations
       try {
         const parsedRecommendations = JSON.parse(aiResponse);
@@ -125,6 +130,10 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
       return <Umbrella size={20} className="text-blue-400" />;
     } else if (lowerCategory.includes('sun') || lowerCategory.includes('uv')) {
       return <Sun size={20} className="text-yellow-400" />;
+    } else if (lowerCategory.includes('diet') || lowerCategory.includes('eat') || lowerCategory.includes('food')) {
+      return <Utensils size={20} className="text-foreground" />;
+    } else if (lowerCategory.includes('sleep') || lowerCategory.includes('rest')) {
+      return <Bed size={20} className="text-muted-foreground" />;
     } else if (lowerCategory.includes('health') || lowerCategory.includes('safety')) {
       return <AlertTriangle size={20} className="text-red-400" />;
     } else {
@@ -191,6 +200,54 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
       });
     }
 
+    // Diet recommendation
+    if (temp >= 26) {
+      recommendations.push({
+        category: "Diet",
+        advice: "Focus on hydration: water, coconut water, fresh fruits; avoid heavy oily foods.",
+        icon: <Utensils size={20} className="text-foreground" />,
+        priority: "medium"
+      });
+    } else if (temp <= 10) {
+      recommendations.push({
+        category: "Diet",
+        advice: "Warm soups, herbal tea, and protein-rich meals to keep energy levels up.",
+        icon: <Utensils size={20} className="text-foreground" />,
+        priority: "medium"
+      });
+    } else {
+      recommendations.push({
+        category: "Diet",
+        advice: "Balanced meals; include vegetables and lean protein; stay moderately hydrated.",
+        icon: <Utensils size={20} className="text-foreground" />,
+        priority: "low"
+      });
+    }
+
+    // Sleep recommendation
+    if (temp >= 28 && weather.current.humidity > 70) {
+      recommendations.push({
+        category: "Sleep",
+        advice: "Aim 7–9 hours; cool your room (fan/AC), light bedding, hydrate before bed.",
+        icon: <Bed size={20} className="text-muted-foreground" />,
+        priority: "medium"
+      });
+    } else if (temp <= 8) {
+      recommendations.push({
+        category: "Sleep",
+        advice: "Aim 7–9 hours; keep room warm, use layered bedding for comfort.",
+        icon: <Bed size={20} className="text-muted-foreground" />,
+        priority: "low"
+      });
+    } else {
+      recommendations.push({
+        category: "Sleep",
+        advice: "Aim 7–9 hours; maintain a consistent schedule and limit late caffeine.",
+        icon: <Bed size={20} className="text-muted-foreground" />,
+        priority: "low"
+      });
+    }
+
     return recommendations;
   };
 
@@ -210,6 +267,7 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
           AI Weather Recommendations
         </h3>
         <Button 
+          type="button"
           onClick={generateRecommendations}
           disabled={loading}
           variant="default"
@@ -229,20 +287,27 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
         </Button>
       </div>
 
-      {!GEMINI_API_KEY && (
+      {!apiKey && (
         <div className="mb-4">
-          <Input
-            type="password"
-            placeholder="Enter your Gemini API key..."
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="bg-white/5 border-white/20"
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              type="password"
+              placeholder="Enter your Gemini API key..."
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              className="bg-white/5 border-white/20"
+            />
+            <Button type="button" variant="secondary" onClick={saveApiKey}>Save Key</Button>
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
             Get your API key from Google AI Studio
           </p>
         </div>
       )}
+
+      <div className="mb-6">
+        <AIAskBar weather={weather} />
+      </div>
 
       {recommendations.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

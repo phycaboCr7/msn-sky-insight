@@ -110,16 +110,14 @@ const Index = () => {
       {/* Dynamic weather-based background */}
       <DynamicBackground weather={weather} />
       
-      {/* Subtle background elements */}
+      {/* Subtle background overlay (no animation) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-purple-500/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background/0" />
       </div>
       
       <div className="container mx-auto px-4 py-8 relative z-20">
         <div className="mb-8 text-center animate-fade-in">
-          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-3 bg-gradient-to-r from-foreground via-primary/30 to-foreground bg-clip-text">
+          <h1 className="font-playfair text-5xl lg:text-6xl font-semibold tracking-tight mb-3 bg-gradient-to-r from-primary/90 via-foreground to-primary/80 bg-clip-text text-transparent">
             Weather Forecast
           </h1>
           <p className="text-muted-foreground text-lg">Stay updated with the latest weather conditions worldwide</p>
