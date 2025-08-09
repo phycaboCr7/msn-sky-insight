@@ -5,18 +5,19 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MessageSquare } from "lucide-react";
 
-interface AIAskBarProps { weather: WeatherData; }
+interface AIAskBarProps { weather: WeatherData; apiKey?: string; }
 
-export const AIAskBar = ({ weather }: AIAskBarProps) => {
+export const AIAskBar = ({ weather, apiKey }: AIAskBarProps) => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const apiKey = (typeof window !== 'undefined' && localStorage.getItem('gemini_api_key')) || "";
+  const apiKeyToUse = (typeof window !== 'undefined' && (localStorage.getItem('gemini_api_key') || "")) || "";
+  const effectiveKey = (typeof window !== 'undefined' ? (apiKey || undefined) : undefined) ?? apiKeyToUse;
 
   const askAI = async () => {
-    if (!apiKey) {
+    if (!effectiveKey) {
       toast({ title: "API Key Required", description: "Save your Gemini API key to ask questions.", variant: "destructive" });
       return;
     }
@@ -39,7 +40,7 @@ export const AIAskBar = ({ weather }: AIAskBarProps) => {
 
       const prompt = `You are a concise weather assistant. Use ONLY this current weather context ${JSON.stringify(weatherInfo)} and answer the user's question in 3-5 bullet points. Be practical and specific to the location. Question: ${question}`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${effectiveKey}` , {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
