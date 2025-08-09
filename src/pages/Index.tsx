@@ -10,7 +10,7 @@ import { HumidityChart } from "@/components/charts/HumidityChart";
 import { UVIndexChart } from "@/components/charts/UVIndexChart";
 import { WindChart } from "@/components/charts/WindChart";
 import { MonthlyChart } from "@/components/charts/MonthlyChart";
-import { AIRecommendations } from "@/components/AIRecommendations";
+
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
@@ -134,7 +134,7 @@ const Index = () => {
           {weather && (
             <>
               <CurrentWeather weather={weather} />
-              <AIRecommendations weather={weather} />
+              
               <TemperatureChart weather={weather} />
               <HourlyForecast weather={weather} />
               <HumidityChart weather={weather} />
