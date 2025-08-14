@@ -1,6 +1,6 @@
 import { WeatherData } from "@/lib/weather";
-import { Card, CardContent } from "@/components/ui/card";
-import { Umbrella, Shirt, Coffee, Moon, Sun, Droplets } from "lucide-react";
+import { WeatherCard } from "./WeatherCard";
+import { Umbrella, Shirt, Coffee, Moon } from "lucide-react";
 
 interface WeatherAdviceProps {
   weather: WeatherData;
@@ -14,27 +14,27 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
   const uvIndex = weather.current.uv;
 
   const getClothingAdvice = () => {
-    if (temp < 10) return "Wear warm clothes, jacket, and layers";
+    if (temp < 10) return "Wear warm clothes, jacket, and layers for comfort";
     if (temp < 18) return "Light jacket or sweater recommended";
     if (temp < 25) return "Comfortable clothing, t-shirt or light shirt";
     return "Light, breathable clothing recommended";
   };
 
   const getFoodAdvice = () => {
-    if (temp < 10) return "Hot drinks, warm soup, comfort food";
-    if (temp < 25) return "Balanced meals, stay hydrated";
-    return "Light meals, cold drinks, fresh fruits";
+    if (temp < 10) return "Hot drinks, warm soup, and comfort food";
+    if (temp < 25) return "Balanced meals and stay well hydrated";
+    return "Light meals, cold drinks, and fresh fruits";
   };
 
   const getSleepAdvice = () => {
-    if (temp < 15) return "7-8 hours, warm blankets recommended";
-    if (temp < 25) return "7-8 hours, comfortable bedding";
-    return "7-8 hours, light bedding, keep room cool";
+    if (temp < 15) return "7-8 hours with warm blankets recommended";
+    if (temp < 25) return "7-8 hours with comfortable bedding";
+    return "7-8 hours with light bedding, keep room cool";
   };
 
   const getUmbrellaAdvice = () => {
     if (condition.includes('rain') || condition.includes('drizzle') || condition.includes('shower')) {
-      return "Take umbrella - rain expected";
+      return "Take umbrella - rain expected today";
     }
     if (rainChance > 60) return "Take umbrella - high rain chance";
     if (rainChance > 30) return "Consider umbrella - possible rain";
@@ -43,44 +43,46 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
 
   const adviceItems = [
     {
-      icon: <Shirt className="w-5 h-5" />,
+      icon: <Shirt className="w-6 h-6 text-blue-400" />,
       title: "What to Wear",
-      advice: getClothingAdvice(),
-      color: "from-blue-500/20 to-cyan-500/20"
+      advice: getClothingAdvice()
     },
     {
-      icon: <Coffee className="w-5 h-5" />,
+      icon: <Coffee className="w-6 h-6 text-orange-400" />,
       title: "What to Eat",
-      advice: getFoodAdvice(),
-      color: "from-orange-500/20 to-red-500/20"
+      advice: getFoodAdvice()
     },
     {
-      icon: <Moon className="w-5 h-5" />,
+      icon: <Moon className="w-6 h-6 text-purple-400" />,
       title: "Sleep Advice",
-      advice: getSleepAdvice(),
-      color: "from-purple-500/20 to-pink-500/20"
+      advice: getSleepAdvice()
     },
     {
-      icon: <Umbrella className="w-5 h-5" />,
+      icon: <Umbrella className={`w-6 h-6 ${rainChance > 30 ? 'text-blue-400' : 'text-green-400'}`} />,
       title: "Umbrella",
-      advice: getUmbrellaAdvice(),
-      color: rainChance > 30 ? "from-blue-600/20 to-blue-700/20" : "from-green-500/20 to-green-600/20"
+      advice: getUmbrellaAdvice()
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <>
       {adviceItems.map((item, index) => (
-        <Card key={index} className="border-white/10 bg-white/5 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${item.color} mb-3`}>
-              {item.icon}
+        <WeatherCard key={index} className="animate-fade-in">
+          <div className="p-6">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 p-3 rounded-lg bg-white/5">
+                {item.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-foreground mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed font-medium">
+                  {item.advice}
+                </p>
+              </div>
             </div>
-            <h3 className="font-semibold text-sm text-foreground mb-2">{item.title}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">{item.advice}</p>
-          </CardContent>
-        </Card>
+          </div>
+        </WeatherCard>
       ))}
-    </div>
+    </>
   );
 };

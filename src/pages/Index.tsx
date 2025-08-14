@@ -162,6 +162,14 @@ const Index = () => {
             </div>
           )}
         </div>
+        
+        {/* Footer */}
+        <footer className="mt-16 py-8 text-center relative z-20">
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-6" />
+          <p className="text-muted-foreground text-sm font-medium">
+            Website made by <span className="text-primary font-semibold">Rakshit Jain</span>
+          </p>
+        </footer>
       </div>
     </div>
   );
