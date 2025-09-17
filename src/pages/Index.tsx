@@ -117,10 +117,18 @@ const Index = () => {
       
       <div className="container mx-auto px-4 py-8 relative z-20">
         <div className="mb-8 text-center animate-fade-in">
+          {/* Large Weather Icon */}
+          <div className="mb-6">
+            <img 
+              src="/favicon.png" 
+              alt="Weatherza Logo" 
+              className="w-24 h-24 lg:w-32 lg:h-32 mx-auto drop-shadow-2xl hover:scale-110 transition-transform duration-300"
+            />
+          </div>
           <h1 className="font-playfair text-5xl lg:text-6xl font-semibold tracking-tight mb-3 bg-gradient-to-r from-primary/90 via-foreground to-primary/80 bg-clip-text text-transparent">
-            Weather Forecast
+            Weatherza
           </h1>
-          <p className="text-muted-foreground text-lg">Stay updated with the latest weather conditions worldwide</p>
+          <p className="text-muted-foreground text-lg">A True Forecasting Experience</p>
           <div className="w-24 h-1 bg-gradient-to-r from-primary to-blue-500 mx-auto mt-4 rounded-full" />
         </div>
 
