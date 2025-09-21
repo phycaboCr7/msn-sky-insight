@@ -35,11 +35,14 @@ const getDayName = (dateString: string, index: number) => {
 export const DailyForecast = ({ weather }: DailyForecastProps) => {
   if (!weather.forecast?.forecastday) return null;
 
-  const dailyData = weather.forecast.forecastday.slice(0, 7);
+  const dailyData = weather.forecast.forecastday;
+  const daysCount = dailyData.length;
 
   return (
     <WeatherCard className="p-6 col-span-full lg:col-span-1">
-      <h3 className="text-lg font-semibold text-foreground mb-4">7-Day Forecast</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4">
+        {daysCount}-Day Forecast
+      </h3>
       <div className="space-y-3">
         {dailyData.map((day, index) => {
           const dayName = getDayName(day.date, index);
