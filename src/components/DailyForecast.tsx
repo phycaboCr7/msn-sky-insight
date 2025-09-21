@@ -1,6 +1,6 @@
 import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
-import { Cloud, Moon, CloudRain, CloudSnow, Snowflake } from "lucide-react";
+import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun } from "lucide-react";
 
 interface DailyForecastProps {
   weather: WeatherData;
@@ -12,7 +12,7 @@ const getWeatherIcon = (condition: string, temp?: number) => {
   if (temp && temp < 5) {
     return <Snowflake size={iconSize} color="#e2e8f0" />;
   } else if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
-    return <Moon size={iconSize} color="#fb923c" />;
+    return <Sun size={iconSize} color="#fb923c" />;
   } else if (condition.toLowerCase().includes('rain')) {
     return <CloudRain size={iconSize} color="#60a5fa" />;
   } else if (condition.toLowerCase().includes('snow')) {
@@ -21,7 +21,7 @@ const getWeatherIcon = (condition: string, temp?: number) => {
     return <Cloud size={iconSize} color="#94a3b8" />;
   }
   
-  return <Moon size={iconSize} color="#fb923c" />;
+  return <Sun size={iconSize} color="#fb923c" />;
 };
 
 const getDayName = (dateString: string, index: number) => {

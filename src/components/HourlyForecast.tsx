@@ -1,6 +1,6 @@
 import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
-import { Cloud, Moon, CloudRain, CloudSnow, Snowflake } from "lucide-react";
+import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface HourlyForecastProps {
@@ -9,12 +9,15 @@ interface HourlyForecastProps {
 
 const getWeatherIcon = (condition: string, isDay: boolean, temp?: number) => {
   const iconSize = 32;
-  const iconColor = isDay ? "#fb923c" : "#60a5fa";
   
   if (temp && temp < 5) {
     return <Snowflake size={iconSize} color="#e2e8f0" />;
   } else if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
-    return <Moon size={iconSize} color={iconColor} />;
+    if (isDay) {
+      return <Sun size={iconSize} color="#fb923c" />;
+    } else {
+      return <Moon size={iconSize} color="#60a5fa" />;
+    }
   } else if (condition.toLowerCase().includes('rain')) {
     return <CloudRain size={iconSize} color="#60a5fa" />;
   } else if (condition.toLowerCase().includes('snow')) {
@@ -23,7 +26,11 @@ const getWeatherIcon = (condition: string, isDay: boolean, temp?: number) => {
     return <Cloud size={iconSize} color="#94a3b8" />;
   }
   
-  return <Moon size={iconSize} color={iconColor} />;
+  if (isDay) {
+    return <Sun size={iconSize} color="#fb923c" />;
+  } else {
+    return <Moon size={iconSize} color="#60a5fa" />;
+  }
 };
 
 export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
