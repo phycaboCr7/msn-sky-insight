@@ -1,16 +1,18 @@
 import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
-import { Cloud, Sun, CloudRain, CloudSnow } from "lucide-react";
+import { Cloud, Moon, CloudRain, CloudSnow, Snowflake } from "lucide-react";
 
 interface DailyForecastProps {
   weather: WeatherData;
 }
 
-const getWeatherIcon = (condition: string) => {
+const getWeatherIcon = (condition: string, temp?: number) => {
   const iconSize = 40;
   
-  if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
-    return <Sun size={iconSize} color="#fb923c" />;
+  if (temp && temp < 5) {
+    return <Snowflake size={iconSize} color="#e2e8f0" />;
+  } else if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
+    return <Moon size={iconSize} color="#fb923c" />;
   } else if (condition.toLowerCase().includes('rain')) {
     return <CloudRain size={iconSize} color="#60a5fa" />;
   } else if (condition.toLowerCase().includes('snow')) {
@@ -19,7 +21,7 @@ const getWeatherIcon = (condition: string) => {
     return <Cloud size={iconSize} color="#94a3b8" />;
   }
   
-  return <Sun size={iconSize} color="#fb923c" />;
+  return <Moon size={iconSize} color="#fb923c" />;
 };
 
 const getDayName = (dateString: string, index: number) => {
@@ -55,7 +57,7 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
                   {dayName}
                 </div>
                 <div className="flex-shrink-0">
-                  {getWeatherIcon(day.day.condition.text)}
+                  {getWeatherIcon(day.day.condition.text, day.day.avgtemp_c)}
                 </div>
                 <div className="flex-1 text-sm text-muted-foreground">
                   {day.day.condition.text}

@@ -1,15 +1,17 @@
 import { WeatherCard } from "./WeatherCard";
 import { LocationBackground } from "./LocationBackground";
 import { WeatherData } from "@/lib/weather";
-import { Cloud, Sun, CloudRain, CloudSnow } from "lucide-react";
+import { Cloud, Moon, CloudRain, CloudSnow, Snowflake } from "lucide-react";
 interface CurrentWeatherProps {
   weather: WeatherData;
 }
-const getWeatherIcon = (condition: string, isDay: boolean) => {
+const getWeatherIcon = (condition: string, isDay: boolean, temp?: number) => {
   const iconSize = 80;
   const iconColor = isDay ? "#fb923c" : "#60a5fa";
-  if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
-    return <Sun size={iconSize} color={iconColor} className="drop-shadow-lg" />;
+  if (temp && temp < 5) {
+    return <Snowflake size={iconSize} color="#e2e8f0" className="drop-shadow-lg" />;
+  } else if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
+    return <Moon size={iconSize} color={iconColor} className="drop-shadow-lg" />;
   } else if (condition.toLowerCase().includes('rain')) {
     return <CloudRain size={iconSize} color="#60a5fa" className="-bottom-0 " />;
   } else if (condition.toLowerCase().includes('snow')) {
@@ -17,7 +19,7 @@ const getWeatherIcon = (condition: string, isDay: boolean) => {
   } else if (condition.toLowerCase().includes('cloud')) {
     return <Cloud size={iconSize} color="#94a3b8" className="drop-shadow-lg" />;
   }
-  return <Sun size={iconSize} color={iconColor} className="drop-shadow-lg" />;
+  return <Moon size={iconSize} color={iconColor} className="drop-shadow-lg" />;
 };
 export const CurrentWeather = ({
   weather
@@ -41,7 +43,7 @@ export const CurrentWeather = ({
       <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div className="flex items-center gap-6">
           <div className="flex-shrink-0 animate-float">
-            {getWeatherIcon(current.condition.text, isDay)}
+            {getWeatherIcon(current.condition.text, isDay, current.temp_c)}
           </div>
           <div className="space-y-2">
             <div className="text-6xl lg:text-8xl font-light text-foreground animate-scale-in bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
