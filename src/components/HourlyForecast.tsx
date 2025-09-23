@@ -44,10 +44,10 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
     );
 
   return (
-    <WeatherCard className="p-6 col-span-full animate-slide-left">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Hourly Forecast</h3>
+    <WeatherCard className="p-4 sm:p-6 col-span-full animate-slide-left">
+      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Hourly Forecast</h3>
       <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-4 pb-4 w-max min-w-full">
+        <div className="flex gap-3 sm:gap-4 pb-4 w-max min-w-full overflow-x-auto touch-pan-x">
           {hourlyData.map((hour, index) => {
             const time = new Date(hour.time);
             const isNow = index === 0;
@@ -55,22 +55,22 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
             return (
               <div
                 key={hour.time}
-                className={`flex-shrink-0 w-20 flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:scale-105 ${
+                className={`flex-shrink-0 w-16 sm:w-20 flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-lg transition-all hover:scale-105 ${
                   isNow 
                     ? 'bg-primary/20 border border-primary/30 shadow-glow' 
                     : 'hover:bg-muted/50'
                 }`}
               >
-                <div className="text-sm text-muted-foreground font-medium">
+                <div className="text-xs sm:text-sm text-muted-foreground font-medium">
                   {isNow ? 'Now' : time.toLocaleTimeString('en-US', { 
                     hour: 'numeric',
                     hour12: true 
                   })}
                 </div>
-                <div className="my-2">
+                <div className="my-1 sm:my-2">
                   {getWeatherIcon(hour.condition.text, hour.is_day === 1, hour.temp_c)}
                 </div>
-                <div className="text-lg font-semibold text-foreground">
+                <div className="text-sm sm:text-lg font-semibold text-foreground">
                   {Math.round(hour.temp_c)}°
                 </div>
                 <div className="text-xs text-muted-foreground text-center">

@@ -38,7 +38,7 @@ export const CurrentWeather = ({
     location
   } = weather;
   const isDay = current.is_day === 1;
-  return <WeatherCard className="p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
+  return <WeatherCard className="p-4 sm:p-6 lg:p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
       {/* Location background image */}
       <LocationBackground weather={weather} />
       
@@ -49,31 +49,31 @@ export const CurrentWeather = ({
       {/* Blur separator for location image */}
       <div className="absolute inset-0 bg-background/20 backdrop-blur-[1px] z-5" />
       
-      <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="flex items-center gap-6">
+      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
           <div className="flex-shrink-0 animate-float">
             {getWeatherIcon(current.condition.text, isDay, current.temp_c)}
           </div>
-          <div className="space-y-2">
-            <div className="text-6xl lg:text-8xl font-light text-foreground animate-scale-in bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+          <div className="space-y-1 sm:space-y-2">
+            <div className="text-4xl sm:text-6xl lg:text-8xl font-light text-foreground animate-scale-in bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
               {Math.round(current.temp_c)}°
             </div>
-            <div className="text-xl text-muted-foreground animate-slide-up">
+            <div className="text-base sm:text-xl text-muted-foreground animate-slide-up">
               {current.condition.text}
             </div>
           </div>
         </div>
         
-        <div className="text-right space-y-3 animate-fade-in">
-          <div className="text-2xl font-semibold text-foreground bg-gradient-to-r from-foreground via-primary/20 to-foreground bg-clip-text">
+        <div className="text-left sm:text-right space-y-2 sm:space-y-3 animate-fade-in w-full sm:w-auto">
+          <div className="text-xl sm:text-2xl font-semibold text-foreground bg-gradient-to-r from-foreground via-primary/20 to-foreground bg-clip-text">
             {location.name}
           </div>
-          <div className="text-muted-foreground text-lg">
+          <div className="text-muted-foreground text-base sm:text-lg">
             {location.region}, {location.country}
           </div>
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/10">
-            <div className="text-sm text-muted-foreground">Feels like</div>
-            <div className="text-lg font-semibold text-primary">
+          <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 inline-block">
+            <div className="text-xs sm:text-sm text-muted-foreground">Feels like</div>
+            <div className="text-base sm:text-lg font-semibold text-primary">
               {Math.round(current.feelslike_c)}°
             </div>
           </div>
