@@ -56,8 +56,8 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
                 key={hour.time}
                 className={`flex-shrink-0 w-20 flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:scale-105 ${
                   isNow 
-                    ? 'bg-primary/20 border border-primary/30 shadow-glow' 
-                    : 'hover:bg-muted/50'
+                    ? 'bg-white/10 border border-white/20 shadow-glow' 
+                    : 'hover:bg-white/5'
                 }`}
               >
                 <div className="text-sm text-muted-foreground font-medium">
