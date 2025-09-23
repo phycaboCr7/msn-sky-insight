@@ -1,6 +1,7 @@
 import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
 import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface HourlyForecastProps {
   weather: WeatherData;
@@ -45,7 +46,7 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
   return (
     <WeatherCard className="p-6 col-span-full animate-slide-left">
       <h3 className="text-lg font-semibold text-foreground mb-4">Hourly Forecast</h3>
-      <div className="overflow-x-auto scrollbar-hide">
+      <ScrollArea className="w-full whitespace-nowrap">
         <div className="flex gap-4 pb-4 w-max min-w-full">
           {hourlyData.map((hour, index) => {
             const time = new Date(hour.time);
@@ -56,8 +57,8 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
                 key={hour.time}
                 className={`flex-shrink-0 w-20 flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:scale-105 ${
                   isNow 
-                    ? 'bg-white/10 border border-white/20 shadow-glow' 
-                    : 'hover:bg-white/5'
+                    ? 'bg-primary/20 border border-primary/30 shadow-glow' 
+                    : 'hover:bg-muted/50'
                 }`}
               >
                 <div className="text-sm text-muted-foreground font-medium">
@@ -83,7 +84,7 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
             );
           })}
         </div>
-      </div>
+      </ScrollArea>
     </WeatherCard>
   );
 };
