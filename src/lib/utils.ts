@@ -5,68 +5,66 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Convert country name to flag emoji
-export function getCountryFlag(countryName: string): string {
+// Convert country name to ISO country code for flag API
+export function getCountryCode(countryName: string): string {
   const countryToCode: { [key: string]: string } = {
-    'India': 'IN',
-    'United States': 'US',
-    'United Kingdom': 'GB',
-    'Canada': 'CA',
-    'Australia': 'AU',
-    'Germany': 'DE',
-    'France': 'FR',
-    'Italy': 'IT',
-    'Spain': 'ES',
-    'Japan': 'JP',
-    'China': 'CN',
-    'Brazil': 'BR',
-    'Mexico': 'MX',
-    'Russia': 'RU',
-    'South Korea': 'KR',
-    'Netherlands': 'NL',
-    'Sweden': 'SE',
-    'Norway': 'NO',
-    'Denmark': 'DK',
-    'Finland': 'FI',
-    'Switzerland': 'CH',
-    'Austria': 'AT',
-    'Belgium': 'BE',
-    'Poland': 'PL',
-    'Turkey': 'TR',
-    'Saudi Arabia': 'SA',
-    'UAE': 'AE',
-    'Egypt': 'EG',
-    'South Africa': 'ZA',
-    'Argentina': 'AR',
-    'Chile': 'CL',
-    'Colombia': 'CO',
-    'Peru': 'PE',
-    'Thailand': 'TH',
-    'Vietnam': 'VN',
-    'Indonesia': 'ID',
-    'Malaysia': 'MY',
-    'Singapore': 'SG',
-    'Philippines': 'PH',
-    'Pakistan': 'PK',
-    'Bangladesh': 'BD',
-    'New Zealand': 'NZ',
-    'Ireland': 'IE',
-    'Portugal': 'PT',
-    'Greece': 'GR',
-    'Czech Republic': 'CZ',
-    'Hungary': 'HU',
-    'Romania': 'RO',
-    'Israel': 'IL',
-    'Ukraine': 'UA',
+    'India': 'in',
+    'United States': 'us',
+    'United Kingdom': 'gb',
+    'Canada': 'ca',
+    'Australia': 'au',
+    'Germany': 'de',
+    'France': 'fr',
+    'Italy': 'it',
+    'Spain': 'es',
+    'Japan': 'jp',
+    'China': 'cn',
+    'Brazil': 'br',
+    'Mexico': 'mx',
+    'Russia': 'ru',
+    'South Korea': 'kr',
+    'Netherlands': 'nl',
+    'Sweden': 'se',
+    'Norway': 'no',
+    'Denmark': 'dk',
+    'Finland': 'fi',
+    'Switzerland': 'ch',
+    'Austria': 'at',
+    'Belgium': 'be',
+    'Poland': 'pl',
+    'Turkey': 'tr',
+    'Saudi Arabia': 'sa',
+    'UAE': 'ae',
+    'Egypt': 'eg',
+    'South Africa': 'za',
+    'Argentina': 'ar',
+    'Chile': 'cl',
+    'Colombia': 'co',
+    'Peru': 'pe',
+    'Thailand': 'th',
+    'Vietnam': 'vn',
+    'Indonesia': 'id',
+    'Malaysia': 'my',
+    'Singapore': 'sg',
+    'Philippines': 'ph',
+    'Pakistan': 'pk',
+    'Bangladesh': 'bd',
+    'New Zealand': 'nz',
+    'Ireland': 'ie',
+    'Portugal': 'pt',
+    'Greece': 'gr',
+    'Czech Republic': 'cz',
+    'Hungary': 'hu',
+    'Romania': 'ro',
+    'Israel': 'il',
+    'Ukraine': 'ua',
   };
 
-  const code = countryToCode[countryName];
-  if (!code) return '🌍'; // Default globe emoji
-  
-  // Convert country code to flag emoji
-  const codePoints = code
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
+  return countryToCode[countryName] || 'un'; // Default to UN flag
+}
+
+// Get flag image URL from country name
+export function getFlagUrl(countryName: string): string {
+  const code = getCountryCode(countryName);
+  return `https://flagcdn.com/w80/${code}.png`;
 }

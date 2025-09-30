@@ -1,7 +1,7 @@
 import { WeatherCard } from "./WeatherCard";
 import { LocationBackground } from "./LocationBackground";
 import { WeatherData } from "@/lib/weather";
-import { getCountryFlag } from "@/lib/utils";
+import { getFlagUrl } from "@/lib/utils";
 import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun } from "lucide-react";
 interface CurrentWeatherProps {
   weather: WeatherData;
@@ -79,10 +79,12 @@ export const CurrentWeather = ({
                 {Math.round(current.feelslike_c)}°
               </div>
             </div>
-            <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 flex flex-col items-center justify-center min-w-[70px]">
-              <div className="text-3xl sm:text-4xl mb-1">
-                {getCountryFlag(location.country)}
-              </div>
+            <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 flex flex-col items-center justify-center min-w-[80px]">
+              <img 
+                src={getFlagUrl(location.country)} 
+                alt={`${location.country} flag`}
+                className="w-12 h-8 object-cover rounded shadow-md mb-1.5"
+              />
               <div className="text-[10px] sm:text-xs text-muted-foreground text-center leading-tight">
                 {location.country}
               </div>
