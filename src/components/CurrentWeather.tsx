@@ -1,6 +1,7 @@
 import { WeatherCard } from "./WeatherCard";
 import { LocationBackground } from "./LocationBackground";
 import { WeatherData } from "@/lib/weather";
+import { getCountryFlag } from "@/lib/utils";
 import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun } from "lucide-react";
 interface CurrentWeatherProps {
   weather: WeatherData;
@@ -71,10 +72,20 @@ export const CurrentWeather = ({
           <div className="text-muted-foreground text-base sm:text-lg">
             {location.region}, {location.country}
           </div>
-          <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 inline-block">
-            <div className="text-xs sm:text-sm text-muted-foreground">Feels like</div>
-            <div className="text-base sm:text-lg font-semibold text-primary">
-              {Math.round(current.feelslike_c)}°
+          <div className="flex items-center gap-2 sm:gap-3 justify-start sm:justify-end">
+            <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10">
+              <div className="text-xs sm:text-sm text-muted-foreground">Feels like</div>
+              <div className="text-base sm:text-lg font-semibold text-primary">
+                {Math.round(current.feelslike_c)}°
+              </div>
+            </div>
+            <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 flex flex-col items-center justify-center min-w-[70px]">
+              <div className="text-3xl sm:text-4xl mb-1">
+                {getCountryFlag(location.country)}
+              </div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground text-center leading-tight">
+                {location.country}
+              </div>
             </div>
           </div>
         </div>
