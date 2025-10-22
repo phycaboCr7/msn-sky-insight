@@ -126,8 +126,7 @@ const Index = () => {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-20 max-w-7xl">
         <div className="mb-6 sm:mb-8 text-center animate-fade-in-scale">
-          <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary via-accent-blue to-accent-purple bg-clip-text text-transparent animate-gradient-shift" 
-              style={{ backgroundSize: '200% auto' }}>
+          <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-2 sm:mb-3 text-foreground">
             Weatherza
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg font-medium tracking-wide">A True Forecasting Experience</p>
