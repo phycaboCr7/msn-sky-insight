@@ -110,32 +110,18 @@ const Index = () => {
       {/* Dynamic weather-based background */}
       <DynamicBackground weather={weather} />
       
-      {/* Enhanced aurora overlay with animation */}
+      {/* Subtle background overlay (no animation) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-        <div className="absolute inset-0 bg-gradient-aurora animate-aurora" 
-             style={{ backgroundSize: '200% 200%' }} />
-        <div className="absolute inset-0 bg-gradient-cosmic opacity-60" />
-        
-        {/* Floating orbs for depth */}
-        <div className="absolute top-20 left-[10%] w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-float-slow" />
-        <div className="absolute bottom-40 right-[15%] w-80 h-80 bg-accent-blue/8 rounded-full blur-3xl animate-float" 
-             style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[60%] left-[20%] w-72 h-72 bg-accent-purple/8 rounded-full blur-3xl animate-float-slow" 
-             style={{ animationDelay: '4s' }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background/0" />
       </div>
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-20 max-w-7xl">
-        <div className="mb-6 sm:mb-8 text-center animate-fade-in-scale">
-          <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-2 sm:mb-3 text-foreground">
+        <div className="mb-6 sm:mb-8 text-center animate-fade-in">
+          <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground to-primary/80 bg-clip-text text-transparent">
             Weatherza
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg font-medium tracking-wide">A True Forecasting Experience</p>
-          <div className="relative w-16 sm:w-24 h-1.5 mx-auto mt-3 sm:mt-4 rounded-full overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent-blue to-accent-purple animate-gradient-shift" 
-                 style={{ backgroundSize: '200% auto' }} />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent-blue to-accent-purple blur-sm animate-gradient-shift" 
-                 style={{ backgroundSize: '200% auto' }} />
-          </div>
+          <p className="text-muted-foreground text-base sm:text-lg">A True Forecasting Experience</p>
+          <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-primary to-blue-500 mx-auto mt-3 sm:mt-4 rounded-full" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
