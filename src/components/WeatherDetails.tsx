@@ -23,13 +23,13 @@ interface DetailItemProps {
 }
 
 const DetailItem = ({ icon, label, value, subtitle }: DetailItemProps) => (
-  <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/20 hover:bg-muted/30 transition-all duration-300 hover:shadow-glow hover:scale-[1.02]">
-    <div className="text-primary">
+  <div className="group relative flex items-center gap-3 p-4 rounded-lg bg-muted/20 hover:bg-muted/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(251,146,60,0.3)] hover:scale-[1.03] hover:border hover:border-primary/20 isolate">
+    <div className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(251,146,60,0.5)] transition-all duration-300">
       {icon}
     </div>
     <div className="flex-1">
-      <div className="text-sm text-muted-foreground">{label}</div>
-      <div className="text-lg font-semibold text-foreground">{value}</div>
+      <div className="text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors">{label}</div>
+      <div className="text-lg font-semibold text-foreground group-hover:text-primary/90 transition-colors">{value}</div>
       {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
     </div>
   </div>
@@ -51,7 +51,7 @@ export const WeatherDetails = ({ weather }: WeatherDetailsProps) => {
   return (
     <WeatherCard className="p-6 col-span-full lg:col-span-2">
       <h3 className="text-lg font-semibold text-foreground mb-4">Weather Details</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DetailItem
           icon={<Thermometer size={20} />}
           label="Feels like"
