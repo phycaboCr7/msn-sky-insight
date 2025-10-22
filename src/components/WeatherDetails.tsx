@@ -23,7 +23,7 @@ interface DetailItemProps {
 }
 
 const DetailItem = ({ icon, label, value, subtitle }: DetailItemProps) => (
-  <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
+  <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/20 hover:bg-muted/30 transition-all duration-300 hover:shadow-glow hover:scale-[1.02]">
     <div className="text-primary">
       {icon}
     </div>
