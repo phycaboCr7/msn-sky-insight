@@ -9,20 +9,24 @@ interface WeatherCardProps {
 
 export const WeatherCard = ({ children, className, variant = "default" }: WeatherCardProps) => {
   const variants = {
-    default: "bg-gradient-card backdrop-blur-glass border border-white/10 shadow-card",
-    glass: "bg-white/5 backdrop-blur-glass border border-white/20 shadow-lg",
-    highlighted: "bg-gradient-hero backdrop-blur-glass shadow-glow border border-primary/30 animate-glow-pulse"
+    default: "bg-gradient-card backdrop-blur-xl border border-glass-border shadow-elevation-mid",
+    glass: "bg-glass-strong backdrop-blur-2xl border border-glass-border shadow-elevation-low",
+    highlighted: "bg-gradient-hero backdrop-blur-2xl shadow-glow border border-primary/40 animate-glow-pulse"
   };
 
   return (
     <Card className={cn(
-      "transition-all duration-500 hover:shadow-glow hover:scale-[1.02] hover:-translate-y-1 animate-fade-in",
-      "before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r before:from-white/5 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300",
+      "group transition-all duration-700 hover:shadow-elevation-high hover:scale-[1.03] hover:-translate-y-2 animate-reveal",
+      "before:absolute before:inset-0 before:rounded-lg before:bg-gradient-aurora before:opacity-0 hover:before:opacity-100 before:transition-all before:duration-700",
+      "after:absolute after:inset-0 after:rounded-lg after:bg-gradient-cosmic after:opacity-0 hover:after:opacity-100 after:transition-all after:duration-700 after:animate-aurora",
       "relative overflow-hidden",
+      "hover:border-primary/30",
       variants[variant],
       className
     )}>
-      {children}
+      <div className="relative z-10">
+        {children}
+      </div>
     </Card>
   );
 };
