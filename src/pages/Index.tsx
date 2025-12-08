@@ -12,6 +12,7 @@ import { WindChart } from "@/components/charts/WindChart";
 import { MonthlyChart } from "@/components/charts/MonthlyChart";
 import { WeatherAdvice } from "@/components/WeatherAdvice";
 import { AirQualityCard } from "@/components/AirQualityCard";
+import { WeatherzaAI } from "@/components/WeatherzaAI";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
@@ -145,6 +146,7 @@ const Index = () => {
               <WeatherDetails weather={weather} />
               <DailyForecast weather={weather} />
               <MonthlyChart weather={weather} />
+              <WeatherzaAI weather={weather} />
             </>
           )}
 
