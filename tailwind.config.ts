@@ -96,7 +96,8 @@ export default {
 				'zoom-in': 'zoom-in 0.5s ease-out',
 				'bounce-soft': 'bounce-soft 1s ease-in-out',
 				'glow-pulse': 'glow-pulse 2s ease-in-out infinite alternate',
-				'float': 'float 6s ease-in-out infinite',
+				'float': 'float 4s ease-in-out infinite',
+				'icon-glow': 'icon-glow 3s ease-in-out infinite',
 				'shimmer': 'shimmer 1.5s ease-in-out infinite'
 			},
 			borderRadius: {
@@ -143,8 +144,12 @@ export default {
 					'100%': { boxShadow: '0 0 60px hsl(28 100% 60% / 0.6), 0 0 100px hsl(28 100% 60% / 0.3)' }
 				},
 				'float': {
-					'0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
-					'50%': { transform: 'translateY(-20px) rotate(180deg)' }
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-8px)' }
+				},
+				'icon-glow': {
+					'0%, 100%': { filter: 'drop-shadow(0 0 8px currentColor) drop-shadow(0 0 20px currentColor)' },
+					'50%': { filter: 'drop-shadow(0 0 15px currentColor) drop-shadow(0 0 35px currentColor) drop-shadow(0 0 50px currentColor)' }
 				},
 				'shimmer': {
 					'0%': { backgroundPosition: '-200% 0' },

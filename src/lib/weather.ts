@@ -1,6 +1,17 @@
 const WEATHER_API_KEY = "424a0fbacc0b4291bdd40124250208";
 const BASE_URL = "https://api.weatherapi.com/v1";
 
+export interface AirQuality {
+  co: number;
+  no2: number;
+  o3: number;
+  so2: number;
+  pm2_5: number;
+  pm10: number;
+  'us-epa-index': number;
+  'gb-defra-index': number;
+}
+
 export interface WeatherData {
   location: {
     name: string;
@@ -43,6 +54,7 @@ export interface WeatherData {
     uv: number;
     gust_mph: number;
     gust_kph: number;
+    air_quality?: AirQuality;
   };
   forecast?: {
     forecastday: Array<{

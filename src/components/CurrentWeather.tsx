@@ -52,7 +52,7 @@ export const CurrentWeather = ({
       
       <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
-          <div className="flex-shrink-0 animate-float">
+          <div className="flex-shrink-0 animate-icon-glow">
             {getWeatherIcon(current.condition.text, isDay, current.temp_c)}
           </div>
           <div className="space-y-1 sm:space-y-2">
