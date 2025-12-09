@@ -57,30 +57,35 @@ Current conditions:
 
 Answer the user's weather-related questions in a helpful, concise, and friendly manner. Use bullet points when appropriate. Keep responses under 150 words.`;
 
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const GEMINI_API_KEY = "AIzaSyAgbMUy582OOkVkJuL15XoPPDGB0pSBI_I";
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: {
-          "Authorization": "Bearer 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",
           "Content-Type": "application/json",
-          "HTTP-Referer": window.location.origin,
         },
         body: JSON.stringify({
-          model: "google/gemini-2.0-flash-exp:free",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: question }
+          contents: [
+            {
+              parts: [
+                { text: `${systemPrompt}\n\nUser question: ${question}` }
+              ]
+            }
           ],
-          max_tokens: 500,
-          temperature: 0.7
+          generationConfig: {
+            maxOutputTokens: 500,
+            temperature: 0.7
+          }
         })
       });
 
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Gemini API error:", errorData);
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      const text = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
       setAnswer(text);
     } catch (error) {
       console.error("AI Error:", error);
