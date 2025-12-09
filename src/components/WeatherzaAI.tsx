@@ -58,7 +58,7 @@ Current conditions:
 Answer the user's weather-related questions in a helpful, concise, and friendly manner. Use bullet points when appropriate. Keep responses under 150 words.`;
 
       const GEMINI_API_KEY = "AIzaSyAgbMUy582OOkVkJuL15XoPPDGB0pSBI_I";
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,8 +79,16 @@ Answer the user's weather-related questions in a helpful, concise, and friendly 
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
+        const errorData = await response.json();
         console.error("Gemini API error:", errorData);
+        if (response.status === 429) {
+          toast({
+            title: "Rate Limit",
+            description: "Too many requests. Please wait a moment and try again.",
+            variant: "destructive",
+          });
+          return;
+        }
         throw new Error(`API error: ${response.status}`);
       }
 
