@@ -57,7 +57,7 @@ Current conditions:
 
 Answer the user's weather-related questions in a helpful, concise, and friendly manner. Use bullet points when appropriate. Keep responses under 150 words.`;
 
-      const GEMINI_API_KEY = "AIzaSyAgbMUy582OOkVkJuL15XoPPDGB0pSBI_I";
+      const GEMINI_API_KEY = "AIzaSyAaNjT6LMVIkg9Po6hKbuyJyACQMy0u6hQ";
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: "POST",
         headers: {
