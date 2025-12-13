@@ -1,11 +1,56 @@
 import { WeatherCard } from "./WeatherCard";
 import { LocationBackground } from "./LocationBackground";
-import { WeatherData } from "@/lib/weather";
+import { WeatherData, AirQuality } from "@/lib/weather";
 import { getFlagUrl } from "@/lib/utils";
-import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun } from "lucide-react";
+import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun, Wind } from "lucide-react";
+
 interface CurrentWeatherProps {
   weather: WeatherData;
 }
+
+// Calculate actual AQI from PM2.5
+const calculateAQI = (pm25: number): number => {
+  const breakpoints = [
+    { lo: 0, hi: 12, aqiLo: 0, aqiHi: 50 },
+    { lo: 12.1, hi: 35.4, aqiLo: 51, aqiHi: 100 },
+    { lo: 35.5, hi: 55.4, aqiLo: 101, aqiHi: 150 },
+    { lo: 55.5, hi: 150.4, aqiLo: 151, aqiHi: 200 },
+    { lo: 150.5, hi: 250.4, aqiLo: 201, aqiHi: 300 },
+    { lo: 250.5, hi: 500.4, aqiLo: 301, aqiHi: 500 },
+  ];
+  for (const bp of breakpoints) {
+    if (pm25 >= bp.lo && pm25 <= bp.hi) {
+      return Math.round(((bp.aqiHi - bp.aqiLo) / (bp.hi - bp.lo)) * (pm25 - bp.lo) + bp.aqiLo);
+    }
+  }
+  return pm25 > 500 ? 500 : 0;
+};
+
+const getAQIColor = (aqi: number) => {
+  if (aqi <= 50) return { color: "text-green-400", bg: "bg-green-500/20" };
+  if (aqi <= 100) return { color: "text-yellow-400", bg: "bg-yellow-500/20" };
+  if (aqi <= 150) return { color: "text-orange-400", bg: "bg-orange-500/20" };
+  if (aqi <= 200) return { color: "text-red-400", bg: "bg-red-500/20" };
+  if (aqi <= 300) return { color: "text-purple-400", bg: "bg-purple-500/20" };
+  return { color: "text-rose-600", bg: "bg-rose-500/20" };
+};
+
+const MiniAQIBox = ({ airQuality }: { airQuality: AirQuality }) => {
+  const aqi = calculateAQI(airQuality.pm2_5);
+  const { color, bg } = getAQIColor(aqi);
+  
+  return (
+    <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10">
+      <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+        <Wind className="w-3 h-3" />
+        <span>AQI</span>
+      </div>
+      <div className={`text-base sm:text-lg font-semibold ${color}`}>
+        {aqi}
+      </div>
+    </div>
+  );
+};
 const getWeatherIcon = (condition: string, isDay: boolean, temp?: number) => {
   const iconSize = 80;
   
@@ -72,13 +117,16 @@ export const CurrentWeather = ({
           <div className="text-muted-foreground text-base sm:text-lg">
             {location.region}, {location.country}
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 justify-start sm:justify-end">
+          <div className="flex items-center gap-2 sm:gap-3 justify-start sm:justify-end flex-wrap">
             <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10">
               <div className="text-xs sm:text-sm text-muted-foreground">Feels like</div>
               <div className="text-base sm:text-lg font-semibold text-primary">
                 {Math.round(current.feelslike_c)}°
               </div>
             </div>
+            {current.air_quality && (
+              <MiniAQIBox airQuality={current.air_quality} />
+            )}
             <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 flex flex-col items-center justify-center min-w-[80px]">
               <img 
                 src={getFlagUrl(location.country)} 

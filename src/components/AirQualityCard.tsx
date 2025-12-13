@@ -6,22 +6,40 @@ interface AirQualityCardProps {
   weather: WeatherData;
 }
 
-const getAQILevel = (index: number) => {
-  switch (index) {
-    case 1:
-      return { label: "Good", color: "text-green-400", bgColor: "bg-green-500/20", description: "Air quality is satisfactory" };
-    case 2:
-      return { label: "Moderate", color: "text-yellow-400", bgColor: "bg-yellow-500/20", description: "Acceptable air quality" };
-    case 3:
-      return { label: "Unhealthy for Sensitive", color: "text-orange-400", bgColor: "bg-orange-500/20", description: "Sensitive groups may be affected" };
-    case 4:
-      return { label: "Unhealthy", color: "text-red-400", bgColor: "bg-red-500/20", description: "Health effects for everyone" };
-    case 5:
-      return { label: "Very Unhealthy", color: "text-purple-400", bgColor: "bg-purple-500/20", description: "Serious health effects" };
-    case 6:
-      return { label: "Hazardous", color: "text-rose-600", bgColor: "bg-rose-500/20", description: "Emergency health warning" };
-    default:
-      return { label: "Unknown", color: "text-muted-foreground", bgColor: "bg-muted/20", description: "Data unavailable" };
+// Calculate actual AQI from pollutant concentrations (US EPA formula)
+const calculateAQI = (pm25: number, pm10: number, o3: number, no2: number): number => {
+  // Simplified AQI calculation using PM2.5 as primary indicator
+  // PM2.5 breakpoints (µg/m³) and corresponding AQI values
+  const pm25Breakpoints = [
+    { lo: 0, hi: 12, aqiLo: 0, aqiHi: 50 },
+    { lo: 12.1, hi: 35.4, aqiLo: 51, aqiHi: 100 },
+    { lo: 35.5, hi: 55.4, aqiLo: 101, aqiHi: 150 },
+    { lo: 55.5, hi: 150.4, aqiLo: 151, aqiHi: 200 },
+    { lo: 150.5, hi: 250.4, aqiLo: 201, aqiHi: 300 },
+    { lo: 250.5, hi: 500.4, aqiLo: 301, aqiHi: 500 },
+  ];
+
+  for (const bp of pm25Breakpoints) {
+    if (pm25 >= bp.lo && pm25 <= bp.hi) {
+      return Math.round(((bp.aqiHi - bp.aqiLo) / (bp.hi - bp.lo)) * (pm25 - bp.lo) + bp.aqiLo);
+    }
+  }
+  return pm25 > 500 ? 500 : 0;
+};
+
+const getAQILevel = (aqi: number) => {
+  if (aqi <= 50) {
+    return { label: "Good", color: "text-green-400", bgColor: "bg-green-500/20", description: "Air quality is satisfactory" };
+  } else if (aqi <= 100) {
+    return { label: "Moderate", color: "text-yellow-400", bgColor: "bg-yellow-500/20", description: "Acceptable air quality" };
+  } else if (aqi <= 150) {
+    return { label: "Unhealthy for Sensitive", color: "text-orange-400", bgColor: "bg-orange-500/20", description: "Sensitive groups may be affected" };
+  } else if (aqi <= 200) {
+    return { label: "Unhealthy", color: "text-red-400", bgColor: "bg-red-500/20", description: "Health effects for everyone" };
+  } else if (aqi <= 300) {
+    return { label: "Very Unhealthy", color: "text-purple-400", bgColor: "bg-purple-500/20", description: "Serious health effects" };
+  } else {
+    return { label: "Hazardous", color: "text-rose-600", bgColor: "bg-rose-500/20", description: "Emergency health warning" };
   }
 };
 
@@ -32,8 +50,8 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
     return null;
   }
 
-  const epaIndex = airQuality['us-epa-index'];
-  const aqiLevel = getAQILevel(epaIndex);
+  const actualAQI = calculateAQI(airQuality.pm2_5, airQuality.pm10, airQuality.o3, airQuality.no2);
+  const aqiLevel = getAQILevel(actualAQI);
 
   return (
     <WeatherCard className="p-4 sm:p-6 animate-fade-in">
@@ -44,7 +62,7 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
       
       <div className="flex items-center gap-4 mb-4">
         <div className={`w-16 h-16 rounded-xl ${aqiLevel.bgColor} flex items-center justify-center animate-glow-pulse`}>
-          <span className={`text-2xl font-bold ${aqiLevel.color}`}>{epaIndex}</span>
+          <span className={`text-2xl font-bold ${aqiLevel.color}`}>{actualAQI}</span>
         </div>
         <div>
           <div className={`text-lg font-semibold ${aqiLevel.color}`}>{aqiLevel.label}</div>
