@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Send } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
@@ -41,47 +42,17 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         aqi: weather.current.air_quality?.['us-epa-index']
       };
 
-      const systemPrompt = `You are Rakshit's Weatherza AI, a friendly and knowledgeable weather assistant. You have access to the current weather data for ${weatherContext.location}, ${weatherContext.country}.
-
-Current conditions:
-- Temperature: ${weatherContext.temperature}°C (feels like ${weatherContext.feelsLike}°C)
-- Condition: ${weatherContext.condition}
-- Humidity: ${weatherContext.humidity}%
-- Wind: ${weatherContext.windSpeed} km/h from ${weatherContext.windDirection}
-- UV Index: ${weatherContext.uvIndex}
-- Visibility: ${weatherContext.visibility} km
-- Pressure: ${weatherContext.pressure} mb
-- Rain chance: ${weatherContext.precipChance}%
-- Today's high/low: ${weatherContext.maxTemp}°C / ${weatherContext.minTemp}°C
-- Air Quality Index: ${weatherContext.aqi || 'N/A'}
-
-Answer the user's weather-related questions in a helpful, concise, and friendly manner. Use bullet points when appropriate. Keep responses under 150 words.`;
-
-      const GEMINI_API_KEY = "AIzaSyCDEnvMp3qTNwN7ta-gctt8e-KMR4oXuW0";
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: `${systemPrompt}\n\nUser question: ${question}` }
-              ]
-            }
-          ],
-          generationConfig: {
-            maxOutputTokens: 500,
-            temperature: 0.7
-          }
-        })
+      const { data, error } = await supabase.functions.invoke('weatherza-chat', {
+        body: { question, weatherContext }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Gemini API error:", errorData);
-        if (response.status === 429) {
+      if (error) {
+        console.error("Edge function error:", error);
+        throw new Error(error.message || "Failed to get AI response");
+      }
+
+      if (data?.error) {
+        if (data.error.includes("Rate limit")) {
           toast({
             title: "Rate Limit",
             description: "Too many requests. Please wait a moment and try again.",
@@ -89,12 +60,10 @@ Answer the user's weather-related questions in a helpful, concise, and friendly 
           });
           return;
         }
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(data.error);
       }
 
-      const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
-      setAnswer(text);
+      setAnswer(data.answer || "Sorry, I couldn't generate a response.");
     } catch (error) {
       console.error("AI Error:", error);
       toast({
