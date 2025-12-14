@@ -24,7 +24,7 @@ export const HumidityChart = ({ weather }: HumidityChartProps) => {
 
   return (
     <WeatherCard className="p-6 col-span-full lg:col-span-1">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Humidity & Rain Chance</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Humidity & Rain Chance</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={humidityData}>

@@ -20,7 +20,7 @@ export const TemperatureChart = ({ weather }: TemperatureChartProps) => {
 
   return (
     <WeatherCard className="p-6 col-span-full lg:col-span-2">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Temperature Trend</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Temperature Trend</h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={hourlyData}>

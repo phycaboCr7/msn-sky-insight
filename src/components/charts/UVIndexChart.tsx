@@ -34,7 +34,7 @@ export const UVIndexChart = ({ weather }: UVIndexChartProps) => {
 
   return (
     <WeatherCard className="p-6 col-span-1">
-      <h3 className="text-lg font-semibold text-foreground mb-4">UV Index</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>UV Index</h3>
       <div className="flex items-center justify-center">
         <div className="relative w-40 h-40 group">
           <ResponsiveContainer width="100%" height="100%">
@@ -76,7 +76,7 @@ export const UVIndexChart = ({ weather }: UVIndexChartProps) => {
             </PieChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-3xl font-bold text-foreground animate-pulse" style={{ color: getUVColor(uvValue) }}>
+            <div className="text-3xl font-bold text-foreground animate-pulse" style={{ color: getUVColor(uvValue), fontFamily: "'Bodoni Moda', Georgia, serif" }}>
               {uvValue}
             </div>
             <div className="text-sm text-muted-foreground font-medium">{getUVLevel(uvValue)}</div>

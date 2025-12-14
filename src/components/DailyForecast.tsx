@@ -40,7 +40,7 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
 
   return (
     <WeatherCard className="p-6 col-span-full lg:col-span-1">
-      <h3 className="text-lg font-semibold text-foreground mb-4">
+      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>
         {daysCount}-Day Forecast
       </h3>
       <div className="space-y-3">
@@ -74,10 +74,10 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-right">
-                  <span className="text-lg font-semibold text-foreground">
+                  <span className="text-lg font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                     {Math.round(day.day.maxtemp_c)}°
                   </span>
-                  <span className="text-muted-foreground">
+                  <span className="text-muted-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                     {Math.round(day.day.mintemp_c)}°
                   </span>
                 </div>

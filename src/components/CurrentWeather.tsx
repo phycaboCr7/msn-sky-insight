@@ -45,7 +45,7 @@ const MiniAQIBox = ({ airQuality }: { airQuality: AirQuality }) => {
         <Wind className="w-3 h-3" />
         <span>AQI</span>
       </div>
-      <div className={`text-base sm:text-lg font-semibold ${color}`}>
+      <div className={`text-lg sm:text-xl font-semibold ${color}`} style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
         {aqi}
       </div>
     </div>
@@ -120,7 +120,7 @@ export const CurrentWeather = ({
           <div className="flex items-center gap-2 sm:gap-3 justify-start sm:justify-end flex-wrap">
             <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10">
               <div className="text-xs sm:text-sm text-muted-foreground">Feels like</div>
-              <div className="text-base sm:text-lg font-semibold text-primary">
+              <div className="text-lg sm:text-xl font-semibold text-primary" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                 {Math.round(current.feelslike_c)}°
               </div>
             </div>
