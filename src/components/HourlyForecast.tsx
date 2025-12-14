@@ -45,7 +45,7 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
 
   return (
     <WeatherCard className="p-4 sm:p-6 col-span-full animate-slide-left">
-      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">Hourly Forecast</h3>
+      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Hourly Forecast</h3>
       <ScrollArea className="w-full whitespace-nowrap">
         <div className="flex gap-3 sm:gap-4 pb-4 w-max min-w-full overflow-x-auto touch-pan-x">
           {hourlyData.map((hour, index) => {
@@ -70,7 +70,7 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
                 <div className="my-1 sm:my-2">
                   {getWeatherIcon(hour.condition.text, hour.is_day === 1, hour.temp_c)}
                 </div>
-                <div className="text-sm sm:text-lg font-semibold text-foreground">
+                <div className="text-sm sm:text-lg font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                   {Math.round(hour.temp_c)}°
                 </div>
                 <div className="text-xs text-muted-foreground text-center">

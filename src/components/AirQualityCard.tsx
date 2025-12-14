@@ -57,15 +57,15 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
     <WeatherCard className="p-4 sm:p-6 animate-fade-in">
       <div className="flex items-center gap-2 mb-4">
         <Wind className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold text-foreground tracking-wide">Air Quality Index</h3>
+        <h3 className="font-semibold text-foreground tracking-wide" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Air Quality Index</h3>
       </div>
       
       <div className="flex items-center gap-4 mb-5">
         <div className={`w-20 h-20 rounded-2xl ${aqiLevel.bgColor} flex items-center justify-center animate-glow-pulse shadow-lg border border-white/10`}>
-          <span className={`text-3xl font-bold ${aqiLevel.color} tracking-tight`} style={{ fontFamily: "'Orbitron', 'SF Pro Display', system-ui, sans-serif" }}>{actualAQI}</span>
+          <span className={`text-3xl font-bold ${aqiLevel.color} tracking-tight`} style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>{actualAQI}</span>
         </div>
         <div className="space-y-1">
-          <div className={`text-xl font-semibold ${aqiLevel.color} tracking-wide`}>{aqiLevel.label}</div>
+          <div className={`text-xl font-semibold ${aqiLevel.color} tracking-wide`} style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>{aqiLevel.label}</div>
           <div className="text-sm text-muted-foreground leading-relaxed">{aqiLevel.description}</div>
         </div>
       </div>

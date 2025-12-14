@@ -25,7 +25,7 @@ export const WindChart = ({ weather }: WindChartProps) => {
 
   return (
     <WeatherCard className="p-6 col-span-1">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Wind</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Wind</h3>
       
       <div className="flex items-center justify-center mb-6">
         <div className="relative w-32 h-32 border-2 border-white/20 rounded-full">
@@ -49,9 +49,8 @@ export const WindChart = ({ weather }: WindChartProps) => {
             />
           </div>
           
-          {/* Center info */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-lg font-bold text-foreground mt-8">{windSpeed}</div>
+            <div className="text-lg font-bold text-foreground mt-8" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>{windSpeed}</div>
             <div className="text-xs text-muted-foreground">km/h</div>
           </div>
         </div>

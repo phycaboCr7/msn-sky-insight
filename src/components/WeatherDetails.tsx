@@ -29,7 +29,7 @@ const DetailItem = ({ icon, label, value, subtitle }: DetailItemProps) => (
     </div>
     <div className="flex-1">
       <div className="text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors">{label}</div>
-      <div className="text-lg font-semibold text-foreground group-hover:text-primary/90 transition-colors">{value}</div>
+      <div className="text-lg font-semibold text-foreground group-hover:text-primary/90 transition-colors" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>{value}</div>
       {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
     </div>
   </div>
@@ -50,7 +50,7 @@ export const WeatherDetails = ({ weather }: WeatherDetailsProps) => {
 
   return (
     <WeatherCard className="p-6 col-span-full lg:col-span-2">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Weather Details</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Weather Details</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DetailItem
           icon={<Thermometer size={20} />}
