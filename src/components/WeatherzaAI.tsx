@@ -6,10 +6,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from "react-markdown";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
 }
+
+// Calculate actual AQI from PM2.5
+const calculateAQI = (pm25: number): number => {
+  const breakpoints = [
+    { lo: 0, hi: 12, aqiLo: 0, aqiHi: 50 },
+    { lo: 12.1, hi: 35.4, aqiLo: 51, aqiHi: 100 },
+    { lo: 35.5, hi: 55.4, aqiLo: 101, aqiHi: 150 },
+    { lo: 55.5, hi: 150.4, aqiLo: 151, aqiHi: 200 },
+    { lo: 150.5, hi: 250.4, aqiLo: 201, aqiHi: 300 },
+    { lo: 250.5, hi: 500.4, aqiLo: 301, aqiHi: 500 },
+  ];
+  for (const bp of breakpoints) {
+    if (pm25 >= bp.lo && pm25 <= bp.hi) {
+      return Math.round(((bp.aqiHi - bp.aqiLo) / (bp.hi - bp.lo)) * (pm25 - bp.lo) + bp.aqiLo);
+    }
+  }
+  return pm25 > 500 ? 500 : 0;
+};
 
 export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
@@ -24,6 +43,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     setAnswer("");
     
     try {
+      const pm25 = weather.current.air_quality?.pm2_5;
+      const actualAQI = pm25 ? calculateAQI(pm25) : null;
+
       const weatherContext = {
         location: weather.location.name,
         country: weather.location.country,
@@ -39,7 +61,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         precipChance: weather.forecast?.forecastday[0]?.day.daily_chance_of_rain || 0,
         maxTemp: weather.forecast?.forecastday[0]?.day.maxtemp_c,
         minTemp: weather.forecast?.forecastday[0]?.day.mintemp_c,
-        aqi: weather.current.air_quality?.['us-epa-index']
+        aqi: actualAQI,
+        pm25: pm25
       };
 
       const { data, error } = await supabase.functions.invoke('weatherza-chat', {
@@ -120,8 +143,24 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         
         {answer && (
           <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20 animate-fade-in">
-            <div className="prose prose-invert prose-sm max-w-none text-foreground/90 whitespace-pre-wrap leading-relaxed">
-              {answer}
+            <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown">
+              <ReactMarkdown
+                components={{
+                  h1: ({ children }) => <h1 className="text-xl font-bold text-foreground mb-3 mt-2">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-base font-semibold text-foreground mb-2 mt-2">{children}</h3>,
+                  p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
+                  strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
+                  em: ({ children }) => <em className="italic text-foreground/80">{children}</em>,
+                  ul: ({ children }) => <ul className="list-none space-y-1 mb-3">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
+                  li: ({ children }) => <li className="text-foreground/90 flex items-start gap-2"><span className="text-primary mt-0.5">•</span><span>{children}</span></li>,
+                  code: ({ children }) => <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>,
+                  blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-foreground/70">{children}</blockquote>,
+                }}
+              >
+                {answer}
+              </ReactMarkdown>
             </div>
           </div>
         )}

@@ -57,35 +57,35 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
     <WeatherCard className="p-4 sm:p-6 animate-fade-in">
       <div className="flex items-center gap-2 mb-4">
         <Wind className="w-5 h-5 text-primary" />
-        <h3 className="font-semibold text-foreground">Air Quality Index</h3>
+        <h3 className="font-semibold text-foreground tracking-wide">Air Quality Index</h3>
       </div>
       
-      <div className="flex items-center gap-4 mb-4">
-        <div className={`w-16 h-16 rounded-xl ${aqiLevel.bgColor} flex items-center justify-center animate-glow-pulse`}>
-          <span className={`text-2xl font-bold ${aqiLevel.color}`}>{actualAQI}</span>
+      <div className="flex items-center gap-4 mb-5">
+        <div className={`w-20 h-20 rounded-2xl ${aqiLevel.bgColor} flex items-center justify-center animate-glow-pulse shadow-lg border border-white/10`}>
+          <span className={`text-3xl font-bold ${aqiLevel.color} tracking-tight`} style={{ fontFamily: "'Orbitron', 'SF Pro Display', system-ui, sans-serif" }}>{actualAQI}</span>
         </div>
-        <div>
-          <div className={`text-lg font-semibold ${aqiLevel.color}`}>{aqiLevel.label}</div>
-          <div className="text-sm text-muted-foreground">{aqiLevel.description}</div>
+        <div className="space-y-1">
+          <div className={`text-xl font-semibold ${aqiLevel.color} tracking-wide`}>{aqiLevel.label}</div>
+          <div className="text-sm text-muted-foreground leading-relaxed">{aqiLevel.description}</div>
         </div>
       </div>
       
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-secondary/30 rounded-lg p-3 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02]">
-          <div className="text-xs text-muted-foreground mb-1">PM2.5</div>
-          <div className="text-sm font-medium text-foreground">{airQuality.pm2_5.toFixed(1)} µg/m³</div>
+        <div className="bg-secondary/30 rounded-xl p-3.5 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02] border border-white/5">
+          <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">PM2.5</div>
+          <div className="text-base font-semibold text-foreground tabular-nums">{airQuality.pm2_5.toFixed(1)} <span className="text-xs text-muted-foreground">µg/m³</span></div>
         </div>
-        <div className="bg-secondary/30 rounded-lg p-3 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02]">
-          <div className="text-xs text-muted-foreground mb-1">PM10</div>
-          <div className="text-sm font-medium text-foreground">{airQuality.pm10.toFixed(1)} µg/m³</div>
+        <div className="bg-secondary/30 rounded-xl p-3.5 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02] border border-white/5">
+          <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">PM10</div>
+          <div className="text-base font-semibold text-foreground tabular-nums">{airQuality.pm10.toFixed(1)} <span className="text-xs text-muted-foreground">µg/m³</span></div>
         </div>
-        <div className="bg-secondary/30 rounded-lg p-3 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02]">
-          <div className="text-xs text-muted-foreground mb-1">O₃ (Ozone)</div>
-          <div className="text-sm font-medium text-foreground">{airQuality.o3.toFixed(1)} µg/m³</div>
+        <div className="bg-secondary/30 rounded-xl p-3.5 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02] border border-white/5">
+          <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">O₃ Ozone</div>
+          <div className="text-base font-semibold text-foreground tabular-nums">{airQuality.o3.toFixed(1)} <span className="text-xs text-muted-foreground">µg/m³</span></div>
         </div>
-        <div className="bg-secondary/30 rounded-lg p-3 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02]">
-          <div className="text-xs text-muted-foreground mb-1">NO₂</div>
-          <div className="text-sm font-medium text-foreground">{airQuality.no2.toFixed(1)} µg/m³</div>
+        <div className="bg-secondary/30 rounded-xl p-3.5 transition-all duration-300 hover:bg-secondary/50 hover:shadow-[0_0_20px_rgba(251,146,60,0.2)] hover:scale-[1.02] border border-white/5">
+          <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">NO₂</div>
+          <div className="text-base font-semibold text-foreground tabular-nums">{airQuality.no2.toFixed(1)} <span className="text-xs text-muted-foreground">µg/m³</span></div>
         </div>
       </div>
     </WeatherCard>

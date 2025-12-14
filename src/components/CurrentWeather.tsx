@@ -101,7 +101,7 @@ export const CurrentWeather = ({
             {getWeatherIcon(current.condition.text, isDay, current.temp_c)}
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <div className="text-4xl sm:text-6xl lg:text-8xl font-light text-foreground animate-scale-in bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+            <div className="text-4xl sm:text-6xl lg:text-8xl font-digital text-foreground animate-scale-in tracking-wider" style={{ fontFamily: "'Orbitron', 'SF Pro Display', system-ui, sans-serif", fontWeight: 500, letterSpacing: '0.05em' }}>
               {Math.round(current.temp_c)}°
             </div>
             <div className="text-base sm:text-xl text-muted-foreground animate-slide-up">
