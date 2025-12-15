@@ -6,7 +6,7 @@ import { Search, MapPin, Loader2 } from "lucide-react";
 
 interface Place {
   name: string;
-  state: string;
+  region: string;
   country: string;
   lat: number;
   lon: number;
@@ -18,27 +18,30 @@ interface SearchLocationProps {
   isLoading?: boolean;
 }
 
-const API_KEY = "0d2ccdd683b2e6b3cfafff7bd6134d8d";
+const WEATHER_API_KEY = "424a0fbacc0b4291bdd40124250208";
 
 export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading }: SearchLocationProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Place[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const detectPlaces = async (query: string) => {
     if (!query || query.trim().length < 2) {
       setSuggestions([]);
+      setShowSuggestions(false);
       return;
     }
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(async () => {
+      setIsSearching(true);
       try {
         const res = await fetch(
-          `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`
+          `https://api.weatherapi.com/v1/search.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(query)}`
         );
 
         if (!res.ok) throw new Error("API error");
@@ -46,7 +49,7 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
         const data = await res.json();
         const places: Place[] = data.map((p: any) => ({
           name: p.name,
-          state: p.state || "",
+          region: p.region || "",
           country: p.country,
           lat: p.lat,
           lon: p.lon
@@ -57,8 +60,10 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
       } catch (err) {
         console.error("Place detection failed:", err);
         setSuggestions([]);
+      } finally {
+        setIsSearching(false);
       }
-    }, 400);
+    }, 300);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +74,7 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
 
   const handleSelectPlace = (place: Place) => {
     const locationString = `${place.lat},${place.lon}`;
-    setSearchQuery(`${place.name}${place.state ? `, ${place.state}` : ""}, ${place.country}`);
+    setSearchQuery(`${place.name}${place.region ? `, ${place.region}` : ""}, ${place.country}`);
     setSuggestions([]);
     setShowSuggestions(false);
     onLocationSelect(locationString);
@@ -119,20 +124,22 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
             
             {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-background/95 backdrop-blur-md border border-white/20 rounded-lg shadow-lg z-50 overflow-hidden">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-[100] overflow-hidden max-h-80 overflow-y-auto">
                 {suggestions.map((place, index) => (
                   <button
                     key={`${place.lat}-${place.lon}-${index}`}
                     type="button"
                     onClick={() => handleSelectPlace(place)}
-                    className="w-full px-4 py-3 text-left hover:bg-white/10 transition-colors duration-200 flex items-center gap-2 border-b border-white/10 last:border-b-0"
+                    className="w-full px-4 py-3 text-left hover:bg-primary/20 transition-colors duration-200 border-b border-gray-700/50 last:border-b-0"
                   >
-                    <MapPin size={16} className="text-primary shrink-0" />
-                    <span className="font-medium" style={{ fontFamily: "'Bodoni Moda', serif" }}>
-                      {place.name}
-                      {place.state && <span className="text-muted-foreground">, {place.state}</span>}
-                      <span className="text-muted-foreground">, {place.country}</span>
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+                        {place.name}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {place.region && `${place.region}, `}{place.country}
+                      </span>
+                    </div>
                   </button>
                 ))}
               </div>
