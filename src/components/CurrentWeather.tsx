@@ -111,10 +111,16 @@ export const CurrentWeather = ({
         </div>
         
         <div className="text-left sm:text-right space-y-2 sm:space-y-3 animate-fade-in w-full sm:w-auto">
-          <div className="text-xl sm:text-2xl font-semibold text-foreground bg-gradient-to-r from-foreground via-primary/20 to-foreground bg-clip-text">
+          <div 
+            className="text-xl sm:text-2xl font-semibold text-foreground"
+            style={{ fontFamily: "'Playfair Display', 'Bodoni Moda', Georgia, serif", letterSpacing: '0.02em' }}
+          >
             {location.name}
           </div>
-          <div className="text-muted-foreground text-base sm:text-lg">
+          <div 
+            className="text-muted-foreground text-base sm:text-lg"
+            style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
+          >
             {location.region}, {location.country}
           </div>
           <div className="flex items-center gap-2 sm:gap-3 justify-start sm:justify-end flex-wrap">
