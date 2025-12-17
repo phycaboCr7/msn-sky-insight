@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
+}
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
 }
 
 // Calculate actual AQI from PM2.5
@@ -32,15 +37,24 @@ const calculateAQI = (pm25: number): number => {
 
 export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const askAI = async () => {
     if (!question.trim()) return;
 
+    const userMessage: Message = { role: "user", content: question.trim() };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setQuestion("");
     setLoading(true);
-    setAnswer("");
     
     try {
       const pm25 = weather.current.air_quality?.pm2_5;
@@ -66,7 +80,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       };
 
       const { data, error } = await supabase.functions.invoke('weatherza-chat', {
-        body: { question, weatherContext }
+        body: { 
+          messages: updatedMessages,
+          weatherContext 
+        }
       });
 
       if (error) {
@@ -86,7 +103,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         throw new Error(data.error);
       }
 
-      setAnswer(data.answer || "Sorry, I couldn't generate a response.");
+      const assistantMessage: Message = { 
+        role: "assistant", 
+        content: data.answer || "Sorry, I couldn't generate a response." 
+      };
+      setMessages([...updatedMessages, assistantMessage]);
     } catch (error) {
       console.error("AI Error:", error);
       toast({
@@ -94,6 +115,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         description: "Failed to get a response. Please try again.",
         variant: "destructive",
       });
+      // Remove the user message if there was an error
+      setMessages(messages);
     } finally {
       setLoading(false);
     }
@@ -106,22 +129,114 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    toast({
+      title: "Chat Cleared",
+      description: "Started a fresh conversation! 🌟",
+    });
+  };
+
   return (
     <Card className="col-span-full glass-card border-white/10 overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20 animate-glow">
-            <Sparkles className="w-5 h-5 text-primary" />
-          </div>
-          <span className="bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent font-semibold">
-            Rakshit's Weatherza AI
-          </span>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20 animate-glow">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <span className="bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent font-semibold">
+              Rakshit's Weatherza AI
+            </span>
+          </CardTitle>
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearChat}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Chat Messages */}
+        {messages.length > 0 && (
+          <div className="max-h-[400px] overflow-y-auto space-y-3 p-2 rounded-xl bg-black/20 border border-white/5">
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`flex gap-3 animate-fade-in ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                {msg.role === "assistant" && (
+                  <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit">
+                    <Bot className="w-4 h-4 text-primary" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[85%] p-3 rounded-2xl ${
+                    msg.role === "user"
+                      ? "bg-primary/20 border border-primary/30 text-foreground"
+                      : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
+                  }`}
+                >
+                  {msg.role === "assistant" ? (
+                    <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown">
+                      <ReactMarkdown
+                        components={{
+                          h1: ({ children }) => <h1 className="text-xl font-bold text-foreground mb-3 mt-2">{children}</h1>,
+                          h2: ({ children }) => <h2 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h2>,
+                          h3: ({ children }) => <h3 className="text-base font-semibold text-foreground mb-2 mt-2">{children}</h3>,
+                          p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
+                          strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
+                          em: ({ children }) => <em className="italic text-foreground/80">{children}</em>,
+                          ul: ({ children }) => <ul className="list-none space-y-1 mb-3">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
+                          li: ({ children }) => <li className="text-foreground/90 flex items-start gap-2"><span className="text-primary mt-0.5">•</span><span>{children}</span></li>,
+                          code: ({ children }) => <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>,
+                          blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-foreground/70">{children}</blockquote>,
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-foreground/90">{msg.content}</p>
+                  )}
+                </div>
+                {msg.role === "user" && (
+                  <div className="p-1.5 rounded-full bg-primary/20 h-fit">
+                    <User className="w-4 h-4 text-primary" />
+                  </div>
+                )}
+              </div>
+            ))}
+            {loading && (
+              <div className="flex gap-3 justify-start animate-fade-in">
+                <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit">
+                  <Bot className="w-4 h-4 text-primary" />
+                </div>
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span className="text-muted-foreground text-sm">Thinking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+
+        {/* Input Area */}
         <div className="flex gap-3">
           <Textarea
-            placeholder="Ask me anything about the weather..."
+            placeholder="Ask me anything... I remember our conversation! 💬"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -140,30 +255,6 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             )}
           </Button>
         </div>
-        
-        {answer && (
-          <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20 animate-fade-in">
-            <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown">
-              <ReactMarkdown
-                components={{
-                  h1: ({ children }) => <h1 className="text-xl font-bold text-foreground mb-3 mt-2">{children}</h1>,
-                  h2: ({ children }) => <h2 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h2>,
-                  h3: ({ children }) => <h3 className="text-base font-semibold text-foreground mb-2 mt-2">{children}</h3>,
-                  p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
-                  strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
-                  em: ({ children }) => <em className="italic text-foreground/80">{children}</em>,
-                  ul: ({ children }) => <ul className="list-none space-y-1 mb-3">{children}</ul>,
-                  ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
-                  li: ({ children }) => <li className="text-foreground/90 flex items-start gap-2"><span className="text-primary mt-0.5">•</span><span>{children}</span></li>,
-                  code: ({ children }) => <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>,
-                  blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-foreground/70">{children}</blockquote>,
-                }}
-              >
-                {answer}
-              </ReactMarkdown>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
