@@ -7,6 +7,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Send, User, Bot, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
@@ -133,7 +136,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     setMessages([]);
     toast({
       title: "Chat Cleared",
-      description: "Started a fresh conversation! 🌟",
+      description: "Started a fresh conversation.",
     });
   };
 
@@ -146,7 +149,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <span className="bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent font-semibold">
-              Rakshit's Weatherza AI
+              Weatherza AI
             </span>
           </CardTitle>
           {messages.length > 0 && (
@@ -188,6 +191,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   {msg.role === "assistant" ? (
                     <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown">
                       <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
                         components={{
                           h1: ({ children }) => <h1 className="text-xl font-bold text-foreground mb-3 mt-2">{children}</h1>,
                           h2: ({ children }) => <h2 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h2>,
@@ -195,10 +200,18 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                           p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
                           strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
                           em: ({ children }) => <em className="italic text-foreground/80">{children}</em>,
-                          ul: ({ children }) => <ul className="list-none space-y-1 mb-3">{children}</ul>,
+                          ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
                           ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
-                          li: ({ children }) => <li className="text-foreground/90 flex items-start gap-2"><span className="text-primary mt-0.5">•</span><span>{children}</span></li>,
-                          code: ({ children }) => <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>,
+                          li: ({ children }) => <li className="text-foreground/90">{children}</li>,
+                          code: ({ className, children }) => {
+                            const isInline = !className;
+                            return isInline ? (
+                              <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>
+                            ) : (
+                              <code className="block bg-black/30 p-3 rounded-lg font-mono text-sm overflow-x-auto">{children}</code>
+                            );
+                          },
+                          pre: ({ children }) => <pre className="bg-black/30 p-3 rounded-lg overflow-x-auto mb-3">{children}</pre>,
                           blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-foreground/70">{children}</blockquote>,
                         }}
                       >
@@ -236,7 +249,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         {/* Input Area */}
         <div className="flex gap-3">
           <Textarea
-            placeholder="Ask me anything... I remember our conversation! 💬"
+            placeholder="Ask me anything - math, science, coding, weather..."
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={handleKeyDown}
