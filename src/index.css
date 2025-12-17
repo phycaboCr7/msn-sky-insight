@@ -248,3 +248,74 @@ All colors MUST be HSL.
 .weatherza-markdown .katex .mop {
   color: inherit;
 }
+
+/* Writing Animation - ChatGPT Style */
+.writing-animation {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.writing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  animation: writing-bounce 1.4s ease-in-out infinite;
+}
+
+.writing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.writing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.writing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes writing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+.blur-text {
+  animation: blur-pulse 2s ease-in-out infinite;
+}
+
+@keyframes blur-pulse {
+  0%, 100% {
+    filter: blur(0px);
+    opacity: 0.7;
+  }
+  50% {
+    filter: blur(1px);
+    opacity: 1;
+  }
+}
+
+/* AI Message Appear Animation */
+.ai-message-appear {
+  animation: ai-appear 0.5s ease-out forwards;
+}
+
+@keyframes ai-appear {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0);
+  }
+}
