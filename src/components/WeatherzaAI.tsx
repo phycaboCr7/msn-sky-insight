@@ -149,7 +149,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <span className="bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent font-semibold">
-              Weatherza AI
+              Rakshit's Weatherza AI
             </span>
           </CardTitle>
           {messages.length > 0 && (
@@ -182,10 +182,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl ${
+                  className={`max-w-[85%] p-3 rounded-2xl transition-all duration-300 ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
-                      : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
+                      : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20 ai-message-appear"
                   }`}
                 >
                   {msg.role === "assistant" ? (
@@ -232,12 +232,16 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             {loading && (
               <div className="flex gap-3 justify-start animate-fade-in">
                 <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit">
-                  <Bot className="w-4 h-4 text-primary" />
+                  <Bot className="w-4 h-4 text-primary animate-pulse" />
                 </div>
                 <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span className="text-muted-foreground text-sm">Thinking...</span>
+                  <div className="flex items-center gap-3">
+                    <div className="writing-animation flex gap-1">
+                      <span className="writing-dot"></span>
+                      <span className="writing-dot"></span>
+                      <span className="writing-dot"></span>
+                    </div>
+                    <span className="text-muted-foreground text-sm blur-text">Rakshit's AI is thinking...</span>
                   </div>
                 </div>
               </div>
