@@ -223,3 +223,28 @@ All colors MUST be HSL.
     100% { background-position: 200% 0; }
   }
 }
+
+/* KaTeX Math Styling */
+.weatherza-markdown .katex {
+  font-size: 1.1em;
+  color: hsl(var(--foreground));
+}
+
+.weatherza-markdown .katex-display {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: hsl(var(--primary) / 0.1);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.weatherza-markdown .katex-display > .katex {
+  color: hsl(var(--primary));
+}
+
+.weatherza-markdown .katex .mord,
+.weatherza-markdown .katex .mbin,
+.weatherza-markdown .katex .mrel,
+.weatherza-markdown .katex .mop {
+  color: inherit;
+}
