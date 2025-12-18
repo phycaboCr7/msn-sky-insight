@@ -4,11 +4,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2 } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
 
 interface WeatherzaAIProps {
@@ -18,6 +19,7 @@ interface WeatherzaAIProps {
 interface Message {
   role: "user" | "assistant";
   content: string;
+  isTyping?: boolean;
 }
 
 // Calculate actual AQI from PM2.5
@@ -36,6 +38,199 @@ const calculateAQI = (pm25: number): number => {
     }
   }
   return pm25 > 500 ? 500 : 0;
+};
+
+// Code block component with copy and run buttons
+const CodeBlock = ({ language, children }: { language?: string; children: string }) => {
+  const [copied, setCopied] = useState(false);
+  const [output, setOutput] = useState<string | null>(null);
+  const [showOutput, setShowOutput] = useState(false);
+  const { toast } = useToast();
+
+  const isRunnable = language && ["javascript", "js", "html", "python", "py"].includes(language.toLowerCase());
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(children);
+    setCopied(true);
+    toast({ title: "Copied!", description: "Code copied to clipboard" });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRun = () => {
+    const lang = language?.toLowerCase();
+    try {
+      if (lang === "javascript" || lang === "js") {
+        // Capture console.log output
+        const logs: string[] = [];
+        const originalLog = console.log;
+        console.log = (...args) => {
+          logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' '));
+        };
+        
+        try {
+          const result = eval(children);
+          console.log = originalLog;
+          const outputText = logs.length > 0 ? logs.join('\n') : (result !== undefined ? String(result) : 'Code executed successfully (no output)');
+          setOutput(outputText);
+        } catch (e: any) {
+          console.log = originalLog;
+          setOutput(`Error: ${e.message}`);
+        }
+      } else if (lang === "html") {
+        const blob = new Blob([children], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        setOutput(`HTML_PREVIEW:${url}`);
+      } else if (lang === "python" || lang === "py") {
+        setOutput("⚠️ Python execution requires a backend server. This is a browser-based environment.");
+      }
+      setShowOutput(true);
+    } catch (e: any) {
+      setOutput(`Error: ${e.message}`);
+      setShowOutput(true);
+    }
+  };
+
+  return (
+    <div className="relative group my-3">
+      <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
+        <span className="text-xs text-muted-foreground font-mono">{language || "code"}</span>
+        <div className="flex gap-1">
+          {isRunnable && (
+            <button
+              onClick={handleRun}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition-colors"
+            >
+              <Play className="w-3 h-3" />
+              Run
+            </button>
+          )}
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-white/10 hover:bg-white/20 text-foreground/70 rounded transition-colors"
+          >
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+      </div>
+      <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0">
+        <code className="font-mono text-sm text-foreground/90">{children}</code>
+      </pre>
+      
+      {/* Output box */}
+      {showOutput && output && (
+        <div className="mt-2 relative">
+          <div className="flex items-center justify-between bg-primary/20 px-3 py-1.5 rounded-t-lg">
+            <span className="text-xs text-primary font-semibold">Output</span>
+            <button
+              onClick={() => setShowOutput(false)}
+              className="p-0.5 hover:bg-white/10 rounded transition-colors"
+            >
+              <X className="w-3 h-3 text-foreground/70" />
+            </button>
+          </div>
+          <div className="bg-black/30 p-3 rounded-b-lg border border-primary/20">
+            {output.startsWith("HTML_PREVIEW:") ? (
+              <iframe
+                src={output.replace("HTML_PREVIEW:", "")}
+                className="w-full h-32 bg-white rounded"
+                sandbox="allow-scripts"
+              />
+            ) : (
+              <pre className="text-sm text-foreground/80 font-mono whitespace-pre-wrap">{output}</pre>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Typing effect hook
+const useTypingEffect = (text: string, isTyping: boolean, speed: number = 15) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    if (!isTyping) {
+      setDisplayedText(text);
+      setIsComplete(true);
+      return;
+    }
+
+    setDisplayedText("");
+    setIsComplete(false);
+    let index = 0;
+
+    const interval = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(text.slice(0, index + 1));
+        index++;
+      } else {
+        setIsComplete(true);
+        clearInterval(interval);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [text, isTyping, speed]);
+
+  return { displayedText, isComplete };
+};
+
+// Message content component with typing effect
+const MessageContent = ({ content, isTyping }: { content: string; isTyping?: boolean }) => {
+  const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
+
+  return (
+    <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown">
+      <ReactMarkdown
+        remarkPlugins={[remarkMath, remarkGfm]}
+        rehypePlugins={[rehypeKatex]}
+        components={{
+          h1: ({ children }) => <h1 className="text-xl font-bold text-foreground mb-3 mt-2">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-base font-semibold text-foreground mb-2 mt-2">{children}</h3>,
+          p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
+          strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
+          em: ({ children }) => <em className="italic text-foreground/80">{children}</em>,
+          ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
+          li: ({ children }) => <li className="text-foreground/90">{children}</li>,
+          code: ({ className, children, ...props }) => {
+            const match = /language-(\w+)/.exec(className || "");
+            const isInline = !className && !match;
+            const codeContent = String(children).replace(/\n$/, "");
+            
+            if (isInline) {
+              return (
+                <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>
+              );
+            }
+            
+            return <CodeBlock language={match?.[1]}>{codeContent}</CodeBlock>;
+          },
+          pre: ({ children }) => <>{children}</>,
+          blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-foreground/70">{children}</blockquote>,
+          table: ({ children }) => (
+            <div className="overflow-x-auto my-3 rounded-lg border border-white/20">
+              <table className="w-full border-collapse bg-black/20">{children}</table>
+            </div>
+          ),
+          thead: ({ children }) => <thead className="bg-primary/20">{children}</thead>,
+          tbody: ({ children }) => <tbody className="divide-y divide-white/10">{children}</tbody>,
+          tr: ({ children }) => <tr className="hover:bg-white/5 transition-colors">{children}</tr>,
+          th: ({ children }) => <th className="px-4 py-2 text-left text-sm font-semibold text-foreground border-b border-white/20">{children}</th>,
+          td: ({ children }) => <td className="px-4 py-2 text-sm text-foreground/80">{children}</td>,
+        }}
+      >
+        {displayedText}
+      </ReactMarkdown>
+      {isTyping && !isComplete && (
+        <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5" />
+      )}
+    </div>
+  );
 };
 
 export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
@@ -84,7 +279,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
       const { data, error } = await supabase.functions.invoke('weatherza-chat', {
         body: { 
-          messages: updatedMessages,
+          messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
           weatherContext 
         }
       });
@@ -108,9 +303,18 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
       const assistantMessage: Message = { 
         role: "assistant", 
-        content: data.answer || "Sorry, I couldn't generate a response." 
+        content: data.answer || "Sorry, I couldn't generate a response.",
+        isTyping: true
       };
       setMessages([...updatedMessages, assistantMessage]);
+      
+      // Mark typing as complete after animation
+      setTimeout(() => {
+        setMessages(prev => prev.map((m, i) => 
+          i === prev.length - 1 ? { ...m, isTyping: false } : m
+        ));
+      }, (data.answer?.length || 0) * 15 + 500);
+      
     } catch (error) {
       console.error("AI Error:", error);
       toast({
@@ -185,39 +389,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   className={`max-w-[85%] p-3 rounded-2xl transition-all duration-300 ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
-                      : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20 ai-message-appear"
+                      : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
                   }`}
                 >
                   {msg.role === "assistant" ? (
-                    <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                        components={{
-                          h1: ({ children }) => <h1 className="text-xl font-bold text-foreground mb-3 mt-2">{children}</h1>,
-                          h2: ({ children }) => <h2 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h2>,
-                          h3: ({ children }) => <h3 className="text-base font-semibold text-foreground mb-2 mt-2">{children}</h3>,
-                          p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
-                          strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
-                          em: ({ children }) => <em className="italic text-foreground/80">{children}</em>,
-                          ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
-                          li: ({ children }) => <li className="text-foreground/90">{children}</li>,
-                          code: ({ className, children }) => {
-                            const isInline = !className;
-                            return isInline ? (
-                              <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>
-                            ) : (
-                              <code className="block bg-black/30 p-3 rounded-lg font-mono text-sm overflow-x-auto">{children}</code>
-                            );
-                          },
-                          pre: ({ children }) => <pre className="bg-black/30 p-3 rounded-lg overflow-x-auto mb-3">{children}</pre>,
-                          blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-foreground/70">{children}</blockquote>,
-                        }}
-                      >
-                        {msg.content}
-                      </ReactMarkdown>
-                    </div>
+                    <MessageContent content={msg.content} isTyping={msg.isTyping} />
                   ) : (
                     <p className="text-foreground/90">{msg.content}</p>
                   )}
