@@ -2,3 +2,6 @@ project_id = "znkvwgwijwmeapcyjpgu"
 
 [functions.weatherza-chat]
 verify_jwt = false
+
+[functions.execute-code]
+verify_jwt = false
