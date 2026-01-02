@@ -119,7 +119,7 @@ const Index = () => {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-20 max-w-7xl">
         <div className="mb-6 sm:mb-8 text-center animate-fade-in">
-          <h1 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground to-primary/80 bg-clip-text text-transparent">
+          <h1 className="font-playfair text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground to-primary/80 bg-clip-text text-transparent">
             Weatherza
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg">A True Forecasting Experience</p>

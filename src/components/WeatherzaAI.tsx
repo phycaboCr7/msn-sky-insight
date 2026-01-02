@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -40,6 +40,74 @@ const calculateAQI = (pm25: number): number => {
   return pm25 > 500 ? 500 : 0;
 };
 
+// Output Modal Component
+const OutputModal = ({ 
+  output, 
+  language, 
+  onClose 
+}: { 
+  output: string; 
+  language: string; 
+  onClose: () => void;
+}) => {
+  const isHTML = output.startsWith("HTML_PREVIEW:");
+  const htmlUrl = isHTML ? output.replace("HTML_PREVIEW:", "") : null;
+
+  const openInNewTab = () => {
+    if (htmlUrl) {
+      window.open(htmlUrl, '_blank');
+    } else {
+      const blob = new Blob([output], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-4xl max-h-[80vh] bg-background/95 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/20 to-purple-500/20 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <Play className="w-4 h-4 text-green-400" />
+            <span className="font-semibold text-foreground">Output - {language}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={openInNewTab}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Open in New Tab
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-foreground/70" />
+            </button>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-4 min-h-[300px]">
+          {isHTML && htmlUrl ? (
+            <iframe
+              src={htmlUrl}
+              className="w-full h-full min-h-[400px] bg-white rounded-lg border border-white/10"
+              sandbox="allow-scripts allow-same-origin"
+            />
+          ) : (
+            <pre className="text-sm text-foreground/90 font-mono whitespace-pre-wrap bg-black/30 p-4 rounded-lg h-full min-h-[300px]">
+              {output}
+            </pre>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Code block component with copy and run buttons
 const CodeBlock = ({ language, children }: { language?: string; children: string }) => {
   const [copied, setCopied] = useState(false);
@@ -60,7 +128,6 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
     const lang = language?.toLowerCase();
     try {
       if (lang === "javascript" || lang === "js") {
-        // Capture console.log output
         const logs: string[] = [];
         const originalLog = console.log;
         console.log = (...args) => {
@@ -91,63 +158,48 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
   };
 
   return (
-    <div className="relative group my-3">
-      <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
-        <span className="text-xs text-muted-foreground font-mono">{language || "code"}</span>
-        <div className="flex gap-1">
-          {isRunnable && (
-            <button
-              onClick={handleRun}
-              className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition-colors"
-            >
-              <Play className="w-3 h-3" />
-              Run
-            </button>
-          )}
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1 px-2 py-1 text-xs bg-white/10 hover:bg-white/20 text-foreground/70 rounded transition-colors"
-          >
-            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            {copied ? "Copied" : "Copy"}
-          </button>
-        </div>
-      </div>
-      <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0">
-        <code className="font-mono text-sm text-foreground/90">{children}</code>
-      </pre>
-      
-      {/* Output box */}
-      {showOutput && output && (
-        <div className="mt-2 relative">
-          <div className="flex items-center justify-between bg-primary/20 px-3 py-1.5 rounded-t-lg">
-            <span className="text-xs text-primary font-semibold">Output</span>
-            <button
-              onClick={() => setShowOutput(false)}
-              className="p-0.5 hover:bg-white/10 rounded transition-colors"
-            >
-              <X className="w-3 h-3 text-foreground/70" />
-            </button>
-          </div>
-          <div className="bg-black/30 p-3 rounded-b-lg border border-primary/20">
-            {output.startsWith("HTML_PREVIEW:") ? (
-              <iframe
-                src={output.replace("HTML_PREVIEW:", "")}
-                className="w-full h-32 bg-white rounded"
-                sandbox="allow-scripts"
-              />
-            ) : (
-              <pre className="text-sm text-foreground/80 font-mono whitespace-pre-wrap">{output}</pre>
+    <>
+      <div className="relative group my-3">
+        <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
+          <span className="text-xs text-muted-foreground font-mono">{language || "code"}</span>
+          <div className="flex gap-1">
+            {isRunnable && (
+              <button
+                onClick={handleRun}
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition-colors"
+              >
+                <Play className="w-3 h-3" />
+                Run
+              </button>
             )}
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-white/10 hover:bg-white/20 text-foreground/70 rounded transition-colors"
+            >
+              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
           </div>
         </div>
+        <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0">
+          <code className="font-mono text-sm text-foreground/90">{children}</code>
+        </pre>
+      </div>
+      
+      {/* Big Output Modal */}
+      {showOutput && output && (
+        <OutputModal 
+          output={output} 
+          language={language || "code"} 
+          onClose={() => setShowOutput(false)} 
+        />
       )}
-    </div>
+    </>
   );
 };
 
-// Typing effect hook
-const useTypingEffect = (text: string, isTyping: boolean, speed: number = 15) => {
+// Typing effect hook - MUCH faster typing (chunks of characters)
+const useTypingEffect = (text: string, isTyping: boolean, chunkSize: number = 5, speed: number = 10) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
 
@@ -164,8 +216,9 @@ const useTypingEffect = (text: string, isTyping: boolean, speed: number = 15) =>
 
     const interval = setInterval(() => {
       if (index < text.length) {
-        setDisplayedText(text.slice(0, index + 1));
-        index++;
+        // Type multiple characters at once for faster output
+        index = Math.min(index + chunkSize, text.length);
+        setDisplayedText(text.slice(0, index));
       } else {
         setIsComplete(true);
         clearInterval(interval);
@@ -173,7 +226,7 @@ const useTypingEffect = (text: string, isTyping: boolean, speed: number = 15) =>
     }, speed);
 
     return () => clearInterval(interval);
-  }, [text, isTyping, speed]);
+  }, [text, isTyping, chunkSize, speed]);
 
   return { displayedText, isComplete };
 };
@@ -308,12 +361,15 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       };
       setMessages([...updatedMessages, assistantMessage]);
       
-      // Mark typing as complete after animation
+      // Mark typing as complete after animation - faster calculation based on chunk size
+      const chunkSize = 5;
+      const speed = 10;
+      const typingDuration = Math.ceil((data.answer?.length || 0) / chunkSize) * speed + 300;
       setTimeout(() => {
         setMessages(prev => prev.map((m, i) => 
           i === prev.length - 1 ? { ...m, isTyping: false } : m
         ));
-      }, (data.answer?.length || 0) * 15 + 500);
+      }, typingDuration);
       
     } catch (error) {
       console.error("AI Error:", error);
@@ -372,7 +428,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="space-y-4">
         {/* Chat Messages */}
         {messages.length > 0 && (
-          <div className="max-h-[400px] overflow-y-auto space-y-3 p-2 rounded-xl bg-black/20 border border-white/5">
+          <div className="h-[400px] overflow-y-auto space-y-3 p-2 rounded-xl bg-black/20 border border-white/5">
             {messages.map((msg, index) => (
               <div
                 key={index}
