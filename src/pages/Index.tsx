@@ -15,7 +15,7 @@ import { AirQualityCard } from "@/components/AirQualityCard";
 import { WeatherzaAI } from "@/components/WeatherzaAI";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Sparkles } from "lucide-react";
 
 const Index = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -91,17 +91,28 @@ const Index = () => {
   };
 
   useEffect(() => {
-    // Try to get user's location on initial load
     getCurrentLocation();
   }, []);
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gradient-weather flex items-center justify-center px-4">
-        <div className="text-center">
-          <Loader2 className="mx-auto mb-4 animate-spin text-primary" size={40} />
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Loading Weather</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">Getting your location...</p>
+      <div className="min-h-screen bg-gradient-weather flex items-center justify-center px-4 relative overflow-hidden">
+        {/* Ambient glow effects */}
+        <div className="ambient-glow ambient-glow-1" />
+        <div className="ambient-glow ambient-glow-2" />
+        
+        <div className="text-center relative z-10">
+          <div className="relative inline-block mb-8">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center loading-premium">
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            </div>
+          </div>
+          <h2 className="hero-title text-3xl sm:text-4xl text-gradient-premium mb-3">
+            Weatherza
+          </h2>
+          <p className="hero-subtitle text-sm text-muted-foreground tracking-widest">
+            Loading your weather experience
+          </p>
         </div>
       </div>
     );
@@ -109,69 +120,143 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-weather relative overflow-hidden">
+      {/* Noise texture overlay for premium feel */}
+      <div className="noise-overlay" />
+      
+      {/* Ambient glow effects */}
+      <div className="ambient-glow ambient-glow-1" />
+      <div className="ambient-glow ambient-glow-2" />
+      <div className="ambient-glow ambient-glow-3" />
+      
       {/* Dynamic weather-based background */}
       <DynamicBackground weather={weather} />
       
-      {/* Subtle background overlay (no animation) */}
+      {/* Gradient overlay */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background/0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background/60" />
+        <div className="absolute inset-0" style={{ background: 'var(--gradient-aurora)' }} />
       </div>
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-20 max-w-7xl">
-        <div className="mb-6 sm:mb-8 text-center animate-fade-in">
-          <h1 className="font-playfair text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground to-primary/80 bg-clip-text text-transparent">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 relative z-20 max-w-7xl">
+        {/* Premium Hero Section */}
+        <header className="mb-10 sm:mb-16 text-center entrance-fade">
+          {/* Decorative element */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-12 bg-gradient-to-r from-transparent to-primary/50" />
+            <Sparkles className="w-4 h-4 text-primary/60 animate-pulse" />
+            <div className="h-px w-12 bg-gradient-to-l from-transparent to-primary/50" />
+          </div>
+          
+          <h1 className="hero-title text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-gradient-premium mb-4 sm:mb-5">
             Weatherza
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg">A True Forecasting Experience</p>
-          <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-primary to-blue-500 mx-auto mt-3 sm:mt-4 rounded-full" />
-        </div>
+          
+          <p className="hero-subtitle text-xs sm:text-sm text-muted-foreground mb-6">
+            A Premium Forecasting Experience
+          </p>
+          
+          {/* Decorative line with glow */}
+          <div className="relative w-32 sm:w-48 h-0.5 mx-auto">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary to-transparent blur-sm" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent blur-lg" />
+          </div>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <SearchLocation
-            onLocationSelect={fetchWeather}
-            onCurrentLocation={getCurrentLocation}
-            isLoading={loading}
-          />
+        {/* Weather Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+          <div className="entrance-fade stagger-1">
+            <SearchLocation
+              onLocationSelect={fetchWeather}
+              onCurrentLocation={getCurrentLocation}
+              isLoading={loading}
+            />
+          </div>
 
           {weather && (
             <>
-              <CurrentWeather weather={weather} />
-              <WeatherAdvice weather={weather} />
-              <AirQualityCard weather={weather} />
-              <TemperatureChart weather={weather} />
-              <HourlyForecast weather={weather} />
-              <HumidityChart weather={weather} />
-              <UVIndexChart weather={weather} />
-              <WindChart weather={weather} />
-              <WeatherDetails weather={weather} />
-              <DailyForecast weather={weather} />
-              <MonthlyChart weather={weather} />
-              <WeatherzaAI weather={weather} />
+              <div className="entrance-fade stagger-2 col-span-full lg:col-span-2">
+                <CurrentWeather weather={weather} />
+              </div>
+              <div className="entrance-fade stagger-3">
+                <WeatherAdvice weather={weather} />
+              </div>
+              <div className="entrance-fade stagger-4">
+                <AirQualityCard weather={weather} />
+              </div>
+              <div className="entrance-fade stagger-5">
+                <TemperatureChart weather={weather} />
+              </div>
+              <div className="entrance-fade stagger-6">
+                <HourlyForecast weather={weather} />
+              </div>
+              <div className="entrance-fade stagger-7">
+                <HumidityChart weather={weather} />
+              </div>
+              <div className="entrance-fade stagger-8">
+                <UVIndexChart weather={weather} />
+              </div>
+              <div className="entrance-fade" style={{ animationDelay: '0.9s' }}>
+                <WindChart weather={weather} />
+              </div>
+              <div className="entrance-fade" style={{ animationDelay: '1s' }}>
+                <WeatherDetails weather={weather} />
+              </div>
+              <div className="entrance-fade" style={{ animationDelay: '1.1s' }}>
+                <DailyForecast weather={weather} />
+              </div>
+              <div className="entrance-fade" style={{ animationDelay: '1.2s' }}>
+                <MonthlyChart weather={weather} />
+              </div>
+              <div className="entrance-fade col-span-full" style={{ animationDelay: '1.3s' }}>
+                <WeatherzaAI weather={weather} />
+              </div>
             </>
           )}
 
           {!weather && !loading && (
-            <div className="col-span-full text-center py-8 sm:py-16 animate-fade-in px-4">
-              <div className="max-w-md mx-auto">
-                <div className="w-16 sm:w-24 h-16 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-primary/20 to-blue-500/20 rounded-full flex items-center justify-center">
-                  <Search className="w-8 sm:w-12 h-8 sm:h-12 text-primary" />
+            <div className="col-span-full text-center py-12 sm:py-20 entrance-fade">
+              <div className="max-w-lg mx-auto">
+                {/* Animated search icon */}
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-8">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/10 to-accent/10 animate-pulse" />
+                  <div className="absolute inset-2 rounded-full bg-gradient-to-br from-primary/20 to-accent/15 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                  <div className="absolute inset-4 rounded-full bg-gradient-to-br from-card to-card/80 flex items-center justify-center">
+                    <Search className="w-10 h-10 sm:w-14 sm:h-14 text-primary/80" />
+                  </div>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-2 sm:mb-3">
+                
+                <h2 className="hero-title text-3xl sm:text-4xl text-gradient-aurora mb-4">
                   Discover Weather Anywhere
                 </h2>
-                <p className="text-muted-foreground text-base sm:text-lg">
-                  Enter a city name or use your current location to get started with detailed weather insights
+                <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mx-auto">
+                  Enter a city name or use your current location to unlock detailed weather insights with stunning visualizations
                 </p>
               </div>
             </div>
           )}
         </div>
         
-        {/* Footer */}
-        <footer className="mt-8 sm:mt-16 py-6 sm:py-8 text-center relative z-20">
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-4 sm:mb-6" />
-          <p className="text-muted-foreground text-xs sm:text-sm font-medium px-4">
-            Website made by <span className="text-primary font-semibold">Rakshit Jain</span>
+        {/* Premium Footer */}
+        <footer className="mt-16 sm:mt-24 py-8 sm:py-12 text-center relative z-20">
+          {/* Decorative separator */}
+          <div className="relative w-full h-px mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          </div>
+          
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Sparkles className="w-3 h-3 text-primary/50" />
+            <span className="hero-subtitle text-[10px] text-muted-foreground/60 tracking-widest">
+              Crafted with precision
+            </span>
+            <Sparkles className="w-3 h-3 text-primary/50" />
+          </div>
+          
+          <p className="text-muted-foreground text-sm font-medium">
+            Designed & Developed by{" "}
+            <span className="text-gradient-premium font-semibold">
+              Rakshit Jain
+            </span>
           </p>
         </footer>
       </div>
