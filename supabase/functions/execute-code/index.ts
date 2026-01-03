@@ -81,6 +81,8 @@ serve(async (req) => {
 
     console.log(`Executing ${pistonLanguage} (${pistonVersion}) code:`, code.substring(0, 100));
 
+    console.log('Calling Piston API...');
+    
     const response = await fetch(`${PISTON_API}/execute`, {
       method: 'POST',
       headers: {
@@ -98,16 +100,30 @@ serve(async (req) => {
         stdin: '',
         args: [],
         compile_timeout: 10000,
-        run_timeout: 5000,
+        run_timeout: 10000,
         compile_memory_limit: -1,
         run_memory_limit: -1,
       }),
     });
 
+    console.log('Piston API response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Piston API error:', errorText);
-      throw new Error(`Execution failed: ${errorText}`);
+      console.error('Piston API error:', response.status, errorText);
+      
+      // Handle common errors
+      if (response.status === 404) {
+        return new Response(
+          JSON.stringify({ 
+            output: `Language "${pistonLanguage}" is not available. Try python, javascript, java, c, cpp, etc.`,
+            hasError: true 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      throw new Error(`Execution failed (${response.status}): ${errorText}`);
     }
 
     const result = await response.json();
