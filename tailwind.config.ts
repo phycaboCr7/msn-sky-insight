@@ -84,12 +84,7 @@ export default {
 				'gradient-hero': 'var(--gradient-hero)',
 				'gradient-weather': 'var(--gradient-weather)',
 				'gradient-shine': 'var(--gradient-shine)',
-			},
-				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-card': 'var(--gradient-card)',
 				'gradient-sunny': 'var(--gradient-sunny)',
-				'gradient-weather': 'var(--gradient-weather)',
-				'gradient-hero': 'var(--gradient-hero)'
 			},
 			boxShadow: {
 				'card': 'var(--shadow-card)',
@@ -123,15 +118,6 @@ export default {
 				'reveal': 'reveal 1s cubic-bezier(0.16, 1, 0.3, 1)',
 				'morph': 'morph 8s ease-in-out infinite',
 			},
-				'slide-right': 'slide-right 0.7s ease-out',
-				'scale-in': 'scale-in 0.4s ease-out',
-				'zoom-in': 'zoom-in 0.5s ease-out',
-				'bounce-soft': 'bounce-soft 1s ease-in-out',
-				'glow-pulse': 'glow-pulse 2s ease-in-out infinite alternate',
-				'float': 'float 4s ease-in-out infinite',
-				'icon-glow': 'icon-glow 3s ease-in-out infinite',
-				'shimmer': 'shimmer 1.5s ease-in-out infinite'
-			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
@@ -141,6 +127,10 @@ export default {
 				'fade-in': {
 					'0%': { opacity: '0', transform: 'translateY(10px)' },
 					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'fade-in-up': {
+					'0%': { opacity: '0', transform: 'translateY(40px) scale(0.98)' },
+					'100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
 				},
 				'slide-up': {
 					'0%': { opacity: '0', transform: 'translateY(100%)' },
@@ -179,6 +169,10 @@ export default {
 					'0%, 100%': { transform: 'translateY(0px)' },
 					'50%': { transform: 'translateY(-8px)' }
 				},
+				'float-slow': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-15px)' }
+				},
 				'icon-glow': {
 					'0%, 100%': { filter: 'drop-shadow(0 0 8px currentColor) drop-shadow(0 0 20px currentColor)' },
 					'50%': { filter: 'drop-shadow(0 0 15px currentColor) drop-shadow(0 0 35px currentColor) drop-shadow(0 0 50px currentColor)' }
@@ -186,6 +180,26 @@ export default {
 				'shimmer': {
 					'0%': { backgroundPosition: '-200% 0' },
 					'100%': { backgroundPosition: '200% 0' }
+				},
+				'aurora': {
+					'0%, 100%': { backgroundPosition: '0% 50%', opacity: '0.5' },
+					'50%': { backgroundPosition: '100% 50%', opacity: '0.8' }
+				},
+				'pulse-ring': {
+					'0%': { transform: 'scale(0.8)', opacity: '0.8' },
+					'100%': { transform: 'scale(1.5)', opacity: '0' }
+				},
+				'text-gradient': {
+					'0%, 100%': { backgroundPosition: '0% 50%' },
+					'50%': { backgroundPosition: '100% 50%' }
+				},
+				'reveal': {
+					'0%': { clipPath: 'inset(0 100% 0 0)', opacity: '0' },
+					'100%': { clipPath: 'inset(0 0 0 0)', opacity: '1' }
+				},
+				'morph': {
+					'0%, 100%': { borderRadius: '60% 40% 30% 70% / 60% 30% 70% 40%' },
+					'50%': { borderRadius: '30% 60% 70% 40% / 50% 60% 30% 60%' }
 				},
 				'accordion-down': {
 					from: { height: '0' },
