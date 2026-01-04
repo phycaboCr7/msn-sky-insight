@@ -4,13 +4,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink, Terminal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
+import { PythonInterpreter } from "./PythonInterpreter";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
@@ -40,79 +41,33 @@ const calculateAQI = (pm25: number): number => {
   return pm25 > 500 ? 500 : 0;
 };
 
-// Output Modal Component - Split view with code on left, output on right
-const OutputModal = ({ 
-  output, 
-  language, 
+// HTML Preview Modal - for web content
+const HTMLPreviewModal = ({ 
+  htmlUrl, 
   code,
-  isLoading,
-  hasError,
   onClose 
 }: { 
-  output: string; 
-  language: string;
+  htmlUrl: string;
   code: string; 
-  isLoading?: boolean;
-  hasError?: boolean;
   onClose: () => void;
 }) => {
-  const isHTML = output.startsWith("HTML_PREVIEW:");
-  const htmlUrl = isHTML ? output.replace("HTML_PREVIEW:", "") : null;
-
-  const openInNewTab = () => {
-    if (htmlUrl) {
-      window.open(htmlUrl, '_blank');
-    } else {
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Code Output - ${language}</title>
-          <style>
-            body { 
-              font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; 
-              background: #1a1a2e; 
-              color: #eee; 
-              padding: 20px; 
-              white-space: pre-wrap;
-              line-height: 1.6;
-            }
-            .error { color: #ff6b6b; }
-            h1 { color: #00d4ff; font-size: 18px; margin-bottom: 20px; }
-          </style>
-        </head>
-        <body>
-          <h1>📄 Output - ${language}</h1>
-          <div class="${hasError ? 'error' : ''}">${output.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-        </body>
-        </html>
-      `;
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
       <div className="w-full max-w-6xl h-[80vh] bg-background/95 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/20 to-purple-500/20 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <Play className="w-4 h-4 text-green-400" />
-            <span className="font-semibold text-foreground">Code Execution - {language}</span>
-            {isLoading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+            <Play className="w-4 h-4 text-blue-400" />
+            <span className="font-semibold text-foreground">HTML Preview</span>
           </div>
           <div className="flex items-center gap-2">
-            {!isLoading && (
-              <button
-                onClick={openInNewTab}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Open in New Tab
-              </button>
-            )}
+            <button
+              onClick={() => window.open(htmlUrl, '_blank')}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Open in New Tab
+            </button>
             <button
               onClick={onClose}
               className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
@@ -122,7 +77,7 @@ const OutputModal = ({
           </div>
         </div>
         
-        {/* Split Content - Code on Left, Output on Right */}
+        {/* Split Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Code */}
           <div className="w-1/2 flex flex-col border-r border-white/10">
@@ -138,30 +93,19 @@ const OutputModal = ({
             </div>
           </div>
           
-          {/* Right Panel - Output */}
+          {/* Right Panel - Preview */}
           <div className="w-1/2 flex flex-col">
             <div className="px-3 py-2 bg-black/30 border-b border-white/10">
               <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
-                <Play className="w-3 h-3" /> Output
+                <Play className="w-3 h-3" /> Live Preview
               </span>
             </div>
-            <div className="flex-1 overflow-auto p-4">
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4">
-                  <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                  <p className="text-muted-foreground">Executing {language} code...</p>
-                </div>
-              ) : isHTML && htmlUrl ? (
-                <iframe
-                  src={htmlUrl}
-                  className="w-full h-full bg-white rounded-lg border border-white/10"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              ) : (
-                <pre className={`text-sm font-mono whitespace-pre-wrap bg-black/30 p-4 rounded-lg h-full ${hasError ? 'text-red-400' : 'text-foreground/90'}`}>
-                  {output || 'No output'}
-                </pre>
-              )}
+            <div className="flex-1 overflow-auto p-2">
+              <iframe
+                src={htmlUrl}
+                className="w-full h-full bg-white rounded-lg border border-white/10"
+                sandbox="allow-scripts allow-same-origin"
+              />
             </div>
           </div>
         </div>
@@ -170,7 +114,13 @@ const OutputModal = ({
   );
 };
 
-// Supported languages for backend execution
+// Languages that support interactive interpreter
+const INTERPRETER_LANGUAGES = [
+  'python', 'py', 'javascript', 'js', 'typescript', 'ts',
+  'ruby', 'rb', 'lua', 'bash', 'sh', 'perl', 'r'
+];
+
+// All supported languages for backend execution
 const BACKEND_LANGUAGES = [
   'python', 'py', 'javascript', 'js', 'typescript', 'ts',
   'java', 'c', 'cpp', 'c++', 'csharp', 'cs', 'go', 'golang',
@@ -183,14 +133,14 @@ const BACKEND_LANGUAGES = [
 // Code block component with copy and run buttons
 const CodeBlock = ({ language, children }: { language?: string; children: string }) => {
   const [copied, setCopied] = useState(false);
-  const [output, setOutput] = useState<string | null>(null);
-  const [showOutput, setShowOutput] = useState(false);
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [showInterpreter, setShowInterpreter] = useState(false);
+  const [showHTMLPreview, setShowHTMLPreview] = useState(false);
+  const [htmlUrl, setHtmlUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const lang = language?.toLowerCase() || '';
   const isRunnable = lang && (BACKEND_LANGUAGES.includes(lang) || lang === 'html');
+  const usesInterpreter = INTERPRETER_LANGUAGES.includes(lang);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(children);
@@ -199,49 +149,16 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleRun = async () => {
-    setShowOutput(true);
-    setIsExecuting(true);
-    setOutput(null);
-    setHasError(false);
-
-    try {
-      // Handle HTML separately (client-side)
-      if (lang === "html") {
-        const blob = new Blob([children], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        setOutput(`HTML_PREVIEW:${url}`);
-        setIsExecuting(false);
-        return;
-      }
-
-      // Execute via backend for all other languages
-      const { data, error } = await supabase.functions.invoke('execute-code', {
-        body: { code: children, language: lang }
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Execution failed');
-      }
-
-      if (data?.error) {
-        setOutput(`❌ Error: ${data.error}`);
-        setHasError(true);
-      } else {
-        setOutput(data.output || 'Code executed successfully (no output)');
-        setHasError(data.hasError || false);
-      }
-    } catch (e: any) {
-      console.error('Code execution error:', e);
-      setOutput(`❌ Error: ${e.message}`);
-      setHasError(true);
-      toast({
-        title: "Execution Error",
-        description: e.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsExecuting(false);
+  const handleRun = () => {
+    if (lang === "html") {
+      // For HTML, show the preview modal
+      const blob = new Blob([children], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      setHtmlUrl(url);
+      setShowHTMLPreview(true);
+    } else {
+      // For all other languages, open the interactive interpreter
+      setShowInterpreter(true);
     }
   };
 
@@ -254,11 +171,10 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
             {isRunnable && (
               <button
                 onClick={handleRun}
-                disabled={isExecuting}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition-colors"
               >
-                {isExecuting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
-                {isExecuting ? 'Running...' : 'Run'}
+                {usesInterpreter ? <Terminal className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                {usesInterpreter ? 'Open Shell' : 'Run'}
               </button>
             )}
             <button
@@ -275,15 +191,24 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
         </pre>
       </div>
       
-      {/* Big Output Modal - Split View */}
-      {showOutput && (
-        <OutputModal 
-          output={output || ''} 
-          language={language || "code"}
+      {/* Interactive Python/JS Interpreter */}
+      {showInterpreter && (
+        <PythonInterpreter
+          initialCode={children}
+          language={lang}
+          onClose={() => setShowInterpreter(false)}
+        />
+      )}
+
+      {/* HTML Preview Modal */}
+      {showHTMLPreview && htmlUrl && (
+        <HTMLPreviewModal
+          htmlUrl={htmlUrl}
           code={children}
-          isLoading={isExecuting}
-          hasError={hasError}
-          onClose={() => setShowOutput(false)} 
+          onClose={() => {
+            setShowHTMLPreview(false);
+            if (htmlUrl) URL.revokeObjectURL(htmlUrl);
+          }}
         />
       )}
     </>
