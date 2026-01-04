@@ -40,16 +40,18 @@ const calculateAQI = (pm25: number): number => {
   return pm25 > 500 ? 500 : 0;
 };
 
-// Output Modal Component
+// Output Modal Component - Split view with code on left, output on right
 const OutputModal = ({ 
   output, 
   language, 
+  code,
   isLoading,
   hasError,
   onClose 
 }: { 
   output: string; 
-  language: string; 
+  language: string;
+  code: string; 
   isLoading?: boolean;
   hasError?: boolean;
   onClose: () => void;
@@ -61,7 +63,6 @@ const OutputModal = ({
     if (htmlUrl) {
       window.open(htmlUrl, '_blank');
     } else {
-      // Create a simple HTML page with the output
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -94,12 +95,12 @@ const OutputModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-4xl max-h-[80vh] bg-background/95 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <div className="w-full max-w-6xl h-[80vh] bg-background/95 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/20 to-purple-500/20 border-b border-white/10">
           <div className="flex items-center gap-2">
             <Play className="w-4 h-4 text-green-400" />
-            <span className="font-semibold text-foreground">Output - {language}</span>
+            <span className="font-semibold text-foreground">Code Execution - {language}</span>
             {isLoading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
           </div>
           <div className="flex items-center gap-2">
@@ -121,24 +122,48 @@ const OutputModal = ({
           </div>
         </div>
         
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4 min-h-[300px]">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-4">
-              <Loader2 className="w-12 h-12 animate-spin text-primary" />
-              <p className="text-muted-foreground">Executing {language} code...</p>
+        {/* Split Content - Code on Left, Output on Right */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left Panel - Code */}
+          <div className="w-1/2 flex flex-col border-r border-white/10">
+            <div className="px-3 py-2 bg-black/30 border-b border-white/10">
+              <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
+                <Copy className="w-3 h-3" /> Source Code
+              </span>
             </div>
-          ) : isHTML && htmlUrl ? (
-            <iframe
-              src={htmlUrl}
-              className="w-full h-full min-h-[400px] bg-white rounded-lg border border-white/10"
-              sandbox="allow-scripts allow-same-origin"
-            />
-          ) : (
-            <pre className={`text-sm font-mono whitespace-pre-wrap bg-black/30 p-4 rounded-lg h-full min-h-[300px] ${hasError ? 'text-red-400' : 'text-foreground/90'}`}>
-              {output}
-            </pre>
-          )}
+            <div className="flex-1 overflow-auto p-4 bg-black/20">
+              <pre className="text-sm font-mono text-foreground/90 whitespace-pre-wrap">
+                <code>{code}</code>
+              </pre>
+            </div>
+          </div>
+          
+          {/* Right Panel - Output */}
+          <div className="w-1/2 flex flex-col">
+            <div className="px-3 py-2 bg-black/30 border-b border-white/10">
+              <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
+                <Play className="w-3 h-3" /> Output
+              </span>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center h-full gap-4">
+                  <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                  <p className="text-muted-foreground">Executing {language} code...</p>
+                </div>
+              ) : isHTML && htmlUrl ? (
+                <iframe
+                  src={htmlUrl}
+                  className="w-full h-full bg-white rounded-lg border border-white/10"
+                  sandbox="allow-scripts allow-same-origin"
+                />
+              ) : (
+                <pre className={`text-sm font-mono whitespace-pre-wrap bg-black/30 p-4 rounded-lg h-full ${hasError ? 'text-red-400' : 'text-foreground/90'}`}>
+                  {output || 'No output'}
+                </pre>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -250,11 +275,12 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
         </pre>
       </div>
       
-      {/* Big Output Modal */}
+      {/* Big Output Modal - Split View */}
       {showOutput && (
         <OutputModal 
           output={output || ''} 
-          language={language || "code"} 
+          language={language || "code"}
+          code={children}
           isLoading={isExecuting}
           hasError={hasError}
           onClose={() => setShowOutput(false)} 
