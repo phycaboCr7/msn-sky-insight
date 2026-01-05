@@ -445,7 +445,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="space-y-4">
         {/* Chat Messages */}
         {messages.length > 0 && (
-          <div className="h-[400px] overflow-y-auto space-y-3 p-2 rounded-xl bg-black/20 border border-white/5">
+          <div className="h-[400px] max-h-[400px] min-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
             {messages.map((msg, index) => (
               <div
                 key={index}
