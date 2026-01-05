@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Play, X, ExternalLink, Terminal, Trash2, Copy, Check } from "lucide-react";
+import { Loader2, X, ExternalLink, Terminal, Trash2, Copy, Check, Image, Code } from "lucide-react";
 
 interface PythonInterpreterProps {
   initialCode?: string;
@@ -9,8 +9,45 @@ interface PythonInterpreterProps {
 }
 
 interface HistoryEntry {
-  type: 'input' | 'output' | 'error' | 'info';
+  type: 'input' | 'output' | 'error' | 'info' | 'image';
   content: string;
+  imageUrl?: string;
+}
+
+// Visualization libraries that produce graphical output
+const VISUAL_LIBRARIES = [
+  'matplotlib', 'plt', 'pyplot',
+  'turtle',
+  'plotly',
+  'seaborn', 'sns',
+  'bokeh',
+  'altair',
+  'pygal',
+  'pillow', 'PIL', 'Image',
+  'cv2', 'opencv',
+  'skimage',
+  'pygame',
+  'tkinter',
+  'manim',
+  'mayavi',
+  'vispy',
+  'vpython',
+  'networkx',
+  'wordcloud',
+  'folium',
+  'geopandas',
+  'cartopy'
+];
+
+// Check if code contains visualization libraries
+function containsVisualization(code: string): boolean {
+  const lowerCode = code.toLowerCase();
+  return VISUAL_LIBRARIES.some(lib => 
+    lowerCode.includes(`import ${lib}`) || 
+    lowerCode.includes(`from ${lib}`) ||
+    lowerCode.includes(`${lib}.`) ||
+    lowerCode.includes(`as ${lib}`)
+  );
 }
 
 export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInterpreterProps) => {
@@ -20,6 +57,7 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [copied, setCopied] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
 
@@ -38,22 +76,76 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
   // Run initial code if provided
   useEffect(() => {
     if (initialCode) {
+      const isVisual = containsVisualization(initialCode);
       setHistory([
         { type: 'info', content: `🐍 ${language.toUpperCase()} Interactive Shell` },
-        { type: 'info', content: `Running initial code from AI...` },
+        { type: 'info', content: isVisual ? `Detected visualization code. Generating image...` : `Running initial code from AI...` },
         { type: 'input', content: initialCode }
       ]);
       executeCode(initialCode);
     } else {
       setHistory([
         { type: 'info', content: `🐍 ${language.toUpperCase()} Interactive Shell` },
-        { type: 'info', content: `Type your code and press Enter to execute.` }
+        { type: 'info', content: `Type your code and press Enter to execute.` },
+        { type: 'info', content: `📊 Matplotlib, Turtle, Seaborn, etc. will generate AI visualizations!` }
       ]);
     }
   }, []);
 
+  const executeVisualCode = async (code: string) => {
+    setGeneratingImage(true);
+    setHistory(prev => [...prev, { type: 'info', content: '🎨 Generating visualization with AI...' }]);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('execute-visual-python', {
+        body: { code }
+      });
+
+      if (error) {
+        setHistory(prev => [...prev, { type: 'error', content: `❌ Error: ${error.message}` }]);
+        return false;
+      } else if (data?.error) {
+        // If not a visualization, return false to try regular execution
+        if (data.isVisual === false) {
+          return false;
+        }
+        setHistory(prev => [...prev, { type: 'error', content: `❌ ${data.error}` }]);
+        return true;
+      } else if (data?.imageUrl) {
+        setHistory(prev => [...prev, 
+          { type: 'info', content: `✅ Visualization generated: ${data.description || 'Python plot'}` },
+          { type: 'image', content: 'Generated visualization:', imageUrl: data.imageUrl }
+        ]);
+        if (data.message) {
+          setHistory(prev => [...prev, { type: 'output', content: data.message }]);
+        }
+        return true;
+      }
+      return false;
+    } catch (e: any) {
+      setHistory(prev => [...prev, { type: 'error', content: `❌ ${e.message}` }]);
+      return true;
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
   const executeCode = async (code: string) => {
     setIsExecuting(true);
+    
+    // Check if this is visualization code
+    if (language === 'python' || language === 'py') {
+      if (containsVisualization(code)) {
+        const handled = await executeVisualCode(code);
+        if (handled) {
+          setIsExecuting(false);
+          inputRef.current?.focus();
+          return;
+        }
+        // If not handled, fall through to regular execution
+        setHistory(prev => [...prev, { type: 'info', content: '📝 Falling back to text execution...' }]);
+      }
+    }
     
     try {
       const { data, error } = await supabase.functions.invoke('execute-code', {
@@ -130,11 +222,22 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
   };
 
   const openInNewTab = () => {
+    // Find any images in history
+    const images = history.filter(h => h.type === 'image' && h.imageUrl);
+    
     const fullContent = history.map(h => {
       if (h.type === 'input') return `>>> ${h.content}`;
       if (h.type === 'info') return `# ${h.content}`;
+      if (h.type === 'image') return `[Image: ${h.content}]`;
       return h.content;
     }).join('\n');
+
+    const imageHtml = images.map(img => 
+      `<div style="margin: 20px 0; text-align: center;">
+        <p style="color: #888; margin-bottom: 10px;">${img.content}</p>
+        <img src="${img.imageUrl}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
+      </div>`
+    ).join('');
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -147,20 +250,30 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
             background: #1a1a2e; 
             color: #eee; 
             padding: 20px; 
-            white-space: pre-wrap;
             line-height: 1.6;
+          }
+          pre {
+            white-space: pre-wrap;
+            margin: 0;
           }
           .prompt { color: #00d4ff; }
           .error { color: #ff6b6b; }
           .info { color: #888; font-style: italic; }
         </style>
       </head>
-      <body>${fullContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</body>
+      <body>
+        <pre>${fullContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+        ${imageHtml}
+      </body>
       </html>
     `;
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
+  };
+
+  const openImageInNewTab = (imageUrl: string) => {
+    window.open(imageUrl, '_blank');
   };
 
   return (
@@ -171,7 +284,12 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
           <div className="flex items-center gap-3">
             <Terminal className="w-5 h-5 text-green-400" />
             <span className="font-semibold text-white">{language.toUpperCase()} Interactive Shell</span>
-            {isExecuting && <Loader2 className="w-4 h-4 animate-spin text-green-400" />}
+            {(isExecuting || generatingImage) && (
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-green-400" />
+                {generatingImage && <span className="text-xs text-green-400">Generating visualization...</span>}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -207,20 +325,45 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
         {/* Terminal Output */}
         <div 
           ref={outputRef}
-          className="flex-1 overflow-auto p-4 font-mono text-sm space-y-1"
+          className="flex-1 overflow-auto p-4 font-mono text-sm space-y-2"
           onClick={() => inputRef.current?.focus()}
         >
           {history.map((entry, idx) => (
-            <div key={idx} className={`${
-              entry.type === 'input' ? 'text-cyan-400' : 
-              entry.type === 'error' ? 'text-red-400' : 
-              entry.type === 'info' ? 'text-gray-500 italic' :
-              'text-green-300'
-            }`}>
-              {entry.type === 'input' && (
-                <span className="text-yellow-400">{'>>> '}</span>
+            <div key={idx}>
+              {entry.type === 'image' && entry.imageUrl ? (
+                <div className="my-4 p-4 bg-black/30 rounded-xl border border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-purple-400">
+                      <Image className="w-4 h-4" />
+                      <span className="text-sm">{entry.content}</span>
+                    </div>
+                    <button
+                      onClick={() => openImageInNewTab(entry.imageUrl!)}
+                      className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded transition-colors"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Open Full Size
+                    </button>
+                  </div>
+                  <img 
+                    src={entry.imageUrl} 
+                    alt="Generated visualization"
+                    className="w-full max-w-2xl mx-auto rounded-lg shadow-lg border border-white/10"
+                  />
+                </div>
+              ) : (
+                <div className={`${
+                  entry.type === 'input' ? 'text-cyan-400' : 
+                  entry.type === 'error' ? 'text-red-400' : 
+                  entry.type === 'info' ? 'text-gray-500 italic' :
+                  'text-green-300'
+                }`}>
+                  {entry.type === 'input' && (
+                    <span className="text-yellow-400">{'>>> '}</span>
+                  )}
+                  <pre className="whitespace-pre-wrap inline">{entry.content}</pre>
+                </div>
               )}
-              <pre className="whitespace-pre-wrap inline">{entry.content}</pre>
             </div>
           ))}
           
@@ -233,19 +376,19 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={isExecuting}
+              disabled={isExecuting || generatingImage}
               className="flex-1 bg-transparent text-cyan-400 outline-none font-mono"
-              placeholder={isExecuting ? "Executing..." : "Type code here..."}
+              placeholder={isExecuting ? "Executing..." : generatingImage ? "Generating image..." : "Type code here..."}
               autoFocus
             />
-            {isExecuting && <Loader2 className="w-4 h-4 animate-spin text-green-400 ml-2" />}
+            {(isExecuting || generatingImage) && <Loader2 className="w-4 h-4 animate-spin text-green-400 ml-2" />}
           </form>
         </div>
 
         {/* Footer with tips */}
         <div className="px-4 py-2 bg-black/30 border-t border-white/10 text-xs text-gray-500 flex items-center justify-between">
-          <span>Press Enter to execute • ↑↓ for command history</span>
-          <span className="text-green-400/70">Powered by Piston API</span>
+          <span>Press Enter to execute • ↑↓ for command history • 📊 Matplotlib/Turtle generates AI images</span>
+          <span className="text-green-400/70">Powered by Piston API + AI Vision</span>
         </div>
       </div>
     </div>
