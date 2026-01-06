@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink, Terminal } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink, Terminal, Image, Mic, MicOff, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -21,6 +21,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   isTyping?: boolean;
+  image?: string; // Base64 image data
 }
 
 // Calculate actual AQI from PM2.5
@@ -307,21 +308,117 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const askAI = async () => {
-    if (!question.trim()) return;
+  // Handle image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const userMessage: Message = { role: "user", content: question.trim() };
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Invalid file", description: "Please upload an image file.", variant: "destructive" });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please upload an image under 10MB.", variant: "destructive" });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setUploadedImage(reader.result as string);
+      toast({ title: "Image uploaded! 📷", description: "Ask a question about the image." });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Speech-to-text using Web Speech API
+  const toggleRecording = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast({ 
+        title: "Not supported", 
+        description: "Speech recognition is not supported in your browser. Try Chrome.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+      toast({ title: "🎤 Listening...", description: "Speak now!" });
+    };
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setQuestion(prev => prev + finalTranscript);
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      setIsRecording(false);
+      toast({ 
+        title: "Speech error", 
+        description: `Error: ${event.error}. Please try again.`, 
+        variant: "destructive" 
+      });
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const askAI = async () => {
+    if (!question.trim() && !uploadedImage) return;
+
+    const userMessage: Message = { 
+      role: "user", 
+      content: question.trim() || "What's in this image?",
+      image: uploadedImage || undefined
+    };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setQuestion("");
+    setUploadedImage(null);
     setLoading(true);
     
     try {
@@ -349,7 +446,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
       const { data, error } = await supabase.functions.invoke('weatherza-chat', {
         body: { 
-          messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
+          messages: updatedMessages.map(m => ({ 
+            role: m.role, 
+            content: m.content,
+            image: m.image 
+          })),
           weatherContext 
         }
       });
@@ -468,7 +569,16 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   {msg.role === "assistant" ? (
                     <MessageContent content={msg.content} isTyping={msg.isTyping} />
                   ) : (
-                    <p className="text-foreground/90">{msg.content}</p>
+                    <div>
+                      {msg.image && (
+                        <img 
+                          src={msg.image} 
+                          alt="Uploaded" 
+                          className="max-w-[200px] max-h-[150px] rounded-lg mb-2 border border-white/20"
+                        />
+                      )}
+                      <p className="text-foreground/90">{msg.content}</p>
+                    </div>
                   )}
                 </div>
                 {msg.role === "user" && (
@@ -499,19 +609,73 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         )}
 
+        {/* Image Preview */}
+        {uploadedImage && (
+          <div className="relative inline-block">
+            <img 
+              src={uploadedImage} 
+              alt="Upload preview" 
+              className="max-w-[150px] max-h-[100px] rounded-lg border border-primary/30"
+            />
+            <button
+              onClick={() => setUploadedImage(null)}
+              className="absolute -top-2 -right-2 p-1 bg-destructive rounded-full text-white hover:bg-destructive/80 transition-colors"
+            >
+              <XCircle className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Input Area */}
-        <div className="flex gap-3">
+        <div className="flex gap-2 items-end">
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            accept="image/*"
+            className="hidden"
+          />
+          
+          {/* Image upload button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
+            title="Upload image"
+          >
+            <Image className="w-4 h-4" />
+          </Button>
+
+          {/* Voice input button */}
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={toggleRecording}
+            className={`shrink-0 border-white/20 transition-all ${
+              isRecording 
+                ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse' 
+                : 'hover:bg-primary/20 hover:border-primary/50'
+            }`}
+            title={isRecording ? "Stop recording" : "Start voice input"}
+          >
+            {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </Button>
+
           <Textarea
-            placeholder="Ask me anything - math, science, coding, weather..."
+            placeholder={uploadedImage ? "Ask about this image..." : "Ask me anything - math, science, coding, weather..."}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors"
+            className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors flex-1"
             rows={2}
           />
           <Button 
             onClick={askAI} 
-            disabled={loading || !question.trim()}
+            disabled={loading || (!question.trim() && !uploadedImage)}
             className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
           >
             {loading ? (
