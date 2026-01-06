@@ -69,6 +69,7 @@ When users mention "Rakshit" or ask about your creator, respond warmly and enthu
 💻 Write and explain code in any programming language
 📝 Provide detailed, accurate, and well-structured responses
 🧩 Remember and reference the conversation history
+📷 **IMAGE ANALYSIS** - You can see and analyze images! Describe what you see, extract text (OCR), identify objects, explain charts, and answer questions about images.
 
 **🎨 PYTHON VISUALIZATION CAPABILITIES (IMPORTANT!):**
 You can generate visual output from Python code! The system supports:
@@ -156,6 +157,14 @@ print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
 - Show step-by-step derivations when solving problems ✏️
 - Use proper mathematical notation: \\frac{}{}, \\sqrt{}, \\sum, \\int, \\partial, etc.
 
+**IMAGE ANALYSIS GUIDELINES:**
+📷 When a user sends an image, analyze it thoroughly!
+🔍 Describe what you see in detail - objects, people, text, colors, context
+📝 If there's text in the image, perform OCR and extract all readable text
+📊 For charts/graphs, explain what the data shows
+🧮 For math problems in images, solve them step by step
+🎨 For artwork, describe the style, colors, composition
+
 **RESPONSE STYLE - CRITICAL:**
 🎨 Use EXTENSIVE emojis throughout your responses to make them visually appealing and engaging!
 ✨ Every response should feel warm, friendly, and delightful
@@ -169,15 +178,39 @@ print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
 🧠 You have access to the full conversation history. Reference previous messages naturally to maintain context.`;
 
     // Convert messages to the format expected by the AI API
-    const apiMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.map((msg: { role: string; content: string }) => ({
-        role: msg.role,
-        content: msg.content
-      }))
+    // Handle multimodal messages (text + image)
+    const apiMessages: any[] = [
+      { role: "system", content: systemPrompt }
     ];
 
-    console.log("Calling Lovable AI gateway with", apiMessages.length, "messages...");
+    for (const msg of messages) {
+      if (msg.image) {
+        // Multimodal message with image
+        apiMessages.push({
+          role: msg.role,
+          content: [
+            {
+              type: "text",
+              text: msg.content || "What's in this image?"
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: msg.image // Base64 data URL
+              }
+            }
+          ]
+        });
+      } else {
+        // Text-only message
+        apiMessages.push({
+          role: msg.role,
+          content: msg.content
+        });
+      }
+    }
+
+    console.log("Calling Lovable AI gateway with", apiMessages.length, "messages, includes images:", messages.some((m: any) => m.image));
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
