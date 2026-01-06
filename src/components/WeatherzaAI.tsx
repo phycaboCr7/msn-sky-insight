@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink, Terminal, Image, Mic, MicOff, XCircle } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink, Terminal, Image, Mic, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -12,6 +12,7 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
 import { PythonInterpreter } from "./PythonInterpreter";
+import { VoiceRecorder } from "./VoiceRecorder";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
@@ -309,11 +310,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<any>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -343,68 +343,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     reader.readAsDataURL(file);
   };
 
-  // Speech-to-text using Web Speech API
-  const toggleRecording = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast({ 
-        title: "Not supported", 
-        description: "Speech recognition is not supported in your browser. Try Chrome.", 
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    if (isRecording) {
-      recognitionRef.current?.stop();
-      setIsRecording(false);
-      return;
-    }
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
-      setIsRecording(true);
-      toast({ title: "🎤 Listening...", description: "Speak now!" });
-    };
-
-    recognition.onresult = (event: any) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
-        } else {
-          interimTranscript += transcript;
-        }
-      }
-
-      if (finalTranscript) {
-        setQuestion(prev => prev + finalTranscript);
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
-      setIsRecording(false);
-      toast({ 
-        title: "Speech error", 
-        description: `Error: ${event.error}. Please try again.`, 
-        variant: "destructive" 
-      });
-    };
-
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
+  // Handle voice transcript
+  const handleVoiceTranscript = (text: string) => {
+    setQuestion(prev => prev ? `${prev} ${text}` : text);
   };
 
   const askAI = async () => {
@@ -654,15 +595,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             type="button"
             variant="outline"
             size="icon"
-            onClick={toggleRecording}
-            className={`shrink-0 border-white/20 transition-all ${
-              isRecording 
-                ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse' 
-                : 'hover:bg-primary/20 hover:border-primary/50'
-            }`}
-            title={isRecording ? "Stop recording" : "Start voice input"}
+            onClick={() => setShowVoiceRecorder(true)}
+            className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
+            title="Start voice input"
           >
-            {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            <Mic className="w-4 h-4" />
           </Button>
 
           <Textarea
@@ -685,6 +622,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             )}
           </Button>
         </div>
+
+        {/* Voice Recorder Modal */}
+        {showVoiceRecorder && (
+          <VoiceRecorder
+            onTranscript={handleVoiceTranscript}
+            onClose={() => setShowVoiceRecorder(false)}
+          />
+        )}
       </CardContent>
     </Card>
   );
