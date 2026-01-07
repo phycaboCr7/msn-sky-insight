@@ -552,7 +552,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full glass-card border-white/10 overflow-hidden">
+    <Card className="col-span-full bg-black/40 backdrop-blur-xl border border-white/15 shadow-xl overflow-hidden transition-all duration-500">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">

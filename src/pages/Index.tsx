@@ -108,7 +108,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden overflow-y-auto">
+    <div className="min-h-screen max-h-screen bg-gradient-weather relative overflow-x-hidden overflow-y-auto">
       {/* Dynamic weather-based background */}
       <DynamicBackground weather={weather} />
       
