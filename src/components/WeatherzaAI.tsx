@@ -310,6 +310,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState("");
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -357,50 +358,82 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     if (isRecording) {
       recognitionRef.current?.stop();
       setIsRecording(false);
+      setInterimTranscript("");
       return;
     }
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    recognition.continuous = true;
+    recognition.continuous = false; // Stop after one result for cleaner transcription
     recognition.interimResults = true;
     recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
       setIsRecording(true);
-      toast({ title: "🎤 Listening...", description: "Speak now!" });
+      setInterimTranscript("");
     };
 
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
-      let interimTranscript = '';
+      let interimText = '';
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript;
         } else {
-          interimTranscript += transcript;
+          interimText += result[0].transcript;
         }
       }
 
+      setInterimTranscript(interimText);
+
       if (finalTranscript) {
-        setQuestion(prev => prev + finalTranscript);
+        setQuestion(prev => {
+          const newText = prev ? prev + ' ' + finalTranscript : finalTranscript;
+          return newText.trim();
+        });
+        setInterimTranscript("");
+        // Restart for continuous listening
+        setTimeout(() => {
+          if (recognitionRef.current && isRecording) {
+            try {
+              recognition.start();
+            } catch (e) {
+              // Already started
+            }
+          }
+        }, 100);
       }
     };
 
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        toast({ 
+          title: "Speech error", 
+          description: `Error: ${event.error}. Please try again.`, 
+          variant: "destructive" 
+        });
+      }
       setIsRecording(false);
-      toast({ 
-        title: "Speech error", 
-        description: `Error: ${event.error}. Please try again.`, 
-        variant: "destructive" 
-      });
+      setInterimTranscript("");
     };
 
     recognition.onend = () => {
-      setIsRecording(false);
+      // Auto-restart if still recording
+      if (isRecording && recognitionRef.current) {
+        try {
+          recognition.start();
+        } catch (e) {
+          setIsRecording(false);
+          setInterimTranscript("");
+        }
+      } else {
+        setIsRecording(false);
+        setInterimTranscript("");
+      }
     };
 
     recognitionRef.current = recognition;
@@ -649,30 +682,43 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             <Image className="w-4 h-4" />
           </Button>
 
-          {/* Voice input button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={toggleRecording}
-            className={`shrink-0 border-white/20 transition-all ${
-              isRecording 
-                ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse' 
-                : 'hover:bg-primary/20 hover:border-primary/50'
-            }`}
-            title={isRecording ? "Stop recording" : "Start voice input"}
-          >
-            {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-          </Button>
+          {/* Voice input button with simple visualizer */}
+          <div className="relative shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={toggleRecording}
+              className={`border-white/20 transition-all ${
+                isRecording 
+                  ? 'bg-white/10 border-white/30' 
+                  : 'hover:bg-primary/20 hover:border-primary/50'
+              }`}
+              title={isRecording ? "Stop recording" : "Start voice input"}
+            >
+              {isRecording ? (
+                <div className="flex items-center justify-center gap-[2px]">
+                  <span className="w-[3px] h-3 bg-foreground rounded-full animate-voice-bar-1" />
+                  <span className="w-[3px] h-3 bg-foreground rounded-full animate-voice-bar-2" />
+                  <span className="w-[3px] h-3 bg-foreground rounded-full animate-voice-bar-3" />
+                </div>
+              ) : (
+                <Mic className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
 
-          <Textarea
-            placeholder={uploadedImage ? "Ask about this image..." : "Ask me anything - math, science, coding, weather..."}
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors flex-1"
-            rows={2}
-          />
+          <div className="flex-1 relative">
+            <Textarea
+              placeholder={uploadedImage ? "Ask about this image..." : isRecording ? "Listening..." : "Ask me anything - math, science, coding, weather..."}
+              value={isRecording && interimTranscript ? question + (question ? ' ' : '') + interimTranscript : question}
+              onChange={(e) => !isRecording && setQuestion(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors w-full"
+              rows={2}
+              readOnly={isRecording}
+            />
+          </div>
           <Button 
             onClick={askAI} 
             disabled={loading || (!question.trim() && !uploadedImage)}
