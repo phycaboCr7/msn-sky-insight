@@ -9,7 +9,8 @@ interface WeatherCardProps {
 }
 
 export const WeatherCard = ({ children, className, variant = "default" }: WeatherCardProps) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [parallaxY, setParallaxY] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -17,7 +18,7 @@ export const WeatherCard = ({ children, className, variant = "default" }: Weathe
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-      { threshold: 0.3 }
+      { threshold: 0.1 }
     );
 
     if (cardRef.current) {
@@ -27,10 +28,26 @@ export const WeatherCard = ({ children, className, variant = "default" }: Weathe
     return () => observer.disconnect();
   }, []);
 
-  const baseStyles = "transition-all duration-700 ease-out";
+  // Subtle parallax effect on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const cardCenter = rect.top + rect.height / 2;
+      const distanceFromCenter = (windowHeight / 2 - cardCenter) / windowHeight;
+      setParallaxY(distanceFromCenter * 15); // Subtle 15px max parallax
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const baseStyles = "transition-all duration-500 ease-out";
   
   const visibleStyles = "bg-black/40 backdrop-blur-xl border border-white/15 shadow-xl";
-  const hiddenStyles = "bg-white/5 backdrop-blur-md border border-white/5 shadow-none";
+  const hiddenStyles = "bg-black/20 backdrop-blur-lg border border-white/8 shadow-md";
 
   const variants = {
     default: isVisible ? visibleStyles : hiddenStyles,
@@ -43,6 +60,7 @@ export const WeatherCard = ({ children, className, variant = "default" }: Weathe
   return (
     <Card 
       ref={cardRef}
+      style={{ transform: `translateY(${parallaxY}px)` }}
       className={cn(
         baseStyles,
         "hover:shadow-glow hover:scale-[1.02] hover:-translate-y-1 animate-fade-in",
