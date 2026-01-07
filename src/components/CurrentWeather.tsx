@@ -51,6 +51,35 @@ const MiniAQIBox = ({ airQuality }: { airQuality: AirQuality }) => {
     </div>
   );
 };
+
+// Moon phase emoji/icon based on phase name
+const getMoonPhaseIcon = (phase: string) => {
+  const phaseMap: { [key: string]: string } = {
+    "New Moon": "🌑",
+    "Waxing Crescent": "🌒",
+    "First Quarter": "🌓",
+    "Waxing Gibbous": "🌔",
+    "Full Moon": "🌕",
+    "Waning Gibbous": "🌖",
+    "Last Quarter": "🌗",
+    "Third Quarter": "🌗",
+    "Waning Crescent": "🌘",
+  };
+  return phaseMap[phase] || "🌙";
+};
+
+const MoonPhaseBox = ({ phase, illumination }: { phase: string; illumination: number }) => {
+  return (
+    <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 flex flex-col items-center justify-center min-w-[80px]">
+      <div className="text-2xl mb-0.5">{getMoonPhaseIcon(phase)}</div>
+      <div className="text-[10px] sm:text-xs text-muted-foreground text-center leading-tight">
+        {phase}
+      </div>
+      <div className="text-[9px] text-primary/70">{illumination}%</div>
+    </div>
+  );
+};
+
 const getWeatherIcon = (condition: string, isDay: boolean, temp?: number) => {
   const iconSize = 80;
   
@@ -76,15 +105,18 @@ const getWeatherIcon = (condition: string, isDay: boolean, temp?: number) => {
     return <Moon size={iconSize} color="#60a5fa" className="drop-shadow-lg" />;
   }
 };
-export const CurrentWeather = ({
-  weather
-}: CurrentWeatherProps) => {
-  const {
-    current,
-    location
-  } = weather;
+
+export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
+  const { current, location, forecast } = weather;
   const isDay = current.is_day === 1;
-  return <WeatherCard className="p-4 sm:p-6 lg:p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
+  
+  // Get moon phase from today's forecast
+  const todayForecast = forecast?.forecastday?.[0];
+  const moonPhase = todayForecast?.astro?.moon_phase;
+  const moonIllumination = todayForecast?.astro?.moon_illumination;
+  
+  return (
+    <WeatherCard className="p-4 sm:p-6 lg:p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
       {/* Location background image */}
       <LocationBackground weather={weather} />
       
@@ -133,6 +165,9 @@ export const CurrentWeather = ({
             {current.air_quality && (
               <MiniAQIBox airQuality={current.air_quality} />
             )}
+            {moonPhase && (
+              <MoonPhaseBox phase={moonPhase} illumination={moonIllumination || 0} />
+            )}
             <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10 flex flex-col items-center justify-center min-w-[80px]">
               <img 
                 src={getFlagUrl(location.country)} 
@@ -146,5 +181,6 @@ export const CurrentWeather = ({
           </div>
         </div>
       </div>
-    </WeatherCard>;
+    </WeatherCard>
+  );
 };
