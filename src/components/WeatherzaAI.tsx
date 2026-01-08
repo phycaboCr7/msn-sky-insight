@@ -560,7 +560,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <span 
-              className="text-foreground font-semibold"
+              className="text-foreground font-semibold text-glow-sweep"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Rakshit's Weatherza AI

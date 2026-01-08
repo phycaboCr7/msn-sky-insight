@@ -1,7 +1,6 @@
 import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
 import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface HourlyForecastProps {
   weather: WeatherData;
@@ -46,45 +45,50 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
   return (
     <WeatherCard className="p-4 sm:p-6 col-span-full animate-slide-left">
       <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Hourly Forecast</h3>
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-3 sm:gap-4 pb-4 w-max min-w-full overflow-x-auto touch-pan-x">
-          {hourlyData.map((hour, index) => {
-            const time = new Date(hour.time);
-            const isNow = index === 0;
-            
-            return (
-              <div
-                key={hour.time}
-                className={`flex-shrink-0 w-16 sm:w-20 flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-lg transition-all hover:scale-105 overflow-hidden ${
-                  isNow 
-                    ? 'bg-primary/10 border border-primary/20 ring-1 ring-primary/30' 
-                    : 'hover:bg-muted/50 border border-transparent'
-                }`}
-              >
-                <div className="text-xs sm:text-sm text-muted-foreground font-medium">
-                  {isNow ? 'Now' : time.toLocaleTimeString('en-US', { 
-                    hour: 'numeric',
-                    hour12: true 
-                  })}
-                </div>
-                <div className="my-1 sm:my-2">
-                  {getWeatherIcon(hour.condition.text, hour.is_day === 1, hour.temp_c)}
-                </div>
-                <div className="text-sm sm:text-lg font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
-                  {Math.round(hour.temp_c)}°
-                </div>
-                <div className="text-xs text-muted-foreground text-center">
-                  {hour.chance_of_rain > 0 && (
-                    <div className="text-blue-400">
-                      {hour.chance_of_rain}%
-                    </div>
-                  )}
-                </div>
+      <div 
+        className="flex gap-3 sm:gap-4 pb-2 overflow-x-auto scrollbar-none"
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        {hourlyData.map((hour, index) => {
+          const time = new Date(hour.time);
+          const isNow = index === 0;
+          
+          return (
+            <div
+              key={hour.time}
+              className={`flex-shrink-0 w-16 sm:w-20 flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-lg transition-all hover:scale-105 ${
+                isNow 
+                  ? 'bg-primary/10 border border-primary/20 ring-1 ring-primary/30' 
+                  : 'hover:bg-muted/50 border border-transparent'
+              }`}
+            >
+              <div className="text-xs sm:text-sm text-muted-foreground font-medium">
+                {isNow ? 'Now' : time.toLocaleTimeString('en-US', { 
+                  hour: 'numeric',
+                  hour12: true 
+                })}
               </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
+              <div className="my-1 sm:my-2">
+                {getWeatherIcon(hour.condition.text, hour.is_day === 1, hour.temp_c)}
+              </div>
+              <div className="text-sm sm:text-lg font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+                {Math.round(hour.temp_c)}°
+              </div>
+              <div className="text-xs text-muted-foreground text-center">
+                {hour.chance_of_rain > 0 && (
+                  <div className="text-blue-400">
+                    {hour.chance_of_rain}%
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </WeatherCard>
   );
 };

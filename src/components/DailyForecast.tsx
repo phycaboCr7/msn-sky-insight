@@ -56,13 +56,13 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
               }`}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className="w-16 text-sm font-medium text-foreground">
+                <div className="w-16 text-sm font-medium text-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                   {dayName}
                 </div>
                 <div className="flex-shrink-0">
                   {getWeatherIcon(day.day.condition.text, day.day.avgtemp_c)}
                 </div>
-                <div className="flex-1 text-sm text-muted-foreground">
+                <div className="flex-1 text-sm text-muted-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                   {day.day.condition.text}
                 </div>
               </div>
