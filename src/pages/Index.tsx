@@ -14,6 +14,7 @@ import { WeatherAdvice } from "@/components/WeatherAdvice";
 import { AirQualityCard } from "@/components/AirQualityCard";
 import { WeatherzaAI } from "@/components/WeatherzaAI";
 import { DynamicBackground } from "@/components/DynamicBackground";
+import { MoonPhaseCard } from "@/components/MoonPhaseCard";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
 
@@ -107,8 +108,17 @@ const Index = () => {
     );
   }
 
+  // Get current time from weather location
+  const currentTime = weather?.location?.localtime 
+    ? new Date(weather.location.localtime).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      })
+    : null;
+
   return (
-    <div className="min-h-screen max-h-screen bg-gradient-weather relative overflow-x-hidden overflow-y-auto">
+    <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden">
       {/* Dynamic weather-based background */}
       <DynamicBackground weather={weather} />
       
@@ -122,11 +132,19 @@ const Index = () => {
           <h1 className="font-playfair text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground to-primary/80 bg-clip-text text-transparent">
             Weatherza
           </h1>
+          {currentTime && (
+            <div 
+              className="text-2xl sm:text-3xl text-foreground/90 mb-2"
+              style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
+            >
+              {currentTime}
+            </div>
+          )}
           <p className="text-muted-foreground text-base sm:text-lg">A True Forecasting Experience</p>
           <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-primary to-blue-500 mx-auto mt-3 sm:mt-4 rounded-full" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           <SearchLocation
             onLocationSelect={fetchWeather}
             onCurrentLocation={getCurrentLocation}
@@ -136,6 +154,7 @@ const Index = () => {
           {weather && (
             <>
               <CurrentWeather weather={weather} />
+              <MoonPhaseCard weather={weather} />
               <WeatherAdvice weather={weather} />
               <AirQualityCard weather={weather} />
               <TemperatureChart weather={weather} />

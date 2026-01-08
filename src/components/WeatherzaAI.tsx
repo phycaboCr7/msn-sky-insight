@@ -552,14 +552,17 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/40 backdrop-blur-xl border border-white/15 shadow-xl overflow-hidden transition-all duration-500">
+    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20 animate-glow">
+            <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
-            <span className="bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent font-semibold">
+            <span 
+              className="text-foreground font-semibold"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
               Rakshit's Weatherza AI
             </span>
           </CardTitle>
