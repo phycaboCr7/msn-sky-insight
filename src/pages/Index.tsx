@@ -15,6 +15,7 @@ import { AirQualityCard } from "@/components/AirQualityCard";
 import { WeatherzaAI } from "@/components/WeatherzaAI";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { MoonPhaseCard } from "@/components/MoonPhaseCard";
+import { SunPhaseCard } from "@/components/SunPhaseCard";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
 
@@ -154,9 +155,10 @@ const Index = () => {
           {weather && (
             <>
               <CurrentWeather weather={weather} />
-              <MoonPhaseCard weather={weather} />
               <WeatherAdvice weather={weather} />
               <AirQualityCard weather={weather} />
+              <MoonPhaseCard weather={weather} />
+              <SunPhaseCard weather={weather} />
               <TemperatureChart weather={weather} />
               <HourlyForecast weather={weather} />
               <HumidityChart weather={weather} />

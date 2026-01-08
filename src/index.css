@@ -347,3 +347,46 @@ All colors MUST be HSL.
 .animate-voice-bar-3 {
   animation: voice-bar-3 0.7s ease-in-out infinite 0.2s;
 }
+
+/* Hide scrollbar for hourly forecast */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Slow pulse animation for moon */
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Text glow sweep animation - left to right */
+.text-glow-sweep {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--foreground)) 0%,
+    hsl(var(--foreground)) 40%,
+    hsl(0 0% 100%) 50%,
+    hsl(var(--foreground)) 60%,
+    hsl(var(--foreground)) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: glow-sweep 3s ease-in-out infinite;
+}
+
+@keyframes glow-sweep {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
