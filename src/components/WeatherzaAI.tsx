@@ -580,70 +580,85 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Chat Messages */}
-        {messages.length > 0 && (
-          <div className="h-[400px] max-h-[400px] min-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 animate-fade-in ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
-              >
-                {msg.role === "assistant" && (
-                  <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </div>
-                )}
+        {/* Chat Messages - Always visible with fixed height */}
+        <div className="h-[400px] max-h-[400px] min-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
+          {messages.length === 0 ? (
+            /* Empty state placeholder */
+            <div className="h-full flex flex-col items-center justify-center text-center px-4">
+              <div className="p-4 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 mb-4">
+                <Sparkles className="w-8 h-8 text-primary/70" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground/80 mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                Ask me anything!
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-[280px]">
+                Weather, math equations, science, coding, image analysis... I'm here to help! 🌤️✨
+              </p>
+            </div>
+          ) : (
+            <>
+              {messages.map((msg, index) => (
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl transition-all duration-300 ${
-                    msg.role === "user"
-                      ? "bg-primary/20 border border-primary/30 text-foreground"
-                      : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
+                  key={index}
+                  className={`flex gap-3 animate-fade-in ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {msg.role === "assistant" ? (
-                    <MessageContent content={msg.content} isTyping={msg.isTyping} />
-                  ) : (
-                    <div>
-                      {msg.image && (
-                        <img 
-                          src={msg.image} 
-                          alt="Uploaded" 
-                          className="max-w-[200px] max-h-[150px] rounded-lg mb-2 border border-white/20"
-                        />
-                      )}
-                      <p className="text-foreground/90">{msg.content}</p>
+                  {msg.role === "assistant" && (
+                    <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit">
+                      <Bot className="w-4 h-4 text-primary" />
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-[85%] p-3 rounded-2xl transition-all duration-300 ${
+                      msg.role === "user"
+                        ? "bg-primary/20 border border-primary/30 text-foreground"
+                        : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
+                    }`}
+                  >
+                    {msg.role === "assistant" ? (
+                      <MessageContent content={msg.content} isTyping={msg.isTyping} />
+                    ) : (
+                      <div>
+                        {msg.image && (
+                          <img 
+                            src={msg.image} 
+                            alt="Uploaded" 
+                            className="max-w-[200px] max-h-[150px] rounded-lg mb-2 border border-white/20"
+                          />
+                        )}
+                        <p className="text-foreground/90">{msg.content}</p>
+                      </div>
+                    )}
+                  </div>
+                  {msg.role === "user" && (
+                    <div className="p-1.5 rounded-full bg-primary/20 h-fit">
+                      <User className="w-4 h-4 text-primary" />
                     </div>
                   )}
                 </div>
-                {msg.role === "user" && (
-                  <div className="p-1.5 rounded-full bg-primary/20 h-fit">
-                    <User className="w-4 h-4 text-primary" />
+              ))}
+              {loading && (
+                <div className="flex gap-3 justify-start animate-fade-in">
+                  <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit">
+                    <Bot className="w-4 h-4 text-primary animate-pulse" />
                   </div>
-                )}
-              </div>
-            ))}
-            {loading && (
-              <div className="flex gap-3 justify-start animate-fade-in">
-                <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit">
-                  <Bot className="w-4 h-4 text-primary animate-pulse" />
-                </div>
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
-                  <div className="flex items-center gap-3">
-                    <div className="writing-animation flex gap-1">
-                      <span className="writing-dot"></span>
-                      <span className="writing-dot"></span>
-                      <span className="writing-dot"></span>
+                  <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
+                    <div className="flex items-center gap-3">
+                      <div className="writing-animation flex gap-1">
+                        <span className="writing-dot"></span>
+                        <span className="writing-dot"></span>
+                        <span className="writing-dot"></span>
+                      </div>
+                      <span className="text-muted-foreground text-sm blur-text">Rakshit's AI is thinking...</span>
                     </div>
-                    <span className="text-muted-foreground text-sm blur-text">Rakshit's AI is thinking...</span>
                   </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+              )}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
 
         {/* Image Preview */}
         {uploadedImage && (
