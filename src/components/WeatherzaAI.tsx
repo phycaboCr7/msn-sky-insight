@@ -552,7 +552,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
+    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden" style={{ minHeight: 'auto' }}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -579,9 +579,12 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Chat Messages - Always visible with fixed height */}
-        <div className="h-[400px] max-h-[400px] min-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
+      <CardContent className="flex flex-col" style={{ height: 'auto', maxHeight: '600px' }}>
+        {/* Chat Messages - Always visible with STRICT fixed height */}
+        <div 
+          className="overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
+          style={{ height: '400px', minHeight: '400px', maxHeight: '400px', flexShrink: 0 }}
+        >
           {messages.length === 0 ? (
             /* Empty state placeholder */
             <div className="h-full flex flex-col items-center justify-center text-center px-4">
@@ -659,6 +662,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             </>
           )}
         </div>
+
+        {/* Spacer */}
+        <div className="h-4 flex-shrink-0" />
 
         {/* Image Preview */}
         {uploadedImage && (
