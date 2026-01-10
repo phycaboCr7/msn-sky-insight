@@ -579,11 +579,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col" style={{ height: '500px', minHeight: '500px', maxHeight: '500px' }}>
-        {/* Chat Messages - Always visible with fixed height */}
+      <CardContent className="flex flex-col p-4" style={{ height: '500px' }}>
+        {/* Chat Messages - Fixed height to prevent shrinking */}
         <div 
-          className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 mb-4"
-          style={{ minHeight: '300px' }}
+          className="overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 mb-4 flex-shrink-0"
+          style={{ height: '340px' }}
         >
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-muted-foreground/50 text-sm">
