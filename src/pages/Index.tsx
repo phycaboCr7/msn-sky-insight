@@ -16,7 +16,6 @@ import { WeatherzaAI } from "@/components/WeatherzaAI";
 import { DynamicBackground } from "@/components/DynamicBackground";
 import { MoonPhaseCard } from "@/components/MoonPhaseCard";
 import { SunPhaseCard } from "@/components/SunPhaseCard";
-import { PrecipitationRadar } from "@/components/PrecipitationRadar";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
 
@@ -160,7 +159,6 @@ const Index = () => {
               <AirQualityCard weather={weather} />
               <MoonPhaseCard weather={weather} />
               <SunPhaseCard weather={weather} />
-              <PrecipitationRadar weather={weather} />
               <TemperatureChart weather={weather} />
               <HourlyForecast weather={weather} />
               <HumidityChart weather={weather} />

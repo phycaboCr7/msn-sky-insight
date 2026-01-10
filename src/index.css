@@ -249,21 +249,6 @@ All colors MUST be HSL.
   color: inherit;
 }
 
-/* Prevent markdown/prose from causing layout shifts */
-.weatherza-markdown {
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.weatherza-markdown > *:first-child {
-  margin-top: 0 !important;
-}
-
-.weatherza-markdown > *:last-child {
-  margin-bottom: 0 !important;
-}
-
 /* Writing Animation - ChatGPT Style */
 .writing-animation {
   display: flex;
@@ -371,19 +356,6 @@ All colors MUST be HSL.
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* CRITICAL: Weatherza AI messages container - fixed height that NEVER changes */
-.weatherza-messages-container {
-  height: 320px !important;
-  min-height: 320px !important;
-  max-height: 320px !important;
-  flex-shrink: 0 !important;
-  flex-grow: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  display: block !important;
-  contain: strict;
 }
 
 /* Slow pulse animation for moon */
