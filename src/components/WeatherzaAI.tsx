@@ -254,7 +254,7 @@ const MessageContent = ({ content, isTyping }: { content: string; isTyping?: boo
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
   return (
-    <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown">
+    <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown break-words">
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
@@ -553,7 +553,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   return (
     <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">
@@ -579,25 +579,25 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col p-4" style={{ height: '500px' }}>
-        {/* Chat Messages - Fixed height to prevent shrinking */}
+      {/* Wrapper with explicit height - NOT using flex for main container */}
+      <CardContent className="p-4 pt-0">
+        {/* Messages container with ABSOLUTE fixed height using CSS */}
         <div 
-          className="overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 mb-4 flex-shrink-0"
-          style={{ height: '340px' }}
+          className="weatherza-messages-container overflow-y-auto overflow-x-hidden space-y-3 p-3 rounded-xl bg-black/20 border border-white/5 mb-4"
         >
           {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-muted-foreground/50 text-sm">
+            <div className="h-full flex items-center justify-center text-muted-foreground/50 text-sm" style={{ minHeight: '280px' }}>
               <div className="text-center space-y-2">
                 <Sparkles className="w-8 h-8 mx-auto opacity-50" />
                 <p>Ask me anything - math, science, coding, weather...</p>
               </div>
             </div>
           ) : (
-            <>
+            <div className="space-y-3">
               {messages.map((msg, index) => (
                 <div
                   key={index}
-                  className={`flex gap-3 animate-fade-in ${
+                  className={`flex gap-3 ${
                     msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
@@ -636,7 +636,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 </div>
               ))}
               {loading && (
-                <div className="flex gap-3 justify-start animate-fade-in">
+                <div className="flex gap-3 justify-start">
                   <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
                     <Bot className="w-4 h-4 text-primary animate-pulse" />
                   </div>
@@ -653,7 +653,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 </div>
               )}
               <div ref={messagesEndRef} />
-            </>
+            </div>
           )}
         </div>
 
