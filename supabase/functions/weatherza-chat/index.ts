@@ -37,10 +37,10 @@ serve(async (req) => {
       location: weatherContext?.location 
     });
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not configured");
+      throw new Error("GEMINI_API_KEY is not configured");
     }
 
     // Calculate actual AQI from PM2.5 if available
@@ -185,56 +185,86 @@ print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
 **MEMORY:** 🧠💭
 🧠 You have access to the full conversation history. Reference previous messages naturally to maintain context and connection with the user! 💫`;
 
-    // Convert messages to the format expected by the AI API
+    // Convert messages to Gemini format
     // Handle multimodal messages (text + image)
-    const apiMessages: any[] = [
-      { role: "system", content: systemPrompt }
-    ];
+    const geminiContents: any[] = [];
+
+    // Add system instruction as the first user message for context
+    geminiContents.push({
+      role: "user",
+      parts: [{ text: systemPrompt }]
+    });
+    geminiContents.push({
+      role: "model",
+      parts: [{ text: "I understand! I'm Rakshit's Weatherza AI 🌤️✨ - ready to help with weather info and any questions! Let's chat! 🎉💫" }]
+    });
 
     for (const msg of messages) {
+      const role = msg.role === "assistant" ? "model" : "user";
+      
       if (msg.image) {
         // Multimodal message with image
-        apiMessages.push({
-          role: msg.role,
-          content: [
-            {
-              type: "text",
-              text: msg.content || "What's in this image?"
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: msg.image // Base64 data URL
+        // Extract base64 data from data URL
+        const base64Match = msg.image.match(/^data:([^;]+);base64,(.+)$/);
+        if (base64Match) {
+          const mimeType = base64Match[1];
+          const base64Data = base64Match[2];
+          
+          geminiContents.push({
+            role: role,
+            parts: [
+              { text: msg.content || "What's in this image?" },
+              {
+                inline_data: {
+                  mime_type: mimeType,
+                  data: base64Data
+                }
               }
-            }
-          ]
-        });
+            ]
+          });
+        } else {
+          // Fallback to text only if image format is invalid
+          geminiContents.push({
+            role: role,
+            parts: [{ text: msg.content || "" }]
+          });
+        }
       } else {
         // Text-only message
-        apiMessages.push({
-          role: msg.role,
-          content: msg.content
+        geminiContents.push({
+          role: role,
+          parts: [{ text: msg.content }]
         });
       }
     }
 
-    console.log("Calling Lovable AI gateway with", apiMessages.length, "messages, includes images:", messages.some((m: any) => m.image));
+    console.log("Calling Gemini API with", geminiContents.length, "messages, includes images:", messages.some((m: any) => m.image));
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: apiMessages,
+        contents: geminiContents,
+        generationConfig: {
+          temperature: 0.8,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 8192,
+        },
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later. 😅" }), {
@@ -242,20 +272,20 @@ print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI usage limit reached. Please add credits. 💳" }), {
-          status: 402,
+      if (response.status === 403) {
+        return new Response(JSON.stringify({ error: "API key invalid or quota exceeded. Please check your Gemini API key. 🔑" }), {
+          status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       
-      throw new Error(`AI gateway error: ${response.status}`);
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. 😔";
     
-    console.log("AI response received successfully");
+    console.log("Gemini response received successfully");
 
     return new Response(JSON.stringify({ answer: text }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
