@@ -1,23 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { WeatherData, getForecastWeather, getLocationFromCoords } from "@/lib/weather";
 import { CurrentWeather } from "@/components/CurrentWeather";
-import { HourlyForecast } from "@/components/HourlyForecast";
-import { WeatherDetails } from "@/components/WeatherDetails";
-import { DailyForecast } from "@/components/DailyForecast";
 import { SearchLocation } from "@/components/SearchLocation";
-import { TemperatureChart } from "@/components/charts/TemperatureChart";
-import { HumidityChart } from "@/components/charts/HumidityChart";
-import { UVIndexChart } from "@/components/charts/UVIndexChart";
-import { WindChart } from "@/components/charts/WindChart";
-import { MonthlyChart } from "@/components/charts/MonthlyChart";
-import { WeatherAdvice } from "@/components/WeatherAdvice";
-import { AirQualityCard } from "@/components/AirQualityCard";
-import { WeatherzaAI } from "@/components/WeatherzaAI";
-import { DynamicBackground } from "@/components/DynamicBackground";
-import { MoonPhaseCard } from "@/components/MoonPhaseCard";
-import { SunPhaseCard } from "@/components/SunPhaseCard";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
+
+// Lazy load non-critical components for faster initial load
+const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })));
+const WeatherDetails = lazy(() => import("@/components/WeatherDetails").then(m => ({ default: m.WeatherDetails })));
+const DailyForecast = lazy(() => import("@/components/DailyForecast").then(m => ({ default: m.DailyForecast })));
+const TemperatureChart = lazy(() => import("@/components/charts/TemperatureChart").then(m => ({ default: m.TemperatureChart })));
+const HumidityChart = lazy(() => import("@/components/charts/HumidityChart").then(m => ({ default: m.HumidityChart })));
+const UVIndexChart = lazy(() => import("@/components/charts/UVIndexChart").then(m => ({ default: m.UVIndexChart })));
+const WindChart = lazy(() => import("@/components/charts/WindChart").then(m => ({ default: m.WindChart })));
+const MonthlyChart = lazy(() => import("@/components/charts/MonthlyChart").then(m => ({ default: m.MonthlyChart })));
+const WeatherAdvice = lazy(() => import("@/components/WeatherAdvice").then(m => ({ default: m.WeatherAdvice })));
+const AirQualityCard = lazy(() => import("@/components/AirQualityCard").then(m => ({ default: m.AirQualityCard })));
+const WeatherzaAI = lazy(() => import("@/components/WeatherzaAI").then(m => ({ default: m.WeatherzaAI })));
+const DynamicBackground = lazy(() => import("@/components/DynamicBackground").then(m => ({ default: m.DynamicBackground })));
+const MoonPhaseCard = lazy(() => import("@/components/MoonPhaseCard").then(m => ({ default: m.MoonPhaseCard })));
+const SunPhaseCard = lazy(() => import("@/components/SunPhaseCard").then(m => ({ default: m.SunPhaseCard })));
+const WorldMap = lazy(() => import("@/components/WorldMap").then(m => ({ default: m.WorldMap })));
+
+// Simple loading skeleton
+const CardSkeleton = ({ className = "" }: { className?: string }) => (
+  <div className={`bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl p-4 animate-pulse ${className}`}>
+    <div className="h-6 bg-white/10 rounded w-1/3 mb-4" />
+    <div className="space-y-2">
+      <div className="h-4 bg-white/10 rounded w-full" />
+      <div className="h-4 bg-white/10 rounded w-2/3" />
+    </div>
+  </div>
+);
 
 const Index = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -49,10 +63,6 @@ const Index = () => {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            const data = await getLocationFromCoords(
-              position.coords.latitude,
-              position.coords.longitude
-            );
             const forecastData = await getForecastWeather(
               `${position.coords.latitude},${position.coords.longitude}`,
               7
@@ -93,7 +103,6 @@ const Index = () => {
   };
 
   useEffect(() => {
-    // Try to get user's location on initial load
     getCurrentLocation();
   }, []);
 
@@ -109,7 +118,6 @@ const Index = () => {
     );
   }
 
-  // Get current time from weather location
   const currentTime = weather?.location?.localtime 
     ? new Date(weather.location.localtime).toLocaleTimeString('en-US', { 
         hour: '2-digit', 
@@ -121,9 +129,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden">
       {/* Dynamic weather-based background */}
-      <DynamicBackground weather={weather} />
+      <Suspense fallback={null}>
+        <DynamicBackground weather={weather} />
+      </Suspense>
       
-      {/* Subtle background overlay (no animation) */}
+      {/* Subtle background overlay */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-background/0" />
       </div>
@@ -155,19 +165,62 @@ const Index = () => {
           {weather && (
             <>
               <CurrentWeather weather={weather} />
-              <WeatherAdvice weather={weather} />
-              <AirQualityCard weather={weather} />
-              <MoonPhaseCard weather={weather} />
-              <SunPhaseCard weather={weather} />
-              <TemperatureChart weather={weather} />
-              <HourlyForecast weather={weather} />
-              <HumidityChart weather={weather} />
-              <UVIndexChart weather={weather} />
-              <WindChart weather={weather} />
-              <WeatherDetails weather={weather} />
-              <DailyForecast weather={weather} />
-              <MonthlyChart weather={weather} />
-              <WeatherzaAI weather={weather} />
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <WeatherAdvice weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <AirQualityCard weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <MoonPhaseCard weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <SunPhaseCard weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton className="col-span-full" />}>
+                <WorldMap weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <TemperatureChart weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <HourlyForecast weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <HumidityChart weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <UVIndexChart weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <WindChart weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <WeatherDetails weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <DailyForecast weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <MonthlyChart weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton className="col-span-full" />}>
+                <WeatherzaAI weather={weather} />
+              </Suspense>
             </>
           )}
 

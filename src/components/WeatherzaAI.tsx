@@ -4,14 +4,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, X, ExternalLink, Terminal, Image, Mic, MicOff, XCircle } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
-import { PythonInterpreter } from "./PythonInterpreter";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
@@ -42,79 +41,6 @@ const calculateAQI = (pm25: number): number => {
   return pm25 > 500 ? 500 : 0;
 };
 
-// HTML Preview Modal - for web content
-const HTMLPreviewModal = ({ 
-  htmlUrl, 
-  code,
-  onClose 
-}: { 
-  htmlUrl: string;
-  code: string; 
-  onClose: () => void;
-}) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-6xl h-[80vh] bg-background/95 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <Play className="w-4 h-4 text-blue-400" />
-            <span className="font-semibold text-foreground">HTML Preview</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => window.open(htmlUrl, '_blank')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Open in New Tab
-            </button>
-            <button
-              onClick={onClose}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground/70" />
-            </button>
-          </div>
-        </div>
-        
-        {/* Split Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel - Code */}
-          <div className="w-1/2 flex flex-col border-r border-white/10">
-            <div className="px-3 py-2 bg-black/30 border-b border-white/10">
-              <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
-                <Copy className="w-3 h-3" /> Source Code
-              </span>
-            </div>
-            <div className="flex-1 overflow-auto p-4 bg-black/20">
-              <pre className="text-sm font-mono text-foreground/90 whitespace-pre-wrap">
-                <code>{code}</code>
-              </pre>
-            </div>
-          </div>
-          
-          {/* Right Panel - Preview */}
-          <div className="w-1/2 flex flex-col">
-            <div className="px-3 py-2 bg-black/30 border-b border-white/10">
-              <span className="text-xs text-muted-foreground font-mono flex items-center gap-2">
-                <Play className="w-3 h-3" /> Live Preview
-              </span>
-            </div>
-            <div className="flex-1 overflow-auto p-2">
-              <iframe
-                src={htmlUrl}
-                className="w-full h-full bg-white rounded-lg border border-white/10"
-                sandbox="allow-scripts allow-same-origin"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // Languages that support interactive interpreter
 const INTERPRETER_LANGUAGES = [
   'python', 'py', 'javascript', 'js', 'typescript', 'ts',
@@ -131,12 +57,9 @@ const BACKEND_LANGUAGES = [
   'cobol', 'pascal', 'lisp', 'prolog', 'brainfuck', 'bf'
 ];
 
-// Code block component with copy and run buttons
+// Code block component with copy and run buttons - opens in NEW BROWSER TAB
 const CodeBlock = ({ language, children }: { language?: string; children: string }) => {
   const [copied, setCopied] = useState(false);
-  const [showInterpreter, setShowInterpreter] = useState(false);
-  const [showHTMLPreview, setShowHTMLPreview] = useState(false);
-  const [htmlUrl, setHtmlUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const lang = language?.toLowerCase() || '';
@@ -151,68 +74,144 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
   };
 
   const handleRun = () => {
+    // Create a popup window for code execution
+    const popupWidth = 1000;
+    const popupHeight = 700;
+    const left = (window.screen.width - popupWidth) / 2;
+    const top = (window.screen.height - popupHeight) / 2;
+
     if (lang === "html") {
-      // For HTML, show the preview modal
-      const blob = new Blob([children], { type: 'text/html' });
+      // For HTML, open directly in new window
+      const htmlContent = children;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
-      setHtmlUrl(url);
-      setShowHTMLPreview(true);
+      window.open(url, '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`);
     } else {
-      // For all other languages, open the interactive interpreter
-      setShowInterpreter(true);
+      // For other languages, open interpreter in new tab
+      const codeData = encodeURIComponent(JSON.stringify({ code: children, language: lang }));
+      const interpreterHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>${lang.toUpperCase()} Interpreter</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Monaco', 'Menlo', monospace; 
+      background: #1a1a2e; 
+      color: #eee; 
+      height: 100vh; 
+      display: flex; 
+      flex-direction: column;
     }
+    .header {
+      background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2));
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header h1 { font-size: 16px; font-weight: 600; }
+    .output {
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .input-line { color: #00d4ff; }
+    .output-line { color: #86efac; }
+    .error-line { color: #f87171; }
+    .info-line { color: #888; font-style: italic; }
+    .prompt { color: #facc15; }
+    .footer {
+      background: rgba(0,0,0,0.3);
+      padding: 8px 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 12px;
+      color: #888;
+    }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+    .loading { color: #facc15; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span>🐍</span>
+    <h1>${lang.toUpperCase()} Interactive Shell</h1>
+    <span id="status"></span>
+  </div>
+  <div class="output" id="output">
+    <div class="info-line">🐍 ${lang.toUpperCase()} Interactive Shell</div>
+    <div class="info-line">Running code...</div>
+    <div class="input-line"><span class="prompt">&gt;&gt;&gt; </span><pre style="display:inline">${children.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
+    <div class="loading" id="loading">⏳ Executing...</div>
+  </div>
+  <div class="footer">Press Ctrl+W to close • Powered by Piston API</div>
+  <script>
+    (async function() {
+      const output = document.getElementById('output');
+      const loading = document.getElementById('loading');
+      try {
+        const response = await fetch('https://znkvwgwijwmeapcyjpgu.supabase.co/functions/v1/execute-code', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpua3Z3Z3dpandtZWFwY3lqcGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2MDc1NjIsImV4cCI6MjA4MTE4MzU2Mn0.wvFfzKNl5EQzCbzX8_xQdS6cinh7gGNEcaFfPzB8ags'
+          },
+          body: JSON.stringify({ code: ${JSON.stringify(children)}, language: '${lang}' })
+        });
+        const data = await response.json();
+        loading.remove();
+        if (data.error) {
+          output.innerHTML += '<div class="error-line">❌ ' + data.error + '</div>';
+        } else {
+          output.innerHTML += '<div class="' + (data.hasError ? 'error-line' : 'output-line') + '">' + (data.output || '(no output)').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+        }
+      } catch (e) {
+        loading.remove();
+        output.innerHTML += '<div class="error-line">❌ ' + e.message + '</div>';
+      }
+    })();
+  </script>
+</body>
+</html>`;
+      const blob = new Blob([interpreterHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`);
+    }
+    toast({ title: "Opened!", description: `${lang.toUpperCase()} code opened in new window` });
   };
 
   return (
-    <>
-      <div className="relative group my-3">
-        <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
-          <span className="text-xs text-muted-foreground font-mono">{language || "code"}</span>
-          <div className="flex gap-1">
-            {isRunnable && (
-              <button
-                onClick={handleRun}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition-colors"
-              >
-                {usesInterpreter ? <Terminal className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                {usesInterpreter ? 'Open Shell' : 'Run'}
-              </button>
-            )}
+    <div className="relative group my-3">
+      <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
+        <span className="text-xs text-orange-400 font-mono font-bold">{language || "code"}</span>
+        <div className="flex gap-1">
+          {isRunnable && (
             <button
-              onClick={handleCopy}
-              className="flex items-center gap-1 px-2 py-1 text-xs bg-white/10 hover:bg-white/20 text-foreground/70 rounded transition-colors"
+              onClick={handleRun}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition-colors"
             >
-              {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-              {copied ? "Copied" : "Copy"}
+              {usesInterpreter ? <Terminal className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+              {usesInterpreter ? 'Open Shell' : 'Run'}
             </button>
-          </div>
+          )}
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-white/10 hover:bg-white/20 text-foreground/70 rounded transition-colors"
+          >
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            {copied ? "Copied" : "Copy"}
+          </button>
         </div>
-        <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0">
-          <code className="font-mono text-sm text-foreground/90">{children}</code>
-        </pre>
       </div>
-      
-      {/* Interactive Python/JS Interpreter */}
-      {showInterpreter && (
-        <PythonInterpreter
-          initialCode={children}
-          language={lang}
-          onClose={() => setShowInterpreter(false)}
-        />
-      )}
-
-      {/* HTML Preview Modal */}
-      {showHTMLPreview && htmlUrl && (
-        <HTMLPreviewModal
-          htmlUrl={htmlUrl}
-          code={children}
-          onClose={() => {
-            setShowHTMLPreview(false);
-            if (htmlUrl) URL.revokeObjectURL(htmlUrl);
-          }}
-        />
-      )}
-    </>
+      <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50">
+        <code className="font-mono text-sm text-foreground/90">{children}</code>
+      </pre>
+    </div>
   );
 };
 
@@ -259,15 +258,15 @@ const MessageContent = ({ content, isTyping }: { content: string; isTyping?: boo
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          h1: ({ children }) => <h1 className="text-xl font-bold text-foreground mb-3 mt-2">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-base font-semibold text-foreground mb-2 mt-2">{children}</h3>,
+          h1: ({ children }) => <h1 className="text-xl font-bold text-orange-400 mb-3 mt-2">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-lg font-semibold text-orange-400 mb-2 mt-3">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-base font-semibold text-orange-300 mb-2 mt-2">{children}</h3>,
           p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
-          strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
-          em: ({ children }) => <em className="italic text-foreground/80">{children}</em>,
+          strong: ({ children }) => <strong className="font-bold text-orange-400">{children}</strong>,
+          em: ({ children }) => <em className="italic text-orange-300/80 bg-orange-500/10 px-1 rounded">{children}</em>,
           ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
           ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
-          li: ({ children }) => <li className="text-foreground/90">{children}</li>,
+          li: ({ children }) => <li className="text-foreground/90 marker:text-orange-400">{children}</li>,
           code: ({ className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || "");
             const isInline = !className && !match;
@@ -275,14 +274,14 @@ const MessageContent = ({ content, isTyping }: { content: string; isTyping?: boo
             
             if (isInline) {
               return (
-                <code className="bg-primary/20 text-primary px-1.5 py-0.5 rounded font-mono text-sm">{children}</code>
+                <code className="bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-mono text-sm font-bold">{children}</code>
               );
             }
             
             return <CodeBlock language={match?.[1]}>{codeContent}</CodeBlock>;
           },
           pre: ({ children }) => <>{children}</>,
-          blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-foreground/70">{children}</blockquote>,
+          blockquote: ({ children }) => <blockquote className="border-l-2 border-orange-500/50 pl-3 italic text-orange-300/70 bg-orange-500/5 py-1">{children}</blockquote>,
           table: ({ children }) => (
             <div className="overflow-x-auto my-3 rounded-lg border border-white/20">
               <table className="w-full border-collapse bg-black/20">{children}</table>
