@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -157,10 +158,10 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const HF_TOKEN = Deno.env.get("HUGGING_FACE_ACCESS_TOKEN");
+    if (!HF_TOKEN) {
+      console.error("HUGGING_FACE_ACCESS_TOKEN is not configured");
+      throw new Error("HUGGING_FACE_ACCESS_TOKEN is not configured");
     }
 
     // Extract description from the code
@@ -168,65 +169,30 @@ serve(async (req) => {
     console.log('Extracted visualization description:', visualDescription);
 
     // Create a detailed prompt for image generation
-    const imagePrompt = `Generate a high-quality, professional visualization that would be produced by this Python code:
+    const imagePrompt = `A high-quality, professional data visualization chart or graph: ${visualDescription}. Clean matplotlib/seaborn style with white background, clear axes labels, grid lines, and professional typography. Scientific visualization quality.`;
 
-${code}
+    console.log('Calling HuggingFace FLUX image generation...');
 
-The visualization should be: ${visualDescription}
+    const hf = new HfInference(HF_TOKEN);
 
-Requirements:
-- Create an accurate representation of what this Python code would output
-- Use clean, professional styling similar to matplotlib/seaborn default themes
-- Include any axes, labels, titles, legends as specified in the code
-- Use appropriate colors and styling
-- The output should look like an actual Python-generated plot/visualization
-- High resolution, clear text and lines
-- White or light background typical of data visualization libraries`;
-
-    console.log('Calling AI image generation...');
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
-        messages: [
-          {
-            role: "user",
-            content: imagePrompt
-          }
-        ],
-        modalities: ["image", "text"]
-      }),
+    const image = await hf.textToImage({
+      inputs: imagePrompt,
+      model: 'black-forest-labs/FLUX.1-schnell',
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI image generation error:', response.status, errorText);
-      throw new Error(`Image generation failed: ${response.status}`);
-    }
+    // Convert the blob to a base64 string
+    const arrayBuffer = await image.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const imageUrl = `data:image/png;base64,${base64}`;
 
-    const data = await response.json();
-    console.log('AI image response received');
-
-    // Extract the image URL from the response
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    const textResponse = data.choices?.[0]?.message?.content || '';
-
-    if (!imageUrl) {
-      console.error('No image in response:', JSON.stringify(data));
-      throw new Error('No image generated');
-    }
+    console.log('HuggingFace image generated successfully');
 
     return new Response(
       JSON.stringify({
         isVisual: true,
         imageUrl: imageUrl,
         description: visualDescription,
-        message: textResponse
+        message: `Generated visualization: ${visualDescription}`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
