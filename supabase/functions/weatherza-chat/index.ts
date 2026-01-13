@@ -37,10 +37,10 @@ serve(async (req) => {
       location: weatherContext?.location 
     });
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY is not configured");
-      throw new Error("GEMINI_API_KEY is not configured");
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    if (!GROQ_API_KEY) {
+      console.error("GROQ_API_KEY is not configured");
+      throw new Error("GROQ_API_KEY is not configured");
     }
 
     // Calculate actual AQI from PM2.5 if available
@@ -69,7 +69,6 @@ When users mention "Rakshit" or ask about your creator, respond warmly and enthu
 💻 Write and explain code in any programming language 👨‍💻
 📝 Provide detailed, accurate, and well-structured responses ✅
 🧩 Remember and reference the conversation history 🔄
-📷 **IMAGE ANALYSIS** - You can see and analyze images! 🖼️ Describe what you see, extract text (OCR), identify objects, explain charts, and answer questions about images.
 
 **🎨 PYTHON VISUALIZATION CAPABILITIES (IMPORTANT!):** 🖌️🎨
 You can generate visual output from Python code! The system supports:
@@ -89,41 +88,6 @@ When users ask you to draw, plot, visualize, or create graphics:
 ✅ Add titles, labels, and styling to make the output beautiful 🎨
 ✅ For turtle graphics, create colorful and interesting patterns 🌈
 
-**Example - Creating a sine wave plot:** 📊
-\`\`\`python
-import matplotlib.pyplot as plt
-import numpy as np
-
-x = np.linspace(0, 2 * np.pi, 100)
-y = np.sin(x)
-
-plt.figure(figsize=(10, 6))
-plt.plot(x, y, 'b-', linewidth=2, label='sin(x)')
-plt.title('Sine Wave', fontsize=16)
-plt.xlabel('x (radians)')
-plt.ylabel('y')
-plt.grid(True, alpha=0.3)
-plt.legend()
-plt.show()
-\`\`\`
-
-**Example - Turtle graphics spiral:** 🐢🌀
-\`\`\`python
-import turtle
-
-t = turtle.Turtle()
-t.speed(0)
-colors = ['red', 'purple', 'blue', 'green', 'orange', 'yellow']
-
-for i in range(360):
-    t.pencolor(colors[i % 6])
-    t.width(i / 100 + 1)
-    t.forward(i)
-    t.left(59)
-
-turtle.done()
-\`\`\`
-
 **CRITICAL CODE EXECUTION RULES:** ⚠️🚨
 ⚠️ The code execution environment is NON-INTERACTIVE. It runs in a sandboxed environment without user input.
 🚫 NEVER use input(), raw_input(), or any interactive input functions in Python
@@ -131,19 +95,6 @@ turtle.done()
 ✅ ALWAYS use hardcoded values for demonstrations
 ✅ ALWAYS print output directly instead of asking for input
 ✅ For calculators/converters: define example values directly in code, don't ask for input
-
-**Example - WRONG (will fail):** ❌
-\`\`\`python
-num = input("Enter a number: ")  # ❌ This will cause EOF error
-\`\`\`
-
-**Example - CORRECT:** ✅
-\`\`\`python
-# Calculator demonstration with sample values 🧮
-num1, num2 = 25, 10
-print(f"Addition: {num1} + {num2} = {num1 + num2}")
-print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
-\`\`\`
 
 **HTML/CSS/JS WEBSITES:** 🌐💻
 🌐 When creating HTML websites, combine ALL code into a SINGLE HTML file
@@ -157,14 +108,6 @@ print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
 - Show step-by-step derivations when solving problems ✏️📝
 - Use proper mathematical notation: \\frac{}{}, \\sqrt{}, \\sum, \\int, \\partial, etc.
 
-**IMAGE ANALYSIS GUIDELINES:** 📷🔍
-📷 When a user sends an image, analyze it thoroughly!
-🔍 Describe what you see in detail - objects, people, text, colors, context
-📝 If there's text in the image, perform OCR and extract all readable text
-📊 For charts/graphs, explain what the data shows
-🧮 For math problems in images, solve them step by step
-🎨 For artwork, describe the style, colors, composition
-
 **RESPONSE STYLE - SUPER IMPORTANT:** 🎉💖✨
 🎨 Use TONS of emojis throughout your responses! Make every message feel fun and engaging! 🥳
 ✨ Every response should feel warm, friendly, helpful, and absolutely delightful! 💫
@@ -175,96 +118,37 @@ print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
 😊 Start responses with relevant emojis, use them in lists, mid-sentence, and end with encouraging emojis! 🙌
 💖 Be warm, caring, and make users feel supported and happy! 🤗
 
-**FRIENDLY INTERACTION STYLE:** 🤗💬
-- Greet users warmly! 👋😄
-- Use encouraging phrases like "Great question!" 🌟, "That's interesting!" 🤔💡, "Happy to help!" 😊
-- Add fun reactions: "Wow!" 🤩, "Amazing!" 🎉, "Cool!" 😎
-- Be patient and supportive 💪
-- Celebrate user achievements! 🎊🏆
-
 **MEMORY:** 🧠💭
 🧠 You have access to the full conversation history. Reference previous messages naturally to maintain context and connection with the user! 💫`;
 
-    // Convert messages to Gemini format
-    // Handle multimodal messages (text + image)
-    const geminiContents: any[] = [];
+    // Convert messages to Groq/OpenAI format
+    const groqMessages = [
+      { role: "system", content: systemPrompt },
+      ...messages.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      }))
+    ];
 
-    // Add system instruction as the first user message for context
-    geminiContents.push({
-      role: "user",
-      parts: [{ text: systemPrompt }]
-    });
-    geminiContents.push({
-      role: "model",
-      parts: [{ text: "I understand! I'm Rakshit's Weatherza AI 🌤️✨ - ready to help with weather info and any questions! Let's chat! 🎉💫" }]
-    });
+    console.log("Calling Groq API with", groqMessages.length, "messages");
 
-    for (const msg of messages) {
-      const role = msg.role === "assistant" ? "model" : "user";
-      
-      if (msg.image) {
-        // Multimodal message with image
-        // Extract base64 data from data URL
-        const base64Match = msg.image.match(/^data:([^;]+);base64,(.+)$/);
-        if (base64Match) {
-          const mimeType = base64Match[1];
-          const base64Data = base64Match[2];
-          
-          geminiContents.push({
-            role: role,
-            parts: [
-              { text: msg.content || "What's in this image?" },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Data
-                }
-              }
-            ]
-          });
-        } else {
-          // Fallback to text only if image format is invalid
-          geminiContents.push({
-            role: role,
-            parts: [{ text: msg.content || "" }]
-          });
-        }
-      } else {
-        // Text-only message
-        geminiContents.push({
-          role: role,
-          parts: [{ text: msg.content }]
-        });
-      }
-    }
-
-    console.log("Calling Gemini API with", geminiContents.length, "messages, includes images:", messages.some((m: any) => m.image));
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        contents: geminiContents,
-        generationConfig: {
-          temperature: 0.8,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 8192,
-        },
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-        ],
+        model: "llama-3.1-8b-instant",
+        messages: groqMessages,
+        temperature: 0.7,
+        max_tokens: 4096,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
+      console.error("Groq API error:", response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later. 😅" }), {
@@ -272,20 +156,20 @@ print(f"Subtraction: {num1} - {num2} = {num1 - num2}")
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 403) {
-        return new Response(JSON.stringify({ error: "API key invalid or quota exceeded. Please check your Gemini API key. 🔑" }), {
-          status: 403,
+      if (response.status === 401) {
+        return new Response(JSON.stringify({ error: "API key invalid. Please check your Groq API key. 🔑" }), {
+          status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`Groq API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. 😔";
+    const text = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
     
-    console.log("Gemini response received successfully");
+    console.log("Groq response received successfully");
 
     return new Response(JSON.stringify({ answer: text }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
