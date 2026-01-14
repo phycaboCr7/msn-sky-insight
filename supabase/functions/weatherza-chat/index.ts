@@ -130,7 +130,7 @@ When users ask you to draw, plot, visualize, or create graphics:
       }))
     ];
 
-    console.log("Calling Groq API with Mixtral model,", groqMessages.length, "messages");
+    console.log("Calling Groq API with Llama 3.3 70B model,", groqMessages.length, "messages");
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -139,7 +139,7 @@ When users ask you to draw, plot, visualize, or create graphics:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "mixtral-8x7b-32768",
+        model: "llama-3.3-70b-versatile",
         messages: groqMessages,
         temperature: 0.4,
         max_tokens: 4096,
@@ -169,7 +169,7 @@ When users ask you to draw, plot, visualize, or create graphics:
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
     
-    console.log("Groq Mixtral response received successfully");
+    console.log("Groq Llama 3.3 70B response received successfully");
 
     return new Response(JSON.stringify({ answer: text }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
