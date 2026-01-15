@@ -42,17 +42,12 @@ const MAP_STYLES = {
   dark: 'https://tiles.openfreemap.org/styles/dark'
 };
 
-// RainViewer API for weather overlays (FREE, no API key)
-const RAINVIEWER_BASE = 'https://tilecache.rainviewer.com';
-const OPENWEATHERMAP_TILES = 'https://tile.openweathermap.org/map';
-
 export const WorldMap = ({ weather }: WorldMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
-  const [activeLayer, setActiveLayer] = useState<MapLayer>('precipitation');
+  const [activeLayer, setActiveLayer] = useState<MapLayer>('temperature');
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [radarTimestamp, setRadarTimestamp] = useState<string | null>(null);
 
   // Initialize map - NO API KEY REQUIRED
   useEffect(() => {
@@ -85,9 +80,6 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
         setIsMapLoaded(true);
         setIsLoading(false);
         
-        // Fetch RainViewer radar timestamps
-        fetchRadarTimestamp();
-        
         // Add marker for current location
         const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
           <div style="color: #333; font-family: sans-serif; padding: 4px;">
@@ -117,73 +109,6 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
       map.current?.remove();
     };
   }, [weather.location.lat, weather.location.lon, weather.location.name, weather.current.temp_c, weather.current.condition.text]);
-
-  // Fetch latest RainViewer radar timestamp
-  const fetchRadarTimestamp = async () => {
-    try {
-      const response = await fetch('https://api.rainviewer.com/public/weather-maps.json');
-      const data = await response.json();
-      if (data.radar?.past?.length > 0) {
-        const latestRadar = data.radar.past[data.radar.past.length - 1];
-        setRadarTimestamp(latestRadar.path);
-      }
-    } catch (error) {
-      console.error('Failed to fetch radar data:', error);
-    }
-  };
-
-  // Add weather overlay layer
-  const addWeatherOverlay = (layer: MapLayer) => {
-    if (!map.current || !isMapLoaded) return;
-
-    // Remove existing overlay if any
-    if (map.current.getLayer('weather-overlay')) {
-      map.current.removeLayer('weather-overlay');
-    }
-    if (map.current.getSource('weather-tiles')) {
-      map.current.removeSource('weather-tiles');
-    }
-
-    let tileUrl = '';
-    
-    if (layer === 'precipitation' && radarTimestamp) {
-      // RainViewer precipitation radar (FREE)
-      tileUrl = `${RAINVIEWER_BASE}${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`;
-    } else if (layer === 'clouds' && radarTimestamp) {
-      // RainViewer satellite/infrared
-      tileUrl = `${RAINVIEWER_BASE}/v2/satellite/nowcast_tiles/{z}/{x}/{y}/0/0_0.png`;
-    } else if (layer === 'temperature') {
-      // Use color gradient overlay based on location temp
-      return; // Skip tile layer for temperature - just show marker
-    } else if (layer === 'wind') {
-      // Skip for wind - show marker only
-      return;
-    }
-
-    if (tileUrl) {
-      map.current.addSource('weather-tiles', {
-        type: 'raster',
-        tiles: [tileUrl],
-        tileSize: 256,
-      });
-
-      map.current.addLayer({
-        id: 'weather-overlay',
-        type: 'raster',
-        source: 'weather-tiles',
-        paint: {
-          'raster-opacity': 0.7,
-        },
-      });
-    }
-  };
-
-  // Update overlay when layer or timestamp changes
-  useEffect(() => {
-    if (isMapLoaded && radarTimestamp) {
-      addWeatherOverlay(activeLayer);
-    }
-  }, [activeLayer, radarTimestamp, isMapLoaded]);
 
   const handleLayerChange = (layer: MapLayer) => {
     setActiveLayer(layer);
@@ -223,6 +148,7 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
               <Globe className="w-5 h-5 text-blue-400" />
             </div>
             <span className="text-foreground font-semibold">World Weather Map</span>
+            <span className="text-xs text-muted-foreground font-normal">(Free • No API Key)</span>
           </CardTitle>
           
           {/* Layer buttons */}
@@ -264,6 +190,9 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
           </div>
         </div>
         
+        <p className="text-xs text-muted-foreground mt-2 text-center">
+          📍 {weather.location.name}, {weather.location.country} • Powered by MapLibre + OpenFreeMap (100% Free)
+        </p>
       </CardContent>
     </Card>
   );
