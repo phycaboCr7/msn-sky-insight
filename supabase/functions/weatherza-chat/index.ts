@@ -5,6 +5,72 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Handle vision requests using Lovable AI (Gemini)
+async function handleVisionRequest(
+  messages: any[], 
+  weatherContext: any, 
+  apiKey: string,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  console.log("Processing vision request with Gemini");
+  
+  // Build content array with images
+  const lastUserMessage = messages.filter((m: any) => m.role === 'user').pop();
+  
+  const content: any[] = [];
+  
+  // Add text instruction
+  const textPrompt = `You are Rakshit's Weatherza AI 🌤️✨ - a friendly, helpful assistant.
+Current weather: ${weatherContext.location} - ${weatherContext.temperature}°C, ${weatherContext.condition}.
+
+User's question: ${lastUserMessage?.content || "What's in this image?"}
+
+Analyze the image and respond helpfully with emojis! 🎉`;
+
+  content.push({ type: "text", text: textPrompt });
+  
+  // Add image if present
+  if (lastUserMessage?.image) {
+    content.push({
+      type: "image_url",
+      image_url: { url: lastUserMessage.image }
+    });
+  }
+
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "user", content }],
+        max_tokens: 2048,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Lovable AI vision error:", response.status, errorText);
+      throw new Error(`Vision API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || "I couldn't analyze the image. Please try again! 😊";
+
+    console.log("Vision response received successfully");
+
+    return new Response(JSON.stringify({ answer: text }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Vision processing error:", error);
+    throw error;
+  }
+}
+
 // Calculate actual AQI from PM2.5
 const calculateAQI = (pm25: number): number => {
   const breakpoints = [
@@ -34,13 +100,24 @@ serve(async (req) => {
     
     console.log("Received weather chat request:", { 
       messageCount: messages?.length || 0, 
-      location: weatherContext?.location 
+      location: weatherContext?.location,
+      hasImages: messages?.some((m: any) => m.image)
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    
     if (!GROQ_API_KEY) {
       console.error("GROQ_API_KEY is not configured");
       throw new Error("GROQ_API_KEY is not configured");
+    }
+    
+    // Check if any message has an image - use vision model
+    const hasImage = messages?.some((m: any) => m.image);
+    
+    if (hasImage && LOVABLE_API_KEY) {
+      // Use Lovable AI with Gemini for vision tasks
+      return await handleVisionRequest(messages, weatherContext, LOVABLE_API_KEY, corsHeaders);
     }
 
     // Calculate actual AQI from PM2.5 if available
