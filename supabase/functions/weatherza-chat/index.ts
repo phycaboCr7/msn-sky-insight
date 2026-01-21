@@ -32,9 +32,13 @@ serve(async (req) => {
   try {
     const { messages, weatherContext } = await req.json();
     
+    // Check if any message contains an image
+    const hasImages = messages.some((msg: any) => msg.image);
+    
     console.log("Received weather chat request:", { 
       messageCount: messages?.length || 0, 
-      location: weatherContext?.location 
+      location: weatherContext?.location,
+      hasImages
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
@@ -69,6 +73,7 @@ When users mention "Rakshit" or ask about your creator, respond warmly and enthu
 💻 Write and explain code in any programming language 👨‍💻
 📝 Provide detailed, accurate, and well-structured responses ✅
 🧩 Remember and reference the conversation history 🔄
+👁️ **VISION:** Analyze images, read text from photos/documents, describe visuals, and answer questions about uploaded images! 📷🖼️
 
 **🎨 PYTHON VISUALIZATION CAPABILITIES (IMPORTANT!):** 🖌️🎨
 You can generate visual output from Python code! The system supports:
@@ -121,16 +126,41 @@ When users ask you to draw, plot, visualize, or create graphics:
 **MEMORY:** 🧠💭
 🧠 You have access to the full conversation history. Reference previous messages naturally to maintain context and connection with the user! 💫`;
 
-    // Convert messages to Groq/OpenAI format
-    const groqMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.map((msg: any) => ({
-        role: msg.role,
-        content: msg.content
-      }))
+    // Convert messages to Groq format - handle images for vision model
+    const groqMessages: any[] = [
+      { role: "system", content: systemPrompt }
     ];
+    
+    for (const msg of messages) {
+      if (msg.image) {
+        // For messages with images, use the vision-compatible format
+        groqMessages.push({
+          role: msg.role,
+          content: [
+            {
+              type: "text",
+              text: msg.content || "What's in this image?"
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: msg.image // Base64 data URL
+              }
+            }
+          ]
+        });
+      } else {
+        groqMessages.push({
+          role: msg.role,
+          content: msg.content
+        });
+      }
+    }
 
-    console.log("Calling Groq API with Llama 3.3 70B model,", groqMessages.length, "messages");
+    // Use vision model if images are present, otherwise use text model
+    const model = hasImages ? "llama-3.2-90b-vision-preview" : "llama-3.3-70b-versatile";
+    
+    console.log(`Calling Groq API with ${model},`, groqMessages.length, "messages");
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -139,7 +169,7 @@ When users ask you to draw, plot, visualize, or create graphics:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model,
         messages: groqMessages,
         temperature: 0.4,
         max_tokens: 4096,
@@ -169,7 +199,7 @@ When users ask you to draw, plot, visualize, or create graphics:
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
     
-    console.log("Groq Llama 3.3 70B response received successfully");
+    console.log(`Groq ${model} response received successfully`);
 
     return new Response(JSON.stringify({ answer: text }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
