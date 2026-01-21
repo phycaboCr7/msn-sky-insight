@@ -23,6 +23,111 @@ const calculateAQI = (pm25: number): number => {
   return pm25 > 500 ? 500 : 0;
 };
 
+// Call Groq API for text-only queries
+async function callGroq(messages: any[], systemPrompt: string, apiKey: string) {
+  const groqMessages = [
+    { role: "system", content: systemPrompt },
+    ...messages.map((msg: any) => ({
+      role: msg.role,
+      content: msg.content
+    }))
+  ];
+
+  console.log("Calling Groq API with llama-3.3-70b-versatile,", groqMessages.length, "messages");
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: groqMessages,
+      temperature: 0.4,
+      max_tokens: 4096,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Groq API error:", response.status, errorText);
+    throw new Error(`Groq API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log("Groq llama-3.3-70b-versatile response received successfully");
+  return data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
+}
+
+// Call Gemini API for vision/image queries
+async function callGemini(messages: any[], systemPrompt: string, apiKey: string) {
+  // Build Gemini contents array
+  const contents: any[] = [];
+  
+  // Add system instruction as first user message context
+  let currentParts: any[] = [];
+  
+  for (const msg of messages) {
+    const parts: any[] = [];
+    
+    if (msg.content) {
+      parts.push({ text: msg.content });
+    }
+    
+    if (msg.image) {
+      // Extract base64 data from data URL
+      const base64Match = msg.image.match(/^data:([^;]+);base64,(.+)$/);
+      if (base64Match) {
+        const mimeType = base64Match[1];
+        const base64Data = base64Match[2];
+        parts.push({
+          inline_data: {
+            mime_type: mimeType,
+            data: base64Data
+          }
+        });
+      }
+    }
+    
+    if (parts.length > 0) {
+      contents.push({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts
+      });
+    }
+  }
+
+  console.log("Calling Gemini API with gemini-2.0-flash,", contents.length, "messages");
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents,
+      systemInstruction: {
+        parts: [{ text: systemPrompt }]
+      },
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 4096,
+      }
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Gemini API error:", response.status, errorText);
+    throw new Error(`Gemini API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log("Gemini gemini-2.0-flash response received successfully");
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. 😔";
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -42,9 +147,16 @@ serve(async (req) => {
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    
     if (!GROQ_API_KEY) {
       console.error("GROQ_API_KEY is not configured");
       throw new Error("GROQ_API_KEY is not configured");
+    }
+    
+    if (hasImages && !GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not configured for vision");
+      throw new Error("GEMINI_API_KEY is not configured for vision capabilities");
     }
 
     // Calculate actual AQI from PM2.5 if available
@@ -74,6 +186,7 @@ When users mention "Rakshit" or ask about your creator, respond warmly and enthu
 📝 Provide detailed, accurate, and well-structured responses ✅
 🧩 Remember and reference the conversation history 🔄
 👁️ **VISION:** Analyze images, read text from photos/documents, describe visuals, and answer questions about uploaded images! 📷🖼️
+📄 **DOCUMENTS:** Read and analyze PDFs, documents, and any text in images with OCR-like capabilities! 📑
 
 **🎨 PYTHON VISUALIZATION CAPABILITIES (IMPORTANT!):** 🖌️🎨
 You can generate visual output from Python code! The system supports:
@@ -126,86 +239,37 @@ When users ask you to draw, plot, visualize, or create graphics:
 **MEMORY:** 🧠💭
 🧠 You have access to the full conversation history. Reference previous messages naturally to maintain context and connection with the user! 💫`;
 
-    // Convert messages to Groq format - handle images for vision model
-    const groqMessages: any[] = [
-      { role: "system", content: systemPrompt }
-    ];
+    let answer: string;
     
-    for (const msg of messages) {
-      if (msg.image) {
-        // For messages with images, use the vision-compatible format
-        groqMessages.push({
-          role: msg.role,
-          content: [
-            {
-              type: "text",
-              text: msg.content || "What's in this image?"
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: msg.image // Base64 data URL
-              }
-            }
-          ]
-        });
-      } else {
-        groqMessages.push({
-          role: msg.role,
-          content: msg.content
-        });
-      }
+    if (hasImages) {
+      // Use Gemini for vision/image analysis
+      answer = await callGemini(messages, systemPrompt, GEMINI_API_KEY!);
+    } else {
+      // Use Groq for text-only queries
+      answer = await callGroq(messages, systemPrompt, GROQ_API_KEY);
     }
 
-    // Use vision model if images are present, otherwise use text model
-    const model = hasImages ? "llama-3.2-90b-vision-preview" : "llama-3.3-70b-versatile";
-    
-    console.log(`Calling Groq API with ${model},`, groqMessages.length, "messages");
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages: groqMessages,
-        temperature: 0.4,
-        max_tokens: 4096,
-      }),
+    return new Response(JSON.stringify({ answer }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Groq API error:", response.status, errorText);
-      
-      if (response.status === 429) {
+  } catch (error) {
+    console.error("weatherza-chat error:", error);
+    
+    if (error instanceof Error) {
+      if (error.message.includes("429")) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later. 😅" }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 401) {
-        return new Response(JSON.stringify({ error: "API key invalid. Please check your Groq API key. 🔑" }), {
+      if (error.message.includes("401")) {
+        return new Response(JSON.stringify({ error: "API key invalid. Please check your API key. 🔑" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      
-      throw new Error(`Groq API error: ${response.status}`);
     }
-
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
     
-    console.log(`Groq ${model} response received successfully`);
-
-    return new Response(JSON.stringify({ answer: text }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("weatherza-chat error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
