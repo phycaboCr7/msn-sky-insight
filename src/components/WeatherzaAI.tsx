@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -21,6 +21,11 @@ interface Message {
   content: string;
   isTyping?: boolean;
   image?: string; // Base64 image data
+  document?: {
+    data: string; // Base64 document data
+    name: string;
+    type: string; // MIME type
+  };
 }
 
 // Calculate actual AQI from PM2.5
@@ -308,6 +313,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedDocument, setUploadedDocument] = useState<{ data: string; name: string; type: string } | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
   const { toast } = useToast();
@@ -320,25 +326,43 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file upload (images and documents)
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast({ title: "Invalid file", description: "Please upload an image file.", variant: "destructive" });
+    const isImage = file.type.startsWith('image/');
+    const isPDF = file.type === 'application/pdf';
+    const isDoc = file.type === 'application/msword' || 
+                  file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+    if (!isImage && !isPDF && !isDoc) {
+      toast({ title: "Invalid file", description: "Please upload an image, PDF, or Word document.", variant: "destructive" });
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Please upload an image under 10MB.", variant: "destructive" });
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please upload a file under 20MB.", variant: "destructive" });
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
-      setUploadedImage(reader.result as string);
-      toast({ title: "Image uploaded! 📷", description: "Ask a question about the image." });
+      const base64Data = reader.result as string;
+      
+      if (isImage) {
+        setUploadedImage(base64Data);
+        setUploadedDocument(null);
+        toast({ title: "Image uploaded! 📷", description: "Ask a question about the image." });
+      } else {
+        setUploadedDocument({
+          data: base64Data,
+          name: file.name,
+          type: file.type
+        });
+        setUploadedImage(null);
+        toast({ title: "Document uploaded! 📄", description: `"${file.name}" ready for analysis.` });
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -440,17 +464,19 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   const askAI = async () => {
-    if (!question.trim() && !uploadedImage) return;
+    if (!question.trim() && !uploadedImage && !uploadedDocument) return;
 
     const userMessage: Message = { 
       role: "user", 
-      content: question.trim() || "What's in this image?",
-      image: uploadedImage || undefined
+      content: question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document"),
+      image: uploadedImage || undefined,
+      document: uploadedDocument || undefined
     };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setQuestion("");
     setUploadedImage(null);
+    setUploadedDocument(null);
     setLoading(true);
     
     try {
@@ -481,7 +507,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           messages: updatedMessages.map(m => ({ 
             role: m.role, 
             content: m.content,
-            image: m.image 
+            image: m.image,
+            document: m.document
           })),
           weatherContext 
         }
@@ -612,6 +639,12 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                           className="max-w-[200px] max-h-[150px] rounded-lg mb-2 border border-white/20"
                         />
                       )}
+                      {msg.document && (
+                        <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg mb-2 border border-primary/30">
+                          <FileText className="w-4 h-4 text-primary" />
+                          <span className="text-sm text-foreground/90 truncate max-w-[180px]">{msg.document.name}</span>
+                        </div>
+                      )}
                       <p className="text-foreground/90">{msg.content}</p>
                     </div>
                   )}
@@ -661,27 +694,46 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         )}
 
+        {/* Document Preview */}
+        {uploadedDocument && (
+          <div className="relative inline-flex items-center gap-2 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+            <FileText className="w-5 h-5 text-primary" />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{uploadedDocument.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {uploadedDocument.type === 'application/pdf' ? 'PDF Document' : 'Word Document'}
+              </span>
+            </div>
+            <button
+              onClick={() => setUploadedDocument(null)}
+              className="ml-2 p-1 bg-destructive rounded-full text-white hover:bg-destructive/80 transition-colors"
+            >
+              <XCircle className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Input Area */}
         <div className="flex gap-2 items-end">
           {/* Hidden file input */}
           <input
             type="file"
             ref={fileInputRef}
-            onChange={handleImageUpload}
-            accept="image/*"
+            onChange={handleFileUpload}
+            accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             className="hidden"
           />
           
-          {/* Image upload button */}
+          {/* File upload button */}
           <Button
             type="button"
             variant="outline"
             size="icon"
             onClick={() => fileInputRef.current?.click()}
             className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
-            title="Upload image"
+            title="Upload image or document"
           >
-            <Image className="w-4 h-4" />
+            {uploadedDocument ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
           </Button>
 
           {/* Voice input button with simple visualizer */}
@@ -712,7 +764,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
           <div className="flex-1 relative">
             <Textarea
-              placeholder={uploadedImage ? "Ask about this image..." : isRecording ? "Listening..." : "Ask me anything - math, science, coding, weather..."}
+              placeholder={uploadedImage ? "Ask about this image..." : uploadedDocument ? `Ask about "${uploadedDocument.name}"...` : isRecording ? "Listening..." : "Ask me anything - math, science, coding, weather..."}
               value={isRecording && interimTranscript ? question + (question ? ' ' : '') + interimTranscript : question}
               onChange={(e) => !isRecording && setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -723,7 +775,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
           <Button 
             onClick={askAI} 
-            disabled={loading || (!question.trim() && !uploadedImage)}
+            disabled={loading || (!question.trim() && !uploadedImage && !uploadedDocument)}
             className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
           >
             {loading ? (
