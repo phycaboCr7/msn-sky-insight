@@ -60,13 +60,10 @@ async function callGroq(messages: any[], systemPrompt: string, apiKey: string) {
   return data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
 }
 
-// Call Gemini API for vision/image queries
+// Call Gemini API for vision/image/document queries
 async function callGemini(messages: any[], systemPrompt: string, apiKey: string) {
   // Build Gemini contents array
   const contents: any[] = [];
-  
-  // Add system instruction as first user message context
-  let currentParts: any[] = [];
   
   for (const msg of messages) {
     const parts: any[] = [];
@@ -75,8 +72,8 @@ async function callGemini(messages: any[], systemPrompt: string, apiKey: string)
       parts.push({ text: msg.content });
     }
     
+    // Handle image uploads
     if (msg.image) {
-      // Extract base64 data from data URL
       const base64Match = msg.image.match(/^data:([^;]+);base64,(.+)$/);
       if (base64Match) {
         const mimeType = base64Match[1];
@@ -90,6 +87,23 @@ async function callGemini(messages: any[], systemPrompt: string, apiKey: string)
       }
     }
     
+    // Handle document uploads (PDF, Word docs)
+    if (msg.document) {
+      const base64Match = msg.document.data.match(/^data:([^;]+);base64,(.+)$/);
+      if (base64Match) {
+        const mimeType = base64Match[1];
+        const base64Data = base64Match[2];
+        parts.push({
+          inline_data: {
+            mime_type: mimeType,
+            data: base64Data
+          }
+        });
+        // Add context about the document
+        parts.push({ text: `[Document uploaded: ${msg.document.name}]` });
+      }
+    }
+    
     if (parts.length > 0) {
       contents.push({
         role: msg.role === "assistant" ? "model" : "user",
@@ -98,7 +112,8 @@ async function callGemini(messages: any[], systemPrompt: string, apiKey: string)
     }
   }
 
-  console.log("Calling Gemini API with gemini-2.0-flash,", contents.length, "messages");
+  const hasDocuments = messages.some((msg: any) => msg.document);
+  console.log(`Calling Gemini API with gemini-2.0-flash, ${contents.length} messages, hasDocuments: ${hasDocuments}`);
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
     method: "POST",
@@ -137,13 +152,16 @@ serve(async (req) => {
   try {
     const { messages, weatherContext } = await req.json();
     
-    // Check if any message contains an image
+    // Check if any message contains an image or document
     const hasImages = messages.some((msg: any) => msg.image);
+    const hasDocuments = messages.some((msg: any) => msg.document);
+    const needsGemini = hasImages || hasDocuments;
     
     console.log("Received weather chat request:", { 
       messageCount: messages?.length || 0, 
       location: weatherContext?.location,
-      hasImages
+      hasImages,
+      hasDocuments
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
@@ -154,9 +172,9 @@ serve(async (req) => {
       throw new Error("GROQ_API_KEY is not configured");
     }
     
-    if (hasImages && !GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY is not configured for vision");
-      throw new Error("GEMINI_API_KEY is not configured for vision capabilities");
+    if (needsGemini && !GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not configured for vision/documents");
+      throw new Error("GEMINI_API_KEY is not configured for vision/document capabilities");
     }
 
     // Calculate actual AQI from PM2.5 if available
@@ -241,8 +259,8 @@ When users ask you to draw, plot, visualize, or create graphics:
 
     let answer: string;
     
-    if (hasImages) {
-      // Use Gemini for vision/image analysis
+    if (needsGemini) {
+      // Use Gemini for vision/image/document analysis
       answer = await callGemini(messages, systemPrompt, GEMINI_API_KEY!);
     } else {
       // Use Groq for text-only queries
