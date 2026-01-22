@@ -113,9 +113,9 @@ async function callGemini(messages: any[], systemPrompt: string, apiKey: string)
   }
 
   const hasDocuments = messages.some((msg: any) => msg.document);
-  console.log(`Calling Gemini API with gemini-2.0-flash, ${contents.length} messages, hasDocuments: ${hasDocuments}`);
+  console.log(`Calling Gemini API with gemini-1.5-flash, ${contents.length} messages, hasDocuments: ${hasDocuments}`);
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -139,7 +139,7 @@ async function callGemini(messages: any[], systemPrompt: string, apiKey: string)
   }
 
   const data = await response.json();
-  console.log("Gemini gemini-2.0-flash response received successfully");
+  console.log("Gemini gemini-1.5-flash response received successfully");
   return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. 😔";
 }
 
