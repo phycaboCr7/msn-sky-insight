@@ -60,77 +60,101 @@ async function callGroq(messages: any[], systemPrompt: string, apiKey: string) {
   return data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
 }
 
+// Universal multimodal prompt for images, PDFs, and documents
+const MULTIMODAL_ANALYSIS_PROMPT = `You are an advanced multimodal analysis AI.
+
+You may receive:
+• Images
+• PDFs
+• Documents (text extracted)
+• Scanned pages
+• Mixed inputs
+
+STRICT RULES:
+1. Analyze ONLY the content provided.
+2. If the input is an image, describe exactly what is visible.
+3. If the input is a document or PDF, read and understand its content faithfully.
+4. Extract visible text exactly as written.
+5. Preserve facts, numbers, headings, questions, and structure.
+6. Do NOT guess missing information.
+7. If something is unclear, unreadable, or missing, clearly say so.
+8. Do NOT hallucinate.
+9. Respond clearly, concisely, and in a structured manner.
+
+TASK:
+Carefully analyze the provided input and explain it accurately.`;
+
 // Call Gemini API for vision/image/document queries
 async function callGemini(messages: any[], systemPrompt: string, apiKey: string) {
-  // Build Gemini contents array
-  const contents: any[] = [];
+  // Build parts array for the single request
+  const parts: any[] = [];
   
-  for (const msg of messages) {
-    const parts: any[] = [];
-    
-    if (msg.content) {
-      parts.push({ text: msg.content });
-    }
-    
-    // Handle image uploads
-    if (msg.image) {
-      const base64Match = msg.image.match(/^data:([^;]+);base64,(.+)$/);
-      if (base64Match) {
-        const mimeType = base64Match[1];
-        const base64Data = base64Match[2];
-        parts.push({
-          inline_data: {
-            mime_type: mimeType,
-            data: base64Data
-          }
-        });
-      }
-    }
-    
-    // Handle document uploads (PDF, Word docs)
-    if (msg.document) {
-      const base64Match = msg.document.data.match(/^data:([^;]+);base64,(.+)$/);
-      if (base64Match) {
-        const mimeType = base64Match[1];
-        const base64Data = base64Match[2];
-        parts.push({
-          inline_data: {
-            mime_type: mimeType,
-            data: base64Data
-          }
-        });
-        // Add context about the document
-        parts.push({ text: `[Document uploaded: ${msg.document.name}]` });
-      }
-    }
-    
-    if (parts.length > 0) {
-      contents.push({
-        role: msg.role === "assistant" ? "model" : "user",
-        parts
+  // Get the latest user message with media
+  const latestMessage = messages[messages.length - 1];
+  
+  // Handle image uploads
+  if (latestMessage.image) {
+    const base64Match = latestMessage.image.match(/^data:([^;]+);base64,(.+)$/);
+    if (base64Match) {
+      const mimeType = base64Match[1];
+      const base64Data = base64Match[2];
+      parts.push({
+        inline_data: {
+          mime_type: mimeType,
+          data: base64Data
+        }
       });
     }
   }
+  
+  // Handle document uploads (PDF, Word docs)
+  if (latestMessage.document) {
+    const base64Match = latestMessage.document.data.match(/^data:([^;]+);base64,(.+)$/);
+    if (base64Match) {
+      const mimeType = base64Match[1];
+      const base64Data = base64Match[2];
+      parts.push({
+        inline_data: {
+          mime_type: mimeType,
+          data: base64Data
+        }
+      });
+    }
+  }
+  
+  // Add user's text query
+  if (latestMessage.content) {
+    parts.push({ text: latestMessage.content });
+  }
+  
+  // Add the multimodal analysis prompt
+  parts.push({ text: MULTIMODAL_ANALYSIS_PROMPT });
 
-  const hasDocuments = messages.some((msg: any) => msg.document);
-  console.log(`Calling Gemini API with gemini-2.0-flash-lite, ${contents.length} messages, hasDocuments: ${hasDocuments}`);
+  const hasDocuments = latestMessage.document !== undefined;
+  const hasImages = latestMessage.image !== undefined;
+  console.log(`Calling Gemini API with gemini-2.0-flash-lite, hasImages: ${hasImages}, hasDocuments: ${hasDocuments}`);
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Connection": "close" // 🔥 Prevents retry loops
     },
     body: JSON.stringify({
-      contents,
-      systemInstruction: {
-        parts: [{ text: systemPrompt }]
-      },
-      generationConfig: {
-        temperature: 0.4,
-        maxOutputTokens: 4096,
-      }
+      contents: [
+        {
+          role: "user",
+          parts
+        }
+      ]
     }),
   });
+
+  // Handle rate limit specifically
+  if (response.status === 429) {
+    console.error("Gemini API rate limit hit (429)");
+    throw new Error("429: Rate limit exceeded. Please wait 10-15 seconds before retrying.");
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
