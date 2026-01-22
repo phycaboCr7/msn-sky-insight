@@ -84,28 +84,79 @@ STRICT RULES:
 TASK:
 Carefully analyze the provided input and explain it accurately.`;
 
-// Call Gemini API for vision/image/document queries
+// Call Groq API for vision/image queries using Llama 4 Scout (FREE vision model)
+async function callGroqVision(messages: any[], systemPrompt: string, apiKey: string) {
+  const latestMessage = messages[messages.length - 1];
+  
+  // Build content array for vision
+  const contentParts: any[] = [];
+  
+  // Add user's text query first
+  if (latestMessage.content) {
+    contentParts.push({ 
+      type: "text", 
+      text: latestMessage.content + "\n\n" + MULTIMODAL_ANALYSIS_PROMPT 
+    });
+  } else {
+    contentParts.push({ 
+      type: "text", 
+      text: MULTIMODAL_ANALYSIS_PROMPT 
+    });
+  }
+  
+  // Handle image uploads
+  if (latestMessage.image) {
+    contentParts.push({
+      type: "image_url",
+      image_url: {
+        url: latestMessage.image // base64 data URL
+      }
+    });
+  }
+
+  const groqMessages = [
+    { role: "system", content: systemPrompt },
+    ...messages.slice(0, -1).map((msg: any) => ({
+      role: msg.role,
+      content: msg.content
+    })),
+    { role: "user", content: contentParts }
+  ];
+
+  console.log("Calling Groq Vision API with meta-llama/llama-4-scout-17b-16e-instruct");
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: groqMessages,
+      temperature: 0.4,
+      max_tokens: 4096,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Groq Vision API error:", response.status, errorText);
+    throw new Error(`Groq Vision API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  console.log("Groq Llama 4 Scout vision response received successfully");
+  return data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the image. 😔";
+}
+
+// Call Gemini API for document analysis (PDF, Word docs) - fallback
 async function callGemini(messages: any[], systemPrompt: string, apiKey: string) {
   // Build parts array for the single request
   const parts: any[] = [];
   
   // Get the latest user message with media
   const latestMessage = messages[messages.length - 1];
-  
-  // Handle image uploads
-  if (latestMessage.image) {
-    const base64Match = latestMessage.image.match(/^data:([^;]+);base64,(.+)$/);
-    if (base64Match) {
-      const mimeType = base64Match[1];
-      const base64Data = base64Match[2];
-      parts.push({
-        inline_data: {
-          mime_type: mimeType,
-          data: base64Data
-        }
-      });
-    }
-  }
   
   // Handle document uploads (PDF, Word docs)
   if (latestMessage.document) {
@@ -130,27 +181,19 @@ async function callGemini(messages: any[], systemPrompt: string, apiKey: string)
   // Add the multimodal analysis prompt
   parts.push({ text: MULTIMODAL_ANALYSIS_PROMPT });
 
-  const hasDocuments = latestMessage.document !== undefined;
-  const hasImages = latestMessage.image !== undefined;
-  console.log(`Calling Gemini API with gemini-2.0-flash-lite, hasImages: ${hasImages}, hasDocuments: ${hasDocuments}`);
+  console.log("Calling Gemini API for document analysis");
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Connection": "close" // 🔥 Prevents retry loops
+      "Connection": "close"
     },
     body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts
-        }
-      ]
+      contents: [{ role: "user", parts }]
     }),
   });
 
-  // Handle rate limit specifically
   if (response.status === 429) {
     console.error("Gemini API rate limit hit (429)");
     throw new Error("429: Rate limit exceeded. Please wait 10-15 seconds before retrying.");
@@ -163,8 +206,8 @@ async function callGemini(messages: any[], systemPrompt: string, apiKey: string)
   }
 
   const data = await response.json();
-  console.log("Gemini gemini-2.0-flash-lite response received successfully");
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. 😔";
+  console.log("Gemini document analysis response received");
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't analyze the document. 😔";
 }
 
 serve(async (req) => {
@@ -179,7 +222,6 @@ serve(async (req) => {
     // Check if any message contains an image or document
     const hasImages = messages.some((msg: any) => msg.image);
     const hasDocuments = messages.some((msg: any) => msg.document);
-    const needsGemini = hasImages || hasDocuments;
     
     console.log("Received weather chat request:", { 
       messageCount: messages?.length || 0, 
@@ -196,9 +238,10 @@ serve(async (req) => {
       throw new Error("GROQ_API_KEY is not configured");
     }
     
-    if (needsGemini && !GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY is not configured for vision/documents");
-      throw new Error("GEMINI_API_KEY is not configured for vision/document capabilities");
+    // Only need Gemini for documents now - images use Groq Llama 4 Scout
+    if (hasDocuments && !GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not configured for document analysis");
+      throw new Error("GEMINI_API_KEY is not configured for document analysis");
     }
 
     // Calculate actual AQI from PM2.5 if available
@@ -283,8 +326,11 @@ When users ask you to draw, plot, visualize, or create graphics:
 
     let answer: string;
     
-    if (needsGemini) {
-      // Use Gemini for vision/image/document analysis
+    if (hasImages) {
+      // Use Groq Llama 4 Scout for image analysis (FREE vision model)
+      answer = await callGroqVision(messages, systemPrompt, GROQ_API_KEY);
+    } else if (hasDocuments) {
+      // Use Gemini for document analysis (PDF, Word docs)
       answer = await callGemini(messages, systemPrompt, GEMINI_API_KEY!);
     } else {
       // Use Groq for text-only queries
