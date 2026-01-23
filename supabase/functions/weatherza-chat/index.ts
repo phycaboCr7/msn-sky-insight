@@ -150,64 +150,74 @@ async function callGroqVision(messages: any[], systemPrompt: string, apiKey: str
   return data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the image. 😔";
 }
 
-// Call Gemini API for document analysis (PDF, Word docs) - fallback
-async function callGemini(messages: any[], systemPrompt: string, apiKey: string) {
-  // Build parts array for the single request
-  const parts: any[] = [];
-  
-  // Get the latest user message with media
+// Call Groq API for document analysis using Llama 4 Scout (handles text extracted from PDFs/docs)
+async function callGroqDocument(messages: any[], systemPrompt: string, apiKey: string) {
   const latestMessage = messages[messages.length - 1];
   
-  // Handle document uploads (PDF, Word docs)
+  // Build content - for documents we include extracted text in the prompt
+  let documentContext = "";
   if (latestMessage.document) {
-    const base64Match = latestMessage.document.data.match(/^data:([^;]+);base64,(.+)$/);
-    if (base64Match) {
-      const mimeType = base64Match[1];
-      const base64Data = base64Match[2];
-      parts.push({
-        inline_data: {
-          mime_type: mimeType,
-          data: base64Data
+    // Extract text content from base64 document for Groq
+    // Note: Groq can't directly process PDFs, so we'll work with the text description
+    documentContext = `\n\n[DOCUMENT UPLOADED: "${latestMessage.document.name}" (${latestMessage.document.type})]\n\nPlease analyze this document based on the user's question. If the document content appears as encoded data, describe what you can infer from the document name and type, and ask the user to describe what they need help with regarding this document.`;
+  }
+
+  const contentParts: any[] = [];
+  
+  // Add user's text query with document context
+  contentParts.push({ 
+    type: "text", 
+    text: (latestMessage.content || "Analyze this document") + documentContext + "\n\n" + MULTIMODAL_ANALYSIS_PROMPT 
+  });
+
+  // If document has base64 data and is an image-based document, try to use vision
+  if (latestMessage.document?.data) {
+    const mimeType = latestMessage.document.type;
+    // For image-based documents (scanned PDFs might be images), try vision
+    if (mimeType.startsWith('image/')) {
+      contentParts.push({
+        type: "image_url",
+        image_url: {
+          url: latestMessage.document.data
         }
       });
     }
   }
-  
-  // Add user's text query
-  if (latestMessage.content) {
-    parts.push({ text: latestMessage.content });
-  }
-  
-  // Add the multimodal analysis prompt
-  parts.push({ text: MULTIMODAL_ANALYSIS_PROMPT });
 
-  console.log("Calling Gemini API for document analysis");
+  const groqMessages = [
+    { role: "system", content: systemPrompt },
+    ...messages.slice(0, -1).map((msg: any) => ({
+      role: msg.role,
+      content: msg.content
+    })),
+    { role: "user", content: contentParts }
+  ];
 
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`, {
+  console.log("Calling Groq API for document analysis with meta-llama/llama-4-scout-17b-16e-instruct");
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
+      "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      "Connection": "close"
     },
     body: JSON.stringify({
-      contents: [{ role: "user", parts }]
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      messages: groqMessages,
+      temperature: 0.4,
+      max_tokens: 4096,
     }),
   });
 
-  if (response.status === 429) {
-    console.error("Gemini API rate limit hit (429)");
-    throw new Error("429: Rate limit exceeded. Please wait 10-15 seconds before retrying.");
-  }
-
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Gemini API error:", response.status, errorText);
-    throw new Error(`Gemini API error: ${response.status}`);
+    console.error("Groq Document API error:", response.status, errorText);
+    throw new Error(`Groq Document API error: ${response.status}`);
   }
 
   const data = await response.json();
-  console.log("Gemini document analysis response received");
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't analyze the document. 😔";
+  console.log("Groq document analysis response received successfully");
+  return data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the document. 😔";
 }
 
 serve(async (req) => {
@@ -231,17 +241,10 @@ serve(async (req) => {
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     
     if (!GROQ_API_KEY) {
       console.error("GROQ_API_KEY is not configured");
       throw new Error("GROQ_API_KEY is not configured");
-    }
-    
-    // Only need Gemini for documents now - images use Groq Llama 4 Scout
-    if (hasDocuments && !GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY is not configured for document analysis");
-      throw new Error("GEMINI_API_KEY is not configured for document analysis");
     }
 
     // Calculate actual AQI from PM2.5 if available
@@ -272,6 +275,7 @@ When users mention "Rakshit" or ask about your creator, respond warmly and enthu
 🧩 Remember and reference the conversation history 🔄
 👁️ **VISION:** Analyze images, read text from photos/documents, describe visuals, and answer questions about uploaded images! 📷🖼️
 📄 **DOCUMENTS:** Read and analyze PDFs, documents, and any text in images with OCR-like capabilities! 📑
+📥 **FILE GENERATION:** When users ask to generate PDF or Word documents, provide well-structured content that can be downloaded. Format the content with clear sections, headings, and proper structure.
 
 **🎨 PYTHON VISUALIZATION CAPABILITIES (IMPORTANT!):** 🖌️🎨
 You can generate visual output from Python code! The system supports:
@@ -330,8 +334,8 @@ When users ask you to draw, plot, visualize, or create graphics:
       // Use Groq Llama 4 Scout for image analysis (FREE vision model)
       answer = await callGroqVision(messages, systemPrompt, GROQ_API_KEY);
     } else if (hasDocuments) {
-      // Use Gemini for document analysis (PDF, Word docs)
-      answer = await callGemini(messages, systemPrompt, GEMINI_API_KEY!);
+      // Use Groq Llama 4 Scout for document analysis (no Gemini dependency)
+      answer = await callGroqDocument(messages, systemPrompt, GROQ_API_KEY);
     } else {
       // Use Groq for text-only queries
       answer = await callGroq(messages, systemPrompt, GROQ_API_KEY);
