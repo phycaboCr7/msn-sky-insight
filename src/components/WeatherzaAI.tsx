@@ -13,6 +13,11 @@ import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import * as pdfjsLib from "pdfjs-dist";
+import mammoth from "mammoth";
+
+// Set PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 interface WeatherzaAIProps {
   weather: WeatherData;
@@ -23,11 +28,8 @@ interface Message {
   content: string;
   isTyping?: boolean;
   image?: string; // Base64 image data
-  document?: {
-    data: string; // Base64 document data
-    name: string;
-    type: string; // MIME type
-  };
+  documentText?: string; // Extracted text from document (for AI)
+  documentName?: string; // Original document name (for display)
 }
 
 // Calculate actual AQI from PM2.5
@@ -475,7 +477,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [uploadedDocument, setUploadedDocument] = useState<{ data: string; name: string; type: string } | null>(null);
+  const [extractedDocText, setExtractedDocText] = useState<string | null>(null);
+  const [extractedDocName, setExtractedDocName] = useState<string | null>(null);
+  const [isExtracting, setIsExtracting] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
   const { toast } = useToast();
@@ -488,17 +492,38 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Extract text from PDF using pdfjs-dist
+  const extractPdfText = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
+    }
+    return fullText.trim();
+  };
+
+  // Extract text from DOCX using mammoth
+  const extractDocxText = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+  };
+
   // Handle file upload (images and documents)
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const isImage = file.type.startsWith('image/');
     const isPDF = file.type === 'application/pdf';
-    const isDoc = file.type === 'application/msword' || 
-                  file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    const isDocx = file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    const isDoc = file.type === 'application/msword';
 
-    if (!isImage && !isPDF && !isDoc) {
+    if (!isImage && !isPDF && !isDocx && !isDoc) {
       toast({ title: "Invalid file", description: "Please upload an image, PDF, or Word document.", variant: "destructive" });
       return;
     }
@@ -508,25 +533,58 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64Data = reader.result as string;
-      
-      if (isImage) {
+    if (isImage) {
+      // Handle image - convert to base64 for vision API
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Data = reader.result as string;
         setUploadedImage(base64Data);
-        setUploadedDocument(null);
+        setExtractedDocText(null);
+        setExtractedDocName(null);
         toast({ title: "Image uploaded! 📷", description: "Ask a question about the image." });
-      } else {
-        setUploadedDocument({
-          data: base64Data,
-          name: file.name,
-          type: file.type
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Handle documents - extract text on frontend
+      setIsExtracting(true);
+      setUploadedImage(null);
+      
+      try {
+        let extractedText = "";
+        
+        if (isPDF) {
+          extractedText = await extractPdfText(file);
+        } else if (isDocx || isDoc) {
+          extractedText = await extractDocxText(file);
+        }
+        
+        if (!extractedText.trim()) {
+          toast({ 
+            title: "No text found", 
+            description: "The document appears to be empty or image-based. Try a text-based document.", 
+            variant: "destructive" 
+          });
+          setIsExtracting(false);
+          return;
+        }
+        
+        setExtractedDocText(extractedText);
+        setExtractedDocName(file.name);
+        toast({ 
+          title: "Document processed! 📄", 
+          description: `Extracted ${extractedText.length} characters from "${file.name}"` 
         });
-        setUploadedImage(null);
-        toast({ title: "Document uploaded! 📄", description: `"${file.name}" ready for analysis.` });
+      } catch (error) {
+        console.error("Document extraction error:", error);
+        toast({ 
+          title: "Extraction failed", 
+          description: "Could not extract text from this document. Try a different file.", 
+          variant: "destructive" 
+        });
+      } finally {
+        setIsExtracting(false);
       }
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   // Speech-to-text using Web Speech API
@@ -626,19 +684,29 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   const askAI = async () => {
-    if (!question.trim() && !uploadedImage && !uploadedDocument) return;
+    if (!question.trim() && !uploadedImage && !extractedDocText) return;
+
+    // Build content for the message
+    let messageContent = question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document");
+    
+    // If document text was extracted, prepend it to the message
+    if (extractedDocText) {
+      messageContent = `DOCUMENT CONTENT START\n${extractedDocText}\nDOCUMENT CONTENT END\n\n${messageContent}`;
+    }
 
     const userMessage: Message = { 
       role: "user", 
       content: question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document"),
       image: uploadedImage || undefined,
-      document: uploadedDocument || undefined
+      documentText: extractedDocText || undefined,
+      documentName: extractedDocName || undefined
     };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setQuestion("");
     setUploadedImage(null);
-    setUploadedDocument(null);
+    setExtractedDocText(null);
+    setExtractedDocName(null);
     setLoading(true);
     
     try {
@@ -664,14 +732,23 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         pm25: pm25
       };
 
+      // Build messages for AI - include extracted document text directly
+      const messagesForAI = updatedMessages.map(m => {
+        let content = m.content;
+        // If this message has document text, include it in the content
+        if (m.documentText) {
+          content = `DOCUMENT CONTENT START\n${m.documentText}\nDOCUMENT CONTENT END\n\nUser question: ${m.content}`;
+        }
+        return {
+          role: m.role,
+          content,
+          image: m.image
+        };
+      });
+
       const { data, error } = await supabase.functions.invoke('weatherza-chat', {
         body: { 
-          messages: updatedMessages.map(m => ({ 
-            role: m.role, 
-            content: m.content,
-            image: m.image,
-            document: m.document
-          })),
+          messages: messagesForAI,
           weatherContext 
         }
       });
@@ -832,11 +909,12 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl transition-all duration-300 overflow-visible ${
+                  className={`max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
                       : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
                   }`}
+                  style={{ overflow: 'visible', minHeight: 'fit-content' }}
                 >
                   {msg.role === "assistant" ? (
                     <MessageContent content={msg.content} isTyping={msg.isTyping} />
@@ -849,10 +927,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                           className="max-w-[200px] max-h-[150px] rounded-lg mb-2 border border-white/20"
                         />
                       )}
-                      {msg.document && (
+                      {msg.documentName && (
                         <div className="flex items-center gap-2 p-2 bg-primary/10 rounded-lg mb-2 border border-primary/30">
                           <FileText className="w-4 h-4 text-primary" />
-                          <span className="text-sm text-foreground/90 truncate max-w-[180px]">{msg.document.name}</span>
+                          <span className="text-sm text-foreground/90 truncate max-w-[180px]">{msg.documentName}</span>
                         </div>
                       )}
                       <p className="text-foreground/90">{msg.content}</p>
@@ -905,21 +983,29 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Document Preview */}
-        {uploadedDocument && (
+        {extractedDocName && (
           <div className="relative inline-flex items-center gap-2 p-3 bg-primary/10 border border-primary/30 rounded-lg">
             <FileText className="w-5 h-5 text-primary" />
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{uploadedDocument.name}</span>
+              <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{extractedDocName}</span>
               <span className="text-xs text-muted-foreground">
-                {uploadedDocument.type === 'application/pdf' ? 'PDF Document' : 'Word Document'}
+                {extractedDocText ? `${extractedDocText.length} characters extracted` : 'Processing...'}
               </span>
             </div>
             <button
-              onClick={() => setUploadedDocument(null)}
+              onClick={() => { setExtractedDocText(null); setExtractedDocName(null); }}
               className="ml-2 p-1 bg-destructive rounded-full text-white hover:bg-destructive/80 transition-colors"
             >
               <XCircle className="w-4 h-4" />
             </button>
+          </div>
+        )}
+        
+        {/* Extraction Loading */}
+        {isExtracting && (
+          <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+            <Loader2 className="w-5 h-5 text-primary animate-spin" />
+            <span className="text-sm text-foreground">Extracting text from document...</span>
           </div>
         )}
 
@@ -943,7 +1029,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
             title="Upload image or document"
           >
-            {uploadedDocument ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+            {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
           </Button>
 
           {/* Voice input button with simple visualizer */}
@@ -974,7 +1060,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
           <div className="flex-1 relative">
             <Textarea
-              placeholder={uploadedImage ? "Ask about this image..." : uploadedDocument ? `Ask about "${uploadedDocument.name}"...` : isRecording ? "Listening..." : "Ask me anything - math, science, coding, weather..."}
+              placeholder={uploadedImage ? "Ask about this image..." : extractedDocName ? `Ask about "${extractedDocName}"...` : isRecording ? "Listening..." : "Ask me anything - math, science, coding, weather..."}
               value={isRecording && interimTranscript ? question + (question ? ' ' : '') + interimTranscript : question}
               onChange={(e) => !isRecording && setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -985,7 +1071,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
           <Button 
             onClick={askAI} 
-            disabled={loading || (!question.trim() && !uploadedImage && !uploadedDocument)}
+            disabled={loading || isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
             className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
           >
             {loading ? (

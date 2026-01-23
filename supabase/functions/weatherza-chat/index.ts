@@ -150,75 +150,8 @@ async function callGroqVision(messages: any[], systemPrompt: string, apiKey: str
   return data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the image. 😔";
 }
 
-// Call Groq API for document analysis using Llama 4 Scout (handles text extracted from PDFs/docs)
-async function callGroqDocument(messages: any[], systemPrompt: string, apiKey: string) {
-  const latestMessage = messages[messages.length - 1];
-  
-  // Build content - for documents we include extracted text in the prompt
-  let documentContext = "";
-  if (latestMessage.document) {
-    // Extract text content from base64 document for Groq
-    // Note: Groq can't directly process PDFs, so we'll work with the text description
-    documentContext = `\n\n[DOCUMENT UPLOADED: "${latestMessage.document.name}" (${latestMessage.document.type})]\n\nPlease analyze this document based on the user's question. If the document content appears as encoded data, describe what you can infer from the document name and type, and ask the user to describe what they need help with regarding this document.`;
-  }
-
-  const contentParts: any[] = [];
-  
-  // Add user's text query with document context
-  contentParts.push({ 
-    type: "text", 
-    text: (latestMessage.content || "Analyze this document") + documentContext + "\n\n" + MULTIMODAL_ANALYSIS_PROMPT 
-  });
-
-  // If document has base64 data and is an image-based document, try to use vision
-  if (latestMessage.document?.data) {
-    const mimeType = latestMessage.document.type;
-    // For image-based documents (scanned PDFs might be images), try vision
-    if (mimeType.startsWith('image/')) {
-      contentParts.push({
-        type: "image_url",
-        image_url: {
-          url: latestMessage.document.data
-        }
-      });
-    }
-  }
-
-  const groqMessages = [
-    { role: "system", content: systemPrompt },
-    ...messages.slice(0, -1).map((msg: any) => ({
-      role: msg.role,
-      content: msg.content
-    })),
-    { role: "user", content: contentParts }
-  ];
-
-  console.log("Calling Groq API for document analysis with meta-llama/llama-4-scout-17b-16e-instruct");
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: groqMessages,
-      temperature: 0.4,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Groq Document API error:", response.status, errorText);
-    throw new Error(`Groq Document API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log("Groq document analysis response received successfully");
-  return data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the document. 😔";
-}
+// Note: Document text is now extracted on the frontend and sent as part of the message content
+// This function is kept for legacy compatibility but documents are now handled as regular text
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -229,15 +162,13 @@ serve(async (req) => {
   try {
     const { messages, weatherContext } = await req.json();
     
-    // Check if any message contains an image or document
+    // Check if any message contains an image (documents are now extracted as text on frontend)
     const hasImages = messages.some((msg: any) => msg.image);
-    const hasDocuments = messages.some((msg: any) => msg.document);
     
     console.log("Received weather chat request:", { 
       messageCount: messages?.length || 0, 
       location: weatherContext?.location,
-      hasImages,
-      hasDocuments
+      hasImages
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
@@ -333,11 +264,8 @@ When users ask you to draw, plot, visualize, or create graphics:
     if (hasImages) {
       // Use Groq Llama 4 Scout for image analysis (FREE vision model)
       answer = await callGroqVision(messages, systemPrompt, GROQ_API_KEY);
-    } else if (hasDocuments) {
-      // Use Groq Llama 4 Scout for document analysis (no Gemini dependency)
-      answer = await callGroqDocument(messages, systemPrompt, GROQ_API_KEY);
     } else {
-      // Use Groq for text-only queries
+      // Use Groq for text-only queries (documents are pre-extracted as text)
       answer = await callGroq(messages, systemPrompt, GROQ_API_KEY);
     }
 
