@@ -224,10 +224,11 @@ All colors MUST be HSL.
   }
 }
 
-/* KaTeX Math Styling */
+/* KaTeX Math Styling - Fixed to prevent box collapse */
 .weatherza-markdown .katex {
   font-size: 1.1em;
   color: hsl(var(--foreground));
+  display: inline;
 }
 
 .weatherza-markdown .katex-display {
@@ -236,10 +237,16 @@ All colors MUST be HSL.
   background: hsl(var(--primary) / 0.1);
   border-radius: 0.5rem;
   overflow-x: auto;
+  overflow-y: visible;
+  min-height: fit-content;
+  display: block !important;
+  width: 100%;
 }
 
 .weatherza-markdown .katex-display > .katex {
   color: hsl(var(--primary));
+  display: block;
+  text-align: center;
 }
 
 .weatherza-markdown .katex .mord,
@@ -247,6 +254,16 @@ All colors MUST be HSL.
 .weatherza-markdown .katex .mrel,
 .weatherza-markdown .katex .mop {
   color: inherit;
+}
+
+/* Prevent KaTeX from collapsing parent containers */
+.weatherza-markdown .katex-html {
+  overflow: visible;
+}
+
+.weatherza-markdown p:has(.katex) {
+  overflow: visible;
+  min-height: fit-content;
 }
 
 /* Writing Animation - ChatGPT Style */
