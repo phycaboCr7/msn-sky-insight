@@ -1,20 +1,23 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
-import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 import * as pdfjsLib from "pdfjs-dist";
 import mammoth from "mammoth";
+import html2canvas from "html2canvas";
+
+// Lazy load PyodideRunner for graph visualization
+const PyodideRunner = lazy(() => import("@/components/PyodideRunner"));
 
 // Set PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -67,19 +70,34 @@ const BACKEND_LANGUAGES = [
 ];
 
 // Code block component with copy and run buttons - opens in NEW BROWSER TAB
-const CodeBlock = ({ language, children }: { language?: string; children: string }) => {
+const CodeBlock = ({ 
+  language, 
+  children, 
+  onOpenPyodide 
+}: { 
+  language?: string; 
+  children: string; 
+  onOpenPyodide?: (code: string) => void;
+}) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const lang = language?.toLowerCase() || '';
   const isRunnable = lang && (BACKEND_LANGUAGES.includes(lang) || lang === 'html');
   const usesInterpreter = INTERPRETER_LANGUAGES.includes(lang);
+  const isPythonGraph = (lang === 'python' || lang === 'py') && isPythonGraphCode(children);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(children);
     setCopied(true);
     toast({ title: "Copied!", description: "Code copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenPyodide = () => {
+    if (onOpenPyodide) {
+      onOpenPyodide(children);
+    }
   };
 
   const handleRun = () => {
@@ -199,6 +217,16 @@ const CodeBlock = ({ language, children }: { language?: string; children: string
       <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
         <span className="text-xs text-orange-400 font-mono font-bold">{language || "code"}</span>
         <div className="flex gap-1">
+          {isPythonGraph && onOpenPyodide && (
+            <button
+              onClick={handleOpenPyodide}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded transition-colors"
+              title="Run with Pyodide (interactive graphs)"
+            >
+              <BarChart3 className="w-3 h-3" />
+              Graph
+            </button>
+          )}
           {isRunnable && (
             <button
               onClick={handleRun}
@@ -258,7 +286,7 @@ const useTypingEffect = (text: string, isTyping: boolean, chunkSize: number = 5,
 };
 
 // Message content component with typing effect
-const MessageContent = ({ content, isTyping }: { content: string; isTyping?: boolean }) => {
+const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void }) => {
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
   return (
@@ -287,7 +315,7 @@ const MessageContent = ({ content, isTyping }: { content: string; isTyping?: boo
               );
             }
             
-            return <CodeBlock language={match?.[1]}>{codeContent}</CodeBlock>;
+            return <CodeBlock language={match?.[1]} onOpenPyodide={onOpenPyodide}>{codeContent}</CodeBlock>;
           },
           pre: ({ children }) => <>{children}</>,
           blockquote: ({ children }) => <blockquote className="border-l-2 border-orange-500/50 pl-3 italic text-orange-300/70 bg-orange-500/5 py-1">{children}</blockquote>,
@@ -312,164 +340,288 @@ const MessageContent = ({ content, isTyping }: { content: string; isTyping?: boo
   );
 };
 
-// PDF Generation helper
-const generatePDF = (content: string, filename: string = "Weatherza_AI_Generated.pdf") => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 15;
-  const maxWidth = pageWidth - margin * 2;
-  
-  // Add title
-  doc.setFontSize(18);
-  doc.setTextColor(255, 140, 0);
-  doc.text("Weatherza AI Generated Document", margin, 20);
-  
-  // Add content
-  doc.setFontSize(12);
-  doc.setTextColor(60, 60, 60);
-  
-  // Clean markdown and split into lines
-  const cleanContent = content
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/#{1,6}\s/g, '')
-    .replace(/`{1,3}[^`]*`{1,3}/g, (match) => match.replace(/`/g, ''))
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-  
-  const lines = doc.splitTextToSize(cleanContent, maxWidth);
-  let y = 35;
-  
-  for (const line of lines) {
-    if (y > doc.internal.pageSize.getHeight() - 20) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.text(line, margin, y);
-    y += 7;
-  }
-  
-  // Footer
-  const pageCount = doc.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(10);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Generated by Rakshit's Weatherza AI • Page ${i} of ${pageCount}`, margin, doc.internal.pageSize.getHeight() - 10);
-  }
-  
-  doc.save(filename);
-};
-
-// Word Generation helper
-const generateWord = async (content: string, filename: string = "Weatherza_AI_Generated.docx") => {
-  // Parse content into paragraphs
-  const paragraphs: any[] = [];
-  
-  // Add title
-  paragraphs.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: "Weatherza AI Generated Document",
-          bold: true,
-          size: 32,
-          color: "FF8C00",
-        }),
-      ],
-      heading: HeadingLevel.HEADING_1,
-      spacing: { after: 400 },
-    })
-  );
-  
-  // Clean and split content
-  const lines = content.split('\n');
-  
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) {
-      paragraphs.push(new Paragraph({ children: [] }));
-      continue;
-    }
+// PDF Generation helper using html2canvas to preserve emojis
+const generatePDF = async (content: string, elementRef?: HTMLElement | null, filename: string = "Weatherza_AI_Generated.pdf") => {
+  try {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
     
-    // Check for headings
-    if (trimmedLine.startsWith('## ')) {
-      paragraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: trimmedLine.replace('## ', ''),
-              bold: true,
-              size: 28,
-            }),
-          ],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 200, after: 100 },
-        })
-      );
-    } else if (trimmedLine.startsWith('# ')) {
-      paragraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: trimmedLine.replace('# ', ''),
-              bold: true,
-              size: 32,
-            }),
-          ],
-          heading: HeadingLevel.HEADING_1,
-          spacing: { before: 200, after: 100 },
-        })
-      );
-    } else {
-      // Regular paragraph - handle bold text
-      const parts = trimmedLine.split(/(\*\*.*?\*\*)/g);
-      const runs = parts.map(part => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return new TextRun({
-            text: part.slice(2, -2),
-            bold: true,
-          });
-        }
-        return new TextRun({ text: part });
+    // If we have an element reference, capture it with html2canvas (preserves emojis)
+    if (elementRef) {
+      const canvas = await html2canvas(elementRef, {
+        backgroundColor: '#1a1a2e',
+        scale: 2,
+        useCORS: true,
+        logging: false,
       });
       
-      paragraphs.push(
-        new Paragraph({
-          children: runs,
-          spacing: { after: 120 },
-        })
-      );
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = pageWidth - margin * 2;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.setTextColor(255, 140, 0);
+      doc.text("Weatherza AI Generated Document", margin, 20);
+      
+      // Add the image (which preserves emojis)
+      let yPos = 30;
+      let remainingHeight = imgHeight;
+      let sourceY = 0;
+      
+      while (remainingHeight > 0) {
+        const availableHeight = pageHeight - yPos - margin;
+        const sliceHeight = Math.min(availableHeight, remainingHeight);
+        
+        if (sourceY > 0) {
+          doc.addPage();
+          yPos = margin;
+        }
+        
+        doc.addImage(imgData, 'PNG', margin, yPos, imgWidth, imgHeight, undefined, 'FAST', 0);
+        remainingHeight -= sliceHeight;
+        sourceY += sliceHeight;
+      }
+    } else {
+      // Fallback: text-based PDF with emoji support via unicode
+      doc.setFontSize(18);
+      doc.setTextColor(255, 140, 0);
+      doc.text("Weatherza AI Generated Document", margin, 20);
+      
+      doc.setFontSize(12);
+      doc.setTextColor(60, 60, 60);
+      
+      // Clean markdown but preserve emojis
+      const cleanContent = content
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/#{1,6}\s/g, '')
+        .replace(/`{1,3}[^`]*`{1,3}/g, (match) => match.replace(/`/g, ''))
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+      
+      const maxWidth = pageWidth - margin * 2;
+      const lines = doc.splitTextToSize(cleanContent, maxWidth);
+      let y = 35;
+      
+      for (const line of lines) {
+        if (y > pageHeight - 20) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, margin, y);
+        y += 7;
+      }
     }
+    
+    // Footer on all pages
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Generated by Rakshit's Weatherza AI - Page ${i} of ${pageCount}`, margin, pageHeight - 10);
+    }
+    
+    doc.save(filename);
+  } catch (err) {
+    console.error("PDF generation error:", err);
+    throw err;
   }
-  
-  // Add footer
-  paragraphs.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: "Generated by Rakshit's Weatherza AI",
-          italics: true,
-          size: 20,
-          color: "888888",
-        }),
-      ],
-      spacing: { before: 400 },
-    })
-  );
-  
-  const doc = new Document({
-    sections: [{
-      children: paragraphs,
-    }],
-  });
-  
-  const blob = await Packer.toBlob(doc);
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+};
+
+// Word Generation helper - improved emoji and text handling
+const generateWord = async (content: string, filename: string = "Weatherza_AI_Generated.docx") => {
+  try {
+    // Parse content into paragraphs with proper emoji support
+    const paragraphs: any[] = [];
+    
+    // Add title
+    paragraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "Weatherza AI Generated Document",
+            bold: true,
+            size: 32,
+            color: "FF8C00",
+          }),
+        ],
+        heading: HeadingLevel.HEADING_1,
+        spacing: { after: 400 },
+      })
+    );
+    
+    // Helper to create runs with emoji support
+    const createTextRuns = (text: string, isBold: boolean = false): TextRun[] => {
+      // Split by emojis but keep them
+      const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
+      const parts = text.split(emojiRegex).filter(Boolean);
+      
+      return parts.map(part => new TextRun({
+        text: part,
+        bold: isBold,
+        size: 24,
+      }));
+    };
+    
+    // Clean and split content
+    const lines = content.split('\n');
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) {
+        paragraphs.push(new Paragraph({ children: [new TextRun({ text: "" })] }));
+        continue;
+      }
+      
+      // Check for headings
+      if (trimmedLine.startsWith('### ')) {
+        paragraphs.push(
+          new Paragraph({
+            children: createTextRuns(trimmedLine.replace('### ', ''), true),
+            heading: HeadingLevel.HEADING_3,
+            spacing: { before: 150, after: 80 },
+          })
+        );
+      } else if (trimmedLine.startsWith('## ')) {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: trimmedLine.replace('## ', ''),
+                bold: true,
+                size: 28,
+              }),
+            ],
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 200, after: 100 },
+          })
+        );
+      } else if (trimmedLine.startsWith('# ')) {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: trimmedLine.replace('# ', ''),
+                bold: true,
+                size: 32,
+              }),
+            ],
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 200, after: 100 },
+          })
+        );
+      } else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+        // Bullet points
+        const bulletText = trimmedLine.replace(/^[-*]\s/, '');
+        paragraphs.push(
+          new Paragraph({
+            children: createTextRuns(`• ${bulletText}`),
+            spacing: { after: 60 },
+          })
+        );
+      } else if (/^\d+\.\s/.test(trimmedLine)) {
+        // Numbered lists
+        paragraphs.push(
+          new Paragraph({
+            children: createTextRuns(trimmedLine),
+            spacing: { after: 60 },
+          })
+        );
+      } else {
+        // Regular paragraph - handle bold and italic text with emojis
+        const runs: TextRun[] = [];
+        let remaining = trimmedLine;
+        
+        // Process bold text
+        const boldRegex = /\*\*(.*?)\*\*/g;
+        let lastIndex = 0;
+        let match;
+        
+        while ((match = boldRegex.exec(remaining)) !== null) {
+          // Add text before bold
+          if (match.index > lastIndex) {
+            runs.push(...createTextRuns(remaining.slice(lastIndex, match.index)));
+          }
+          // Add bold text
+          runs.push(...createTextRuns(match[1], true));
+          lastIndex = match.index + match[0].length;
+        }
+        
+        // Add remaining text
+        if (lastIndex < remaining.length) {
+          runs.push(...createTextRuns(remaining.slice(lastIndex)));
+        }
+        
+        if (runs.length === 0) {
+          runs.push(...createTextRuns(trimmedLine));
+        }
+        
+        paragraphs.push(
+          new Paragraph({
+            children: runs,
+            spacing: { after: 120 },
+          })
+        );
+      }
+    }
+    
+    // Add footer
+    paragraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "",
+          }),
+        ],
+        spacing: { before: 200 },
+      })
+    );
+    
+    paragraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "Generated by Rakshit's Weatherza AI",
+            italics: true,
+            size: 20,
+            color: "888888",
+          }),
+        ],
+      })
+    );
+    
+    const doc = new Document({
+      sections: [{
+        children: paragraphs,
+      }],
+    });
+    
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Word generation error:", err);
+    throw err;
+  }
+};
+
+// Detect if code contains graph-generating Python
+const isPythonGraphCode = (code: string): boolean => {
+  const graphIndicators = [
+    'plt.plot', 'plt.scatter', 'plt.bar', 'plt.pie', 'plt.hist',
+    'matplotlib', 'np.linspace', 'np.sin', 'np.cos', 'FuncAnimation'
+  ];
+  return graphIndicators.some(indicator => code.includes(indicator));
 };
 
 export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
@@ -477,6 +629,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [pyodideCode, setPyodideCode] = useState<string | null>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
   const [extractedDocText, setExtractedDocText] = useState<string | null>(null);
   const [extractedDocName, setExtractedDocName] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
@@ -816,15 +970,19 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     });
   };
 
-  // Export last AI message to PDF
-  const exportToPDF = () => {
+  // Export last AI message to PDF with emoji support via html2canvas
+  const exportToPDF = async () => {
     const lastAssistantMessage = [...messages].reverse().find(m => m.role === "assistant");
     if (!lastAssistantMessage) {
       toast({ title: "No content", description: "No AI response to export.", variant: "destructive" });
       return;
     }
-    generatePDF(lastAssistantMessage.content);
-    toast({ title: "PDF Generated! 📄", description: "Your document has been downloaded." });
+    try {
+      await generatePDF(lastAssistantMessage.content, lastMessageRef.current);
+      toast({ title: "PDF Generated! 📄", description: "Your document has been downloaded." });
+    } catch (err) {
+      toast({ title: "Export failed", description: "Could not generate PDF.", variant: "destructive" });
+    }
   };
 
   // Export last AI message to Word
@@ -834,8 +992,17 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       toast({ title: "No content", description: "No AI response to export.", variant: "destructive" });
       return;
     }
-    await generateWord(lastAssistantMessage.content);
-    toast({ title: "Word Document Generated! 📝", description: "Your document has been downloaded." });
+    try {
+      await generateWord(lastAssistantMessage.content);
+      toast({ title: "Word Document Generated! 📝", description: "Your document has been downloaded." });
+    } catch (err) {
+      toast({ title: "Export failed", description: "Could not generate Word document.", variant: "destructive" });
+    }
+  };
+
+  // Open Pyodide graph runner
+  const openPyodideGraph = (code: string) => {
+    setPyodideCode(code);
   };
 
   return (
@@ -917,7 +1084,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   style={{ overflow: 'visible', minHeight: 'fit-content' }}
                 >
                   {msg.role === "assistant" ? (
-                    <MessageContent content={msg.content} isTyping={msg.isTyping} />
+                    <div ref={index === messages.length - 1 ? lastMessageRef : undefined}>
+                      <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} />
+                    </div>
                   ) : (
                     <div>
                       {msg.image && (
@@ -1081,6 +1250,20 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             )}
           </Button>
         </div>
+        
+        {/* Pyodide Graph Modal */}
+        {pyodideCode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+            <Suspense fallback={
+              <div className="flex items-center gap-3 p-8 bg-card rounded-lg">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <span>Loading Python environment...</span>
+              </div>
+            }>
+              <PyodideRunner code={pyodideCode} onClose={() => setPyodideCode(null)} />
+            </Suspense>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

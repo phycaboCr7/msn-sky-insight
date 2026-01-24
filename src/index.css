@@ -228,6 +228,8 @@ All colors MUST be HSL.
 .weatherza-markdown {
   overflow: visible !important;
   min-height: auto !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
 }
 
 .weatherza-markdown .katex {
@@ -247,6 +249,7 @@ All colors MUST be HSL.
   height: auto !important;
   display: block !important;
   width: 100%;
+  flex-shrink: 0 !important;
 }
 
 .weatherza-markdown .katex-display > .katex {
@@ -267,6 +270,7 @@ All colors MUST be HSL.
 .weatherza-markdown .katex-html {
   overflow: visible !important;
   height: auto !important;
+  min-height: fit-content !important;
 }
 
 .weatherza-markdown p:has(.katex),
@@ -274,6 +278,7 @@ All colors MUST be HSL.
   overflow: visible !important;
   min-height: fit-content !important;
   height: auto !important;
+  flex-shrink: 0 !important;
 }
 
 /* Ensure the message bubble expands for math content */
@@ -281,10 +286,14 @@ All colors MUST be HSL.
   overflow: visible !important;
   min-height: fit-content !important;
   height: auto !important;
+  flex-shrink: 0 !important;
+  contain: none !important;
 }
 
 .weatherza-message-bubble .prose {
   overflow: visible !important;
+  min-height: fit-content !important;
+  height: auto !important;
 }
 
 /* Writing Animation - ChatGPT Style */
