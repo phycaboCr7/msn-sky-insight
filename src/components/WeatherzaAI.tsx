@@ -340,89 +340,122 @@ const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string;
   );
 };
 
-// PDF Generation helper using html2canvas to preserve emojis
-const generatePDF = async (content: string, elementRef?: HTMLElement | null, filename: string = "Weatherza_AI_Generated.pdf") => {
+// PDF Generation helper - simple text with colors and emojis, no repetition
+const generatePDF = async (content: string, _elementRef?: HTMLElement | null, filename: string = "Weatherza_AI_Generated.pdf") => {
   try {
     const { jsPDF } = await import('jspdf');
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 15;
+    const maxWidth = pageWidth - margin * 2;
     
-    // If we have an element reference, capture it with html2canvas (preserves emojis)
-    if (elementRef) {
-      const canvas = await html2canvas(elementRef, {
-        backgroundColor: '#1a1a2e',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
+    // Add title
+    doc.setFontSize(20);
+    doc.setTextColor(255, 140, 0);
+    doc.text("Weatherza AI Generated Document", margin, 20);
+    
+    // Add separator line
+    doc.setDrawColor(255, 140, 0);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 25, pageWidth - margin, 25);
+    
+    // Clean markdown but preserve emojis and structure
+    let cleanContent = content
+      // Remove bold markers but keep text
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      // Remove italic markers but keep text
+      .replace(/\*(.*?)\*/g, '$1')
+      // Remove heading markers but keep text
+      .replace(/^#{1,6}\s+/gm, '')
+      // Remove inline code backticks
+      .replace(/`([^`]+)`/g, '$1')
+      // Remove code block markers
+      .replace(/```[\s\S]*?```/g, '[Code block]')
+      // Remove link markdown but keep text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Normalize multiple newlines to double newlines
+      .replace(/\n{3,}/g, '\n\n')
+      // Trim whitespace
+      .trim();
+    
+    // Split into paragraphs (by double newlines)
+    const paragraphs = cleanContent.split(/\n\n+/);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(40, 40, 40);
+    
+    let y = 35;
+    const lineHeight = 6;
+    const paragraphSpacing = 4;
+    
+    // Track processed content to avoid duplicates
+    const processedContent = new Set<string>();
+    
+    for (const paragraph of paragraphs) {
+      const trimmedParagraph = paragraph.trim();
+      if (!trimmedParagraph) continue;
       
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = pageWidth - margin * 2;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Skip duplicate paragraphs
+      const paragraphKey = trimmedParagraph.substring(0, 100);
+      if (processedContent.has(paragraphKey)) continue;
+      processedContent.add(paragraphKey);
       
-      // Add title
-      doc.setFontSize(18);
-      doc.setTextColor(255, 140, 0);
-      doc.text("Weatherza AI Generated Document", margin, 20);
-      
-      // Add the image (which preserves emojis)
-      let yPos = 30;
-      let remainingHeight = imgHeight;
-      let sourceY = 0;
-      
-      while (remainingHeight > 0) {
-        const availableHeight = pageHeight - yPos - margin;
-        const sliceHeight = Math.min(availableHeight, remainingHeight);
-        
-        if (sourceY > 0) {
-          doc.addPage();
-          yPos = margin;
-        }
-        
-        doc.addImage(imgData, 'PNG', margin, yPos, imgWidth, imgHeight, undefined, 'FAST', 0);
-        remainingHeight -= sliceHeight;
-        sourceY += sliceHeight;
-      }
-    } else {
-      // Fallback: text-based PDF with emoji support via unicode
-      doc.setFontSize(18);
-      doc.setTextColor(255, 140, 0);
-      doc.text("Weatherza AI Generated Document", margin, 20);
-      
-      doc.setFontSize(12);
-      doc.setTextColor(60, 60, 60);
-      
-      // Clean markdown but preserve emojis
-      const cleanContent = content
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        .replace(/\*(.*?)\*/g, '$1')
-        .replace(/#{1,6}\s/g, '')
-        .replace(/`{1,3}[^`]*`{1,3}/g, (match) => match.replace(/`/g, ''))
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-      
-      const maxWidth = pageWidth - margin * 2;
-      const lines = doc.splitTextToSize(cleanContent, maxWidth);
-      let y = 35;
+      // Handle bullet points and numbered lists
+      const lines = trimmedParagraph.split('\n');
       
       for (const line of lines) {
-        if (y > pageHeight - 20) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue;
+        
+        // Check if we need a new page
+        if (y > pageHeight - 25) {
           doc.addPage();
           y = 20;
         }
-        doc.text(line, margin, y);
-        y += 7;
+        
+        // Detect and style different content types
+        let textToWrite = trimmedLine;
+        
+        // Bullet points
+        if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+          textToWrite = '• ' + trimmedLine.substring(2);
+          doc.setTextColor(60, 60, 60);
+        }
+        // Numbered lists
+        else if (/^\d+\.\s/.test(trimmedLine)) {
+          doc.setTextColor(60, 60, 60);
+        }
+        // Regular text
+        else {
+          doc.setTextColor(40, 40, 40);
+        }
+        
+        // Split long lines to fit page width
+        const wrappedLines = doc.splitTextToSize(textToWrite, maxWidth);
+        
+        for (const wrappedLine of wrappedLines) {
+          if (y > pageHeight - 25) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(wrappedLine, margin, y);
+          y += lineHeight;
+        }
       }
+      
+      // Add paragraph spacing
+      y += paragraphSpacing;
     }
     
     // Footer on all pages
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(150, 150, 150);
-      doc.text(`Generated by Rakshit's Weatherza AI - Page ${i} of ${pageCount}`, margin, pageHeight - 10);
+      doc.text(`Generated by Rakshit's Weatherza AI`, margin, pageHeight - 10);
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin - 25, pageHeight - 10);
     }
     
     doc.save(filename);
@@ -1251,18 +1284,18 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </Button>
         </div>
         
-        {/* Pyodide Graph Modal */}
+        {/* Pyodide Graph Modal - Now handled inside PyodideRunner component */}
         {pyodideCode && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-            <Suspense fallback={
-              <div className="flex items-center gap-3 p-8 bg-card rounded-lg">
+          <Suspense fallback={
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
+              <div className="flex items-center gap-3 p-8 bg-card rounded-lg border border-white/10">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                <span>Loading Python environment...</span>
+                <span className="text-foreground">Loading Python environment...</span>
               </div>
-            }>
-              <PyodideRunner code={pyodideCode} onClose={() => setPyodideCode(null)} />
-            </Suspense>
-          </div>
+            </div>
+          }>
+            <PyodideRunner code={pyodideCode} onClose={() => setPyodideCode(null)} />
+          </Suspense>
         )}
       </CardContent>
     </Card>
