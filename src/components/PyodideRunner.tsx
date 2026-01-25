@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Play, Download, FileImage, FileText, Loader2, RotateCcw, Settings, X } from "lucide-react";
+import { Play, Download, FileImage, FileText, Loader2, RotateCcw, Settings, X, Maximize2, Film, Turtle } from "lucide-react";
 
 // Type declarations for Pyodide
 declare global {
@@ -14,7 +13,7 @@ declare global {
 }
 
 // Execution type detection
-type ExecutionType = "STATIC_GRAPH" | "ANIMATION" | "SIMULATION" | "TEXT_ONLY";
+type ExecutionType = "STATIC_GRAPH" | "ANIMATION" | "SIMULATION" | "TURTLE" | "TEXT_ONLY";
 
 interface PyodideRunnerProps {
   code: string;
@@ -32,8 +31,9 @@ interface SliderConfig {
 
 // Detect what type of code we're running
 const detectExecutionType = (code: string): ExecutionType => {
+  if (code.includes("turtle") || code.includes("Turtle")) return "TURTLE";
   if (code.includes("FuncAnimation") || code.includes("animation")) return "ANIMATION";
-  if (code.includes("plt.plot") || code.includes("plt.scatter") || code.includes("plt.bar") || code.includes("plt.pie")) return "STATIC_GRAPH";
+  if (code.includes("plt.plot") || code.includes("plt.scatter") || code.includes("plt.bar") || code.includes("plt.pie") || code.includes("plt.hist")) return "STATIC_GRAPH";
   if (code.includes("simulate") || code.includes("time.sleep") || code.includes("for i in range")) return "SIMULATION";
   return "TEXT_ONLY";
 };
@@ -84,10 +84,14 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
   const [running, setRunning] = useState(false);
   const [output, setOutput] = useState<string>("");
   const [imageData, setImageData] = useState<string | null>(null);
+  const [animationFrames, setAnimationFrames] = useState<string[]>([]);
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sliders, setSliders] = useState<SliderConfig[]>([]);
   const [showSliders, setShowSliders] = useState(false);
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number | null>(null);
   const { toast } = useToast();
   
   const executionType = detectExecutionType(code);
@@ -116,7 +120,7 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
           // Load essential packages
           await window.pyodide.loadPackage(["numpy", "matplotlib"]);
           
-          // Setup matplotlib for browser
+          // Setup matplotlib for browser + turtle simulation
           await window.pyodide.runPythonAsync(`
 import matplotlib
 matplotlib.use('AGG')
@@ -124,6 +128,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import io
 import base64
+import math
 
 def get_plot_as_base64():
     buf = io.BytesIO()
@@ -132,10 +137,164 @@ def get_plot_as_base64():
     img_str = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
     return img_str
+
+# Simple turtle simulation using matplotlib
+class SimpleTurtle:
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.angle = 90  # Facing up
+        self.pen_down = True
+        self.paths = []
+        self.current_path = [(0, 0)]
+        self.color = 'green'
+        self.colors = []
+        
+    def forward(self, distance):
+        rad = math.radians(self.angle)
+        new_x = self.x + distance * math.cos(rad)
+        new_y = self.y + distance * math.sin(rad)
+        if self.pen_down:
+            self.current_path.append((new_x, new_y))
+        else:
+            if len(self.current_path) > 1:
+                self.paths.append((self.current_path, self.color))
+            self.current_path = [(new_x, new_y)]
+        self.x, self.y = new_x, new_y
+        
+    def fd(self, distance):
+        self.forward(distance)
+        
+    def backward(self, distance):
+        self.forward(-distance)
+        
+    def bk(self, distance):
+        self.backward(distance)
+        
+    def right(self, angle):
+        self.angle -= angle
+        
+    def rt(self, angle):
+        self.right(angle)
+        
+    def left(self, angle):
+        self.angle += angle
+        
+    def lt(self, angle):
+        self.left(angle)
+        
+    def penup(self):
+        if len(self.current_path) > 1:
+            self.paths.append((self.current_path, self.color))
+        self.current_path = [(self.x, self.y)]
+        self.pen_down = False
+        
+    def pu(self):
+        self.penup()
+        
+    def pendown(self):
+        self.pen_down = True
+        self.current_path = [(self.x, self.y)]
+        
+    def pd(self):
+        self.pendown()
+        
+    def goto(self, x, y=None):
+        if y is None and hasattr(x, '__iter__'):
+            x, y = x
+        if self.pen_down:
+            self.current_path.append((x, y))
+        else:
+            if len(self.current_path) > 1:
+                self.paths.append((self.current_path, self.color))
+            self.current_path = [(x, y)]
+        self.x, self.y = x, y
+        
+    def setpos(self, x, y=None):
+        self.goto(x, y)
+        
+    def setposition(self, x, y=None):
+        self.goto(x, y)
+        
+    def setheading(self, angle):
+        self.angle = angle
+        
+    def seth(self, angle):
+        self.setheading(angle)
+        
+    def circle(self, radius, extent=360):
+        steps = max(int(abs(extent) / 5), 1)
+        step_angle = extent / steps
+        step_length = 2 * math.pi * radius * abs(extent) / 360 / steps
+        for _ in range(steps):
+            self.forward(step_length)
+            self.left(step_angle) if radius > 0 else self.right(-step_angle)
+            
+    def pencolor(self, *args):
+        if len(args) == 1:
+            self.color = args[0]
+        elif len(args) == 3:
+            self.color = '#{:02x}{:02x}{:02x}'.format(int(args[0]*255), int(args[1]*255), int(args[2]*255))
+            
+    def color(self, *args):
+        self.pencolor(*args)
+        
+    def speed(self, s):
+        pass  # Speed doesn't apply in this simulation
+        
+    def hideturtle(self):
+        pass
+        
+    def ht(self):
+        pass
+        
+    def showturtle(self):
+        pass
+        
+    def st(self):
+        pass
+        
+    def draw(self):
+        if len(self.current_path) > 1:
+            self.paths.append((self.current_path, self.color))
+        
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.set_facecolor('#1a1a2e')
+        fig.patch.set_facecolor('#1a1a2e')
+        
+        for path, color in self.paths:
+            xs, ys = zip(*path)
+            ax.plot(xs, ys, color=color, linewidth=2)
+        
+        # Draw turtle position
+        ax.plot(self.x, self.y, 'g^', markersize=10)
+        
+        ax.set_aspect('equal')
+        ax.grid(True, alpha=0.3, color='white')
+        ax.tick_params(colors='white')
+        for spine in ax.spines.values():
+            spine.set_color('white')
+            spine.set_alpha(0.3)
+        ax.set_xlabel('X', color='white')
+        ax.set_ylabel('Y', color='white')
+        ax.set_title('Turtle Graphics', color='orange', fontsize=14)
+        
+        return get_plot_as_base64()
+
+# Create a turtle instance
+t = SimpleTurtle()
+turtle = t
+Turtle = SimpleTurtle
+
+def done():
+    pass
+    
+def mainloop():
+    pass
           `);
           
           setPyodideReady(true);
-          toast({ title: "Python Ready! 🐍", description: "Pyodide loaded with NumPy & Matplotlib" });
+          toast({ title: "Python Ready! 🐍", description: "Pyodide loaded with NumPy, Matplotlib & Turtle" });
         } catch (err) {
           console.error("Pyodide load error:", err);
           setError("Failed to load Python environment");
@@ -158,7 +317,35 @@ def get_plot_as_base64():
     const extractedSliders = extractSliderConfigs(code);
     setSliders(extractedSliders);
     setShowSliders(extractedSliders.length > 0);
+
+    // Cleanup animation on unmount
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
   }, [code]);
+
+  // Animation loop for frame-based animations
+  useEffect(() => {
+    if (isAnimating && animationFrames.length > 0) {
+      const animate = () => {
+        setCurrentFrame((prev) => (prev + 1) % animationFrames.length);
+        animationRef.current = requestAnimationFrame(animate);
+      };
+      
+      const frameDelay = setTimeout(() => {
+        animationRef.current = requestAnimationFrame(animate);
+      }, 100); // 10 FPS
+      
+      return () => {
+        clearTimeout(frameDelay);
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    }
+  }, [isAnimating, animationFrames.length]);
 
   // Inject slider values into code and run
   const runCode = useCallback(async () => {
@@ -168,6 +355,8 @@ def get_plot_as_base64():
     setError(null);
     setOutput("");
     setImageData(null);
+    setAnimationFrames([]);
+    setIsAnimating(false);
     
     try {
       // Inject slider values as variables
@@ -181,19 +370,37 @@ def get_plot_as_base64():
           modifiedCode = `${slider.name} = ${slider.value}\n` + modifiedCode;
         }
       }
-      
-      // Modify code to capture output instead of plt.show()
-      modifiedCode = modifiedCode
-        .replace(/plt\.show\(\)/g, '')
-        .replace(/plt\.savefig\([^)]+\)/g, '');
-      
-      // Add our image capture at the end
-      modifiedCode += `
+
+      // Handle turtle graphics
+      if (executionType === "TURTLE") {
+        // Reset turtle before running
+        await window.pyodide.runPythonAsync(`t = SimpleTurtle()`);
+        
+        // Replace turtle imports and setup
+        modifiedCode = modifiedCode
+          .replace(/from turtle import \*/g, '')
+          .replace(/import turtle/g, '')
+          .replace(/turtle\s*=\s*turtle\.Turtle\(\)/g, '')
+          .replace(/turtle\.done\(\)/g, '')
+          .replace(/turtle\.mainloop\(\)/g, '')
+          .replace(/done\(\)/g, '')
+          .replace(/mainloop\(\)/g, '');
+        
+        modifiedCode += `\n_result_img = t.draw()`;
+      } else {
+        // Modify code to capture output instead of plt.show()
+        modifiedCode = modifiedCode
+          .replace(/plt\.show\(\)/g, '')
+          .replace(/plt\.savefig\([^)]+\)/g, '');
+        
+        // Add our image capture at the end
+        modifiedCode += `
 try:
     _result_img = get_plot_as_base64()
 except:
     _result_img = None
 `;
+      }
 
       // Capture stdout
       await window.pyodide.runPythonAsync(`
@@ -231,7 +438,7 @@ _stdout_capture.getvalue()
     } finally {
       setRunning(false);
     }
-  }, [pyodideReady, code, sliders, toast]);
+  }, [pyodideReady, code, sliders, executionType, toast]);
 
   // Handle slider change
   const handleSliderChange = (index: number, value: number[]) => {
@@ -253,7 +460,7 @@ _stdout_capture.getvalue()
     toast({ title: "Exported! 📷", description: "Graph saved as PNG" });
   };
 
-  // Export as PDF (using canvas to PDF)
+  // Export as PDF
   const exportPDF = async () => {
     if (!imageData) return;
     
@@ -287,20 +494,37 @@ _stdout_capture.getvalue()
     setSliders(extractedSliders);
   };
 
+  // Toggle animation playback
+  const toggleAnimation = () => {
+    setIsAnimating(!isAnimating);
+  };
+
+  // Get execution type badge
+  const getTypeBadge = () => {
+    switch (executionType) {
+      case "STATIC_GRAPH": return { icon: "📊", label: "Graph" };
+      case "ANIMATION": return { icon: "🎞️", label: "Animation" };
+      case "SIMULATION": return { icon: "🔬", label: "Simulation" };
+      case "TURTLE": return { icon: "🐢", label: "Turtle" };
+      default: return { icon: "📝", label: "Script" };
+    }
+  };
+
+  const badge = getTypeBadge();
+
   return (
-    <Card className="bg-[#1a1a2e] border-white/10 shadow-2xl max-w-4xl w-full">
-      <CardHeader className="pb-3 border-b border-white/10">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg text-foreground">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+      <div className="bg-[#1a1a2e] border border-white/10 shadow-2xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-gradient-to-r from-primary/10 to-purple-500/10">
+          <div className="flex items-center gap-3">
             <span className="text-2xl">🐍</span>
-            <span>Python Graph Visualizer</span>
-            <span className="px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded">
-              {executionType === "STATIC_GRAPH" && "📊 Graph"}
-              {executionType === "ANIMATION" && "🎞️ Animation"}
-              {executionType === "SIMULATION" && "🔬 Simulation"}
-              {executionType === "TEXT_ONLY" && "📝 Script"}
+            <h2 className="text-lg font-semibold text-foreground">Python Graph Visualizer</h2>
+            <span className="px-2 py-0.5 text-xs bg-green-500/20 text-green-400 rounded-full flex items-center gap-1">
+              <span>{badge.icon}</span>
+              <span>{badge.label}</span>
             </span>
-          </CardTitle>
+          </div>
           <div className="flex items-center gap-2">
             {sliders.length > 0 && (
               <Button
@@ -313,138 +537,166 @@ _stdout_capture.getvalue()
                 Sliders
               </Button>
             )}
-            {onClose && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-muted-foreground hover:text-foreground hover:bg-destructive/20"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {/* Loading state */}
+          {loading && (
+            <div className="flex items-center justify-center gap-3 p-8 bg-black/30 rounded-lg">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading Python environment...</span>
+            </div>
+          )}
+          
+          {/* Sliders */}
+          {showSliders && sliders.length > 0 && (
+            <div className="p-4 bg-black/20 rounded-lg border border-white/10 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-primary" />
+                  Interactive Parameters
+                </h3>
+                <Button variant="ghost" size="sm" onClick={resetSliders} className="text-xs">
+                  <RotateCcw className="w-3 h-3 mr-1" />
+                  Reset
+                </Button>
+              </div>
+              {sliders.map((slider, index) => (
+                <div key={slider.name} className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{slider.label}</span>
+                    <span className="text-primary font-mono">{slider.value.toFixed(2)}</span>
+                  </div>
+                  <Slider
+                    value={[slider.value]}
+                    min={slider.min}
+                    max={slider.max}
+                    step={slider.step}
+                    onValueChange={(value) => handleSliderChange(index, value)}
+                    className="cursor-pointer"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Action buttons */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={runCode}
+              disabled={!pyodideReady || running}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+            >
+              {running ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Running...
+                </>
+              ) : (
+                <>
+                  {executionType === "TURTLE" ? <Turtle className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+                  {executionType === "STATIC_GRAPH" ? "Generate Graph" : 
+                   executionType === "ANIMATION" ? "Run Animation" : 
+                   executionType === "SIMULATION" ? "Run Simulation" : 
+                   executionType === "TURTLE" ? "Draw Turtle" : "Run"}
+                </>
+              )}
+            </Button>
+            
+            {imageData && (
+              <>
+                <Button
+                  onClick={exportPNG}
+                  variant="outline"
+                  className="border-white/20 hover:bg-white/10"
+                >
+                  <FileImage className="w-4 h-4 mr-2" />
+                  Export PNG
+                </Button>
+                <Button
+                  onClick={exportPDF}
+                  variant="outline"
+                  className="border-white/20 hover:bg-white/10"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Export PDF
+                </Button>
+              </>
+            )}
+
+            {animationFrames.length > 1 && (
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="text-muted-foreground hover:text-foreground"
+                onClick={toggleAnimation}
+                variant="outline"
+                className="border-white/20 hover:bg-white/10"
               >
-                <X className="w-4 h-4" />
+                <Film className="w-4 h-4 mr-2" />
+                {isAnimating ? "Pause" : "Play Animation"}
               </Button>
             )}
           </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4 pt-4">
-        {/* Loading state */}
-        {loading && (
-          <div className="flex items-center justify-center gap-3 p-8 bg-black/30 rounded-lg">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <span className="text-muted-foreground">Loading Python environment...</span>
-          </div>
-        )}
-        
-        {/* Sliders */}
-        {showSliders && sliders.length > 0 && (
-          <div className="p-4 bg-black/20 rounded-lg border border-white/10 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-foreground">Interactive Parameters</h3>
-              <Button variant="ghost" size="sm" onClick={resetSliders} className="text-xs">
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Reset
-              </Button>
+          
+          {/* Code preview */}
+          <div className="relative">
+            <div className="absolute top-2 right-2 flex gap-1">
+              <span className="px-2 py-0.5 text-xs bg-orange-500/20 text-orange-400 rounded font-mono">python</span>
             </div>
-            {sliders.map((slider, index) => (
-              <div key={slider.name} className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{slider.label}</span>
-                  <span className="text-primary font-mono">{slider.value.toFixed(2)}</span>
-                </div>
-                <Slider
-                  value={[slider.value]}
-                  min={slider.min}
-                  max={slider.max}
-                  step={slider.step}
-                  onValueChange={(value) => handleSliderChange(index, value)}
-                  className="cursor-pointer"
+            <pre className="bg-black/40 p-4 rounded-lg overflow-x-auto text-sm font-mono text-green-400 max-h-[200px] overflow-y-auto border border-white/10">
+              <code>{code}</code>
+            </pre>
+          </div>
+          
+          {/* Output */}
+          {output && (
+            <div className="bg-black/30 p-4 rounded-lg border border-white/10">
+              <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                <span>📤</span> Output:
+              </h4>
+              <pre className="text-sm text-foreground/90 whitespace-pre-wrap font-mono">{output}</pre>
+            </div>
+          )}
+          
+          {/* Error */}
+          {error && (
+            <div className="bg-red-500/10 p-4 rounded-lg border border-red-500/30">
+              <h4 className="text-sm font-medium text-red-400 mb-2 flex items-center gap-2">
+                <span>❌</span> Error:
+              </h4>
+              <pre className="text-sm text-red-300 whitespace-pre-wrap font-mono">{error}</pre>
+            </div>
+          )}
+          
+          {/* Graph output */}
+          {imageData && (
+            <div className="bg-black/30 p-4 rounded-lg border border-white/10">
+              <h4 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                <span>📊</span> Graph Output:
+              </h4>
+              <div className="flex justify-center">
+                <img 
+                  src={animationFrames.length > 0 ? animationFrames[currentFrame] : imageData} 
+                  alt="Generated graph" 
+                  className="max-w-full max-h-[400px] rounded-lg shadow-lg"
                 />
               </div>
-            ))}
-          </div>
-        )}
-        
-        {/* Action buttons */}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={runCode}
-            disabled={!pyodideReady || running}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-          >
-            {running ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Running...
-              </>
-            ) : (
-              <>
-                <Play className="w-4 h-4 mr-2" />
-                {executionType === "STATIC_GRAPH" ? "Generate Graph" : 
-                 executionType === "ANIMATION" ? "Run Animation" : 
-                 executionType === "SIMULATION" ? "Run Simulation" : "Run"}
-              </>
-            )}
-          </Button>
-          
-          {imageData && (
-            <>
-              <Button
-                onClick={exportPNG}
-                variant="outline"
-                className="border-white/20 hover:bg-white/10"
-              >
-                <FileImage className="w-4 h-4 mr-2" />
-                Export PNG
-              </Button>
-              <Button
-                onClick={exportPDF}
-                variant="outline"
-                className="border-white/20 hover:bg-white/10"
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Export PDF
-              </Button>
-            </>
+            </div>
           )}
+          
+          {/* Hidden canvas for animations */}
+          <canvas ref={canvasRef} className="hidden" />
         </div>
-        
-        {/* Code preview */}
-        <div className="relative">
-          <pre className="bg-black/40 p-4 rounded-lg overflow-x-auto text-sm font-mono text-green-400 max-h-[200px] overflow-y-auto border border-white/10">
-            <code>{code}</code>
-          </pre>
-        </div>
-        
-        {/* Output */}
-        {output && (
-          <div className="bg-black/30 p-4 rounded-lg border border-white/10">
-            <h4 className="text-sm font-medium text-muted-foreground mb-2">Output:</h4>
-            <pre className="text-sm text-foreground/90 whitespace-pre-wrap">{output}</pre>
-          </div>
-        )}
-        
-        {/* Error */}
-        {error && (
-          <div className="bg-red-500/10 p-4 rounded-lg border border-red-500/30">
-            <h4 className="text-sm font-medium text-red-400 mb-2">Error:</h4>
-            <pre className="text-sm text-red-300 whitespace-pre-wrap">{error}</pre>
-          </div>
-        )}
-        
-        {/* Graph output */}
-        {imageData && (
-          <div ref={canvasRef} className="bg-black/30 p-4 rounded-lg border border-white/10">
-            <h4 className="text-sm font-medium text-muted-foreground mb-3">Graph Output:</h4>
-            <img 
-              src={imageData} 
-              alt="Generated graph" 
-              className="max-w-full rounded-lg shadow-lg mx-auto"
-            />
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
