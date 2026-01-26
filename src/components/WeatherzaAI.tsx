@@ -17,7 +17,7 @@ import mammoth from "mammoth";
 import html2canvas from "html2canvas";
 
 // Lazy load PyodideRunner for graph visualization
-const PyodideRunner = lazy(() => import("@/components/PyodideRunner"));
+const PyodideRunner = lazy(() => import("@/components/python-visualizer"));
 
 // Set PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";

@@ -1,0 +1,446 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Settings, X } from "lucide-react";
+
+// Import modular components
+import type { PyodideRunnerProps, SliderConfig, ExecutionType } from "./types";
+import { detectExecutionType, detectFromMetadata, extractSliderConfigs, getTypeBadge } from "./detection";
+import { PYTHON_SETUP_CODE } from "./pyodide-setup";
+import { VideoRecorder } from "./VideoRecorder";
+import { ParameterSliders } from "./ParameterSliders";
+import { ActionButtons } from "./ActionButtons";
+import { ExportButtons } from "./ExportButtons";
+import { OutputPanel } from "./OutputPanel";
+
+// Type declarations for Pyodide
+declare global {
+  interface Window {
+    loadPyodide: any;
+    pyodide: any;
+  }
+}
+
+export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
+  const [pyodideReady, setPyodideReady] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [running, setRunning] = useState(false);
+  const [output, setOutput] = useState("");
+  const [imageData, setImageData] = useState<string | null>(null);
+  const [animationFrames, setAnimationFrames] = useState<string[]>([]);
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sliders, setSliders] = useState<SliderConfig[]>([]);
+  const [showSliders, setShowSliders] = useState(false);
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [recordingAnimation, setRecordingAnimation] = useState(false);
+  const [animationProgress, setAnimationProgress] = useState(0);
+  
+  const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { toast } = useToast();
+  
+  const executionType = detectExecutionType(code);
+  const hasExplicitMetadata = detectFromMetadata(code) !== null;
+  const badge = getTypeBadge(executionType);
+
+  // Load Pyodide
+  useEffect(() => {
+    const loadPyodideScript = async () => {
+      if (window.pyodide) {
+        setPyodideReady(true);
+        setLoading(false);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js";
+      script.async = true;
+      
+      script.onload = async () => {
+        try {
+          window.pyodide = await window.loadPyodide({
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/"
+          });
+          
+          await window.pyodide.loadPackage(["numpy", "matplotlib"]);
+          await window.pyodide.runPythonAsync(PYTHON_SETUP_CODE);
+          
+          setPyodideReady(true);
+          toast({ title: "Python Ready! 🐍", description: "Loaded NumPy, Matplotlib & Turtle" });
+        } catch (err) {
+          console.error("Pyodide load error:", err);
+          setError("Failed to load Python environment");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      script.onerror = () => {
+        setError("Failed to load Pyodide script");
+        setLoading(false);
+      };
+      
+      document.body.appendChild(script);
+    };
+
+    loadPyodideScript();
+    const extractedSliders = extractSliderConfigs(code);
+    setSliders(extractedSliders);
+    setShowSliders(extractedSliders.length > 0);
+
+    return () => {
+      if (animationRef.current) {
+        clearTimeout(animationRef.current);
+      }
+    };
+  }, [code, toast]);
+
+  // Animation loop for frame-based playback
+  useEffect(() => {
+    if (isAnimating && animationFrames.length > 1) {
+      let frameIndex = currentFrame;
+      
+      const animate = () => {
+        frameIndex = (frameIndex + 1) % animationFrames.length;
+        setCurrentFrame(frameIndex);
+        animationRef.current = setTimeout(() => {
+          requestAnimationFrame(animate);
+        }, 1000 / 24); // 24 FPS
+      };
+      
+      animate();
+      
+      return () => {
+        if (animationRef.current) {
+          clearTimeout(animationRef.current);
+        }
+      };
+    }
+  }, [isAnimating, animationFrames.length, currentFrame]);
+
+  // Run Python code
+  const runCode = useCallback(async () => {
+    if (!pyodideReady || !window.pyodide) return;
+    
+    setRunning(true);
+    setError(null);
+    setOutput("");
+    setImageData(null);
+    setAnimationFrames([]);
+    setIsAnimating(false);
+    setVideoBlob(null);
+    setAnimationProgress(0);
+    
+    try {
+      // Inject slider values
+      let modifiedCode = code;
+      for (const slider of sliders) {
+        const varPattern = new RegExp(`^${slider.name}\\s*=\\s*[^\\n]+`, 'm');
+        if (varPattern.test(modifiedCode)) {
+          modifiedCode = modifiedCode.replace(varPattern, `${slider.name} = ${slider.value}`);
+        } else {
+          modifiedCode = `${slider.name} = ${slider.value}\n` + modifiedCode;
+        }
+      }
+
+      // Handle turtle graphics
+      if (executionType === "TURTLE") {
+        await window.pyodide.runPythonAsync(`t = SimpleTurtle()\nturtle = t`);
+        
+        modifiedCode = modifiedCode
+          .replace(/from turtle import \*/g, '')
+          .replace(/import turtle/g, '')
+          .replace(/turtle\s*=\s*turtle\.Turtle\(\)/g, '')
+          .replace(/turtle\.done\(\)/g, '')
+          .replace(/turtle\.mainloop\(\)/g, '')
+          .replace(/done\(\)/g, '')
+          .replace(/mainloop\(\)/g, '')
+          .replace(/exitonclick\(\)/g, '')
+          .replace(/turtle\.Screen\(\)/g, 'Screen()');
+        
+        modifiedCode += `\n_result_img = t.draw()`;
+      } 
+      // Handle animations - generate multiple frames
+      else if (executionType === "ANIMATION") {
+        await window.pyodide.runPythonAsync(`clear_animation_frames()`);
+        
+        modifiedCode = modifiedCode
+          .replace(/plt\.show\(\)/g, '')
+          .replace(/plt\.savefig\([^)]+\)/g, '');
+        
+        // Check for FuncAnimation
+        if (modifiedCode.includes("FuncAnimation")) {
+          modifiedCode += `
+# Generate frames from FuncAnimation
+try:
+    for i in range(60):  # Generate 60 frames (~2.5 seconds at 24fps)
+        update(i)
+        capture_animation_frame()
+        plt.clf()
+except Exception as e:
+    capture_animation_frame()
+`;
+        } else {
+          modifiedCode += `\ncapture_animation_frame()`;
+        }
+        
+        modifiedCode += `\n_result_img = get_animation_frames()[-1] if get_animation_frames() else get_plot_as_base64()`;
+      }
+      else {
+        modifiedCode = modifiedCode
+          .replace(/plt\.show\(\)/g, '')
+          .replace(/plt\.savefig\([^)]+\)/g, '');
+        
+        modifiedCode += `
+try:
+    _result_img = get_plot_as_base64()
+except:
+    _result_img = None
+`;
+      }
+
+      // Capture stdout
+      await window.pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+_stdout_capture = StringIO()
+sys.stdout = _stdout_capture
+      `);
+      
+      await window.pyodide.runPythonAsync(modifiedCode);
+      
+      const stdout = await window.pyodide.runPythonAsync(`
+sys.stdout = sys.__stdout__
+_stdout_capture.getvalue()
+      `);
+      
+      if (stdout) setOutput(stdout);
+      
+      // Get animation frames if available
+      if (executionType === "ANIMATION") {
+        const framesResult = await window.pyodide.runPythonAsync(`get_animation_frames()`);
+        if (framesResult && framesResult.length > 0) {
+          const frames = framesResult.toJs ? framesResult.toJs() : Array.from(framesResult);
+          const dataUrls = frames.map((f: string) => `data:image/png;base64,${f}`);
+          setAnimationFrames(dataUrls);
+          setImageData(dataUrls[0]);
+          toast({ title: "Animation Ready! 🎞️", description: `Generated ${frames.length} frames` });
+        }
+      }
+      
+      // Get single image
+      const imgResult = await window.pyodide.runPythonAsync(`_result_img if '_result_img' in dir() else None`);
+      if (imgResult && animationFrames.length === 0) {
+        setImageData(`data:image/png;base64,${imgResult}`);
+      }
+      
+      toast({ title: "Executed! ✅", description: "Python code ran successfully" });
+      
+    } catch (err: any) {
+      console.error("Python error:", err);
+      setError(err.message || "Python execution failed");
+      toast({ title: "Error", description: "Execution failed", variant: "destructive" });
+    } finally {
+      setRunning(false);
+    }
+  }, [pyodideReady, code, sliders, executionType, toast, animationFrames.length]);
+
+  // Run animation and generate video
+  const runAnimation = useCallback(async () => {
+    await runCode();
+    if (animationFrames.length > 1) {
+      setIsAnimating(true);
+    }
+  }, [runCode, animationFrames.length]);
+
+  // Export as video using MediaRecorder
+  const exportVideo = useCallback(async () => {
+    if (animationFrames.length < 2) {
+      toast({ title: "Error", description: "No animation frames to export", variant: "destructive" });
+      return;
+    }
+    
+    setRecordingAnimation(true);
+    
+    try {
+      const recorder = new VideoRecorder(800, 600, setAnimationProgress);
+      const blob = await recorder.recordFrames(animationFrames, 24);
+      setVideoBlob(blob);
+      toast({ title: "Video Ready! 🎬", description: "Click Download Video to save" });
+    } catch (err) {
+      console.error("Video export error:", err);
+      toast({ title: "Error", description: "Failed to create video", variant: "destructive" });
+    } finally {
+      setRecordingAnimation(false);
+    }
+  }, [animationFrames, toast]);
+
+  // Download video
+  const downloadVideo = () => {
+    if (!videoBlob) return;
+    const url = URL.createObjectURL(videoBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "animation.webm";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Downloaded! 📥", description: "Animation saved as WebM video" });
+  };
+
+  const handleSliderChange = (index: number, value: number[]) => {
+    setSliders(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], value: value[0] };
+      return updated;
+    });
+  };
+
+  const exportPNG = () => {
+    if (!imageData) return;
+    const link = document.createElement('a');
+    link.download = 'graph.png';
+    link.href = imageData;
+    link.click();
+    toast({ title: "Exported! 📷", description: "Saved as PNG" });
+  };
+
+  const exportPDF = async () => {
+    if (!imageData) return;
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.setTextColor(255, 140, 0);
+      doc.text("Weatherza AI - Python Graph", 15, 20);
+      doc.addImage(imageData, 'PNG', 15, 30, 180, 120);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text("Generated by Weatherza AI using Pyodide", 15, 280);
+      doc.save('graph.pdf');
+      toast({ title: "Exported! 📄", description: "Saved as PDF" });
+    } catch (err) {
+      toast({ title: "Error", description: "PDF export failed", variant: "destructive" });
+    }
+  };
+
+  const resetSliders = () => {
+    setSliders(extractSliderConfigs(code));
+  };
+
+  const toggleAnimation = () => {
+    setIsAnimating(!isAnimating);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 animate-fade-in">
+      <div className="bg-[#1a1a2e] border border-white/10 shadow-2xl rounded-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/10 bg-gradient-to-r from-primary/10 to-purple-500/10 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <span className="text-2xl">🐍</span>
+            <h2 className="text-base sm:text-lg font-semibold text-foreground">Python Visualizer</h2>
+            <span className={`px-2 py-0.5 text-xs rounded-full flex items-center gap-1 ${badge.color}`}>
+              <span>{badge.icon}</span>
+              <span className="hidden sm:inline">{badge.label}</span>
+            </span>
+            {hasExplicitMetadata && (
+              <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full hidden sm:inline">
+                @output_type
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {sliders.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowSliders(!showSliders)} 
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Settings className="w-4 h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Sliders</span>
+              </Button>
+            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose} 
+              className="text-muted-foreground hover:text-foreground hover:bg-destructive/20 rounded-full"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          {/* Loading */}
+          {loading && (
+            <div className="flex items-center justify-center gap-3 p-8 bg-black/30 rounded-xl">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <span className="text-muted-foreground">Loading Python environment...</span>
+            </div>
+          )}
+          
+          {/* Sliders */}
+          {showSliders && (
+            <ParameterSliders 
+              sliders={sliders} 
+              onSliderChange={handleSliderChange} 
+              onReset={resetSliders} 
+            />
+          )}
+          
+          {/* Action Buttons */}
+          <ActionButtons
+            executionType={executionType}
+            pyodideReady={pyodideReady}
+            running={running}
+            hasAnimationFrames={animationFrames.length >= 2}
+            recordingAnimation={recordingAnimation}
+            animationProgress={animationProgress}
+            onRun={runCode}
+            onRunAnimation={runAnimation}
+            onCreateVideo={exportVideo}
+          />
+          
+          {/* Export buttons */}
+          <ExportButtons
+            hasImageData={!!imageData}
+            hasVideo={!!videoBlob}
+            hasAnimationFrames={animationFrames.length > 1}
+            isAnimating={isAnimating}
+            onExportPNG={exportPNG}
+            onExportPDF={exportPDF}
+            onDownloadVideo={downloadVideo}
+            onToggleAnimation={toggleAnimation}
+          />
+          
+          {/* Code preview */}
+          <div className="relative">
+            <div className="absolute top-2 right-2 flex gap-1">
+              <span className="px-2 py-0.5 text-xs bg-orange-500/20 text-orange-400 rounded font-mono">python</span>
+            </div>
+            <pre className="bg-black/40 p-4 rounded-xl overflow-x-auto text-sm font-mono text-green-400 max-h-[180px] overflow-y-auto border border-white/10">
+              <code>{code}</code>
+            </pre>
+          </div>
+          
+          {/* Output Panel */}
+          <OutputPanel
+            output={output}
+            error={error}
+            imageData={imageData}
+            animationFrames={animationFrames}
+            currentFrame={currentFrame}
+            videoBlob={videoBlob}
+            executionType={executionType}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PyodideRunner;
