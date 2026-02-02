@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Settings, X } from "lucide-react";
+import { Loader2, Settings, X, Maximize2, Minimize2 } from "lucide-react";
 
 // Import modular components
 import type { PyodideRunnerProps, SliderConfig, ExecutionType } from "./types";
 import { detectExecutionType, detectFromMetadata, extractSliderConfigs, getTypeBadge } from "./detection";
 import { PYTHON_SETUP_CODE } from "./pyodide-setup";
-import { VideoRecorder } from "./VideoRecorder";
 import { ParameterSliders } from "./ParameterSliders";
 import { ActionButtons } from "./ActionButtons";
 import { ExportButtons } from "./ExportButtons";
 import { OutputPanel } from "./OutputPanel";
+import { LiveCanvas } from "./LiveCanvas";
+import { CanvasVideoRecorder } from "./CanvasVideoRecorder";
 
 // Type declarations for Pyodide
 declare global {
@@ -38,6 +39,7 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
   const [animationProgress, setAnimationProgress] = useState(0);
   
   const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(true);
   const { toast } = useToast();
   
   const executionType = detectExecutionType(code);
@@ -254,7 +256,7 @@ _stdout_capture.getvalue()
     }
   }, [runCode, animationFrames.length]);
 
-  // Export as video using MediaRecorder
+  // Export as video using real canvas-based MediaRecorder
   const exportVideo = useCallback(async () => {
     if (animationFrames.length < 2) {
       toast({ title: "Error", description: "No animation frames to export", variant: "destructive" });
@@ -262,12 +264,14 @@ _stdout_capture.getvalue()
     }
     
     setRecordingAnimation(true);
+    setAnimationProgress(0);
     
     try {
-      const recorder = new VideoRecorder(800, 600, setAnimationProgress);
-      const blob = await recorder.recordFrames(animationFrames, 24);
+      // Use real canvas-based recorder
+      const recorder = new CanvasVideoRecorder(800, 600);
+      const blob = await recorder.recordFramesLive(animationFrames, 24, setAnimationProgress);
       setVideoBlob(blob);
-      toast({ title: "Video Ready! 🎬", description: "Click Download Video to save" });
+      toast({ title: "Video Ready! 🎬", description: "Real video created with MediaRecorder" });
     } catch (err) {
       console.error("Video export error:", err);
       toast({ title: "Error", description: "Failed to create video", variant: "destructive" });
@@ -275,6 +279,12 @@ _stdout_capture.getvalue()
       setRecordingAnimation(false);
     }
   }, [animationFrames, toast]);
+
+  // Handle video ready from LiveCanvas
+  const handleVideoReady = useCallback((blob: Blob) => {
+    setVideoBlob(blob);
+    toast({ title: "Video Ready! 🎬", description: "Animation recorded successfully" });
+  }, [toast]);
 
   // Download video
   const downloadVideo = () => {
@@ -333,13 +343,20 @@ _stdout_capture.getvalue()
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 animate-fade-in">
-      <div className="bg-[#1a1a2e] border border-white/10 shadow-2xl rounded-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-lg animate-fade-in"
+      onClick={(e) => e.target === e.currentTarget && onClose?.()}
+    >
+      <div className={`bg-[#0d0d1a] border border-white/10 shadow-2xl rounded-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+        isFullscreen 
+          ? 'w-full h-full max-w-none max-h-none rounded-none' 
+          : 'w-full max-w-5xl max-h-[95vh] m-4'
+      }`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/10 bg-gradient-to-r from-primary/10 to-purple-500/10 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 bg-gradient-to-r from-purple-900/30 to-orange-900/20 shrink-0">
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <span className="text-2xl">🐍</span>
-            <h2 className="text-base sm:text-lg font-semibold text-foreground">Python Visualizer</h2>
+            <h2 className="text-base sm:text-lg font-bold text-white">Python Visualizer</h2>
             <span className={`px-2 py-0.5 text-xs rounded-full flex items-center gap-1 ${badge.color}`}>
               <span>{badge.icon}</span>
               <span className="hidden sm:inline">{badge.label}</span>
@@ -350,13 +367,13 @@ _stdout_capture.getvalue()
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {sliders.length > 0 && (
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setShowSliders(!showSliders)} 
-                className="text-muted-foreground hover:text-foreground"
+                className="text-white/70 hover:text-white hover:bg-white/10"
               >
                 <Settings className="w-4 h-4 sm:mr-1" />
                 <span className="hidden sm:inline">Sliders</span>
@@ -365,10 +382,18 @@ _stdout_capture.getvalue()
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={onClose} 
-              className="text-muted-foreground hover:text-foreground hover:bg-destructive/20 rounded-full"
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="text-white/70 hover:text-white hover:bg-white/10"
             >
-              <X className="w-5 h-5" />
+              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose} 
+              className="text-white/70 hover:text-white hover:bg-red-500/20 rounded-full ml-2"
+            >
+              <X className="w-6 h-6" />
             </Button>
           </div>
         </div>
@@ -427,16 +452,48 @@ _stdout_capture.getvalue()
             </pre>
           </div>
           
-          {/* Output Panel */}
-          <OutputPanel
-            output={output}
-            error={error}
-            imageData={imageData}
-            animationFrames={animationFrames}
-            currentFrame={currentFrame}
-            videoBlob={videoBlob}
-            executionType={executionType}
-          />
+          {/* Live Canvas Animation with MediaRecorder */}
+          {animationFrames.length > 1 && (
+            <div className="bg-black/30 p-4 rounded-xl border border-purple-500/20">
+              <h4 className="text-sm font-medium text-purple-400 mb-3 flex items-center gap-2">
+                🎞️ Live Animation Canvas (Real Video Recording):
+              </h4>
+              <LiveCanvas 
+                frames={animationFrames} 
+                fps={24} 
+                autoPlay={false}
+                onVideoReady={handleVideoReady}
+              />
+            </div>
+          )}
+          
+          {/* Output Panel - for static images and text */}
+          {animationFrames.length <= 1 && (
+            <OutputPanel
+              output={output}
+              error={error}
+              imageData={imageData}
+              animationFrames={animationFrames}
+              currentFrame={currentFrame}
+              videoBlob={videoBlob}
+              executionType={executionType}
+            />
+          )}
+          
+          {/* Text output always shown */}
+          {output && animationFrames.length > 1 && (
+            <div className="bg-black/30 p-4 rounded-xl border border-white/10">
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">📤 Output:</h4>
+              <pre className="text-sm text-foreground/90 whitespace-pre-wrap font-mono">{output}</pre>
+            </div>
+          )}
+          
+          {error && (
+            <div className="bg-red-500/10 p-4 rounded-xl border border-red-500/30">
+              <h4 className="text-sm font-medium text-red-400 mb-2">❌ Error:</h4>
+              <pre className="text-sm text-red-300 whitespace-pre-wrap font-mono">{error}</pre>
+            </div>
+          )}
         </div>
       </div>
     </div>
