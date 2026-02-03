@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,9 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 import * as pdfjsLib from "pdfjs-dist";
 import mammoth from "mammoth";
 import html2canvas from "html2canvas";
-import { PythonVisualizerPortal } from "./PythonVisualizerPortal";
+
+// Lazy load PyodideRunner for graph visualization
+const PyodideRunner = lazy(() => import("@/components/python-visualizer"));
 
 // Set PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -1037,7 +1039,6 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <>
     <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
@@ -1282,14 +1283,21 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             )}
           </Button>
         </div>
+        
+        {/* Pyodide Graph Modal - Now handled inside PyodideRunner component */}
+        {pyodideCode && (
+          <Suspense fallback={
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
+              <div className="flex items-center gap-3 p-8 bg-card rounded-lg border border-white/10">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <span className="text-foreground">Loading Python environment...</span>
+              </div>
+            </div>
+          }>
+            <PyodideRunner code={pyodideCode} onClose={() => setPyodideCode(null)} />
+          </Suspense>
+        )}
       </CardContent>
     </Card>
-
-    {/* Python Visualizer - Renders as SEPARATE POPUP at document root via Portal */}
-    <PythonVisualizerPortal 
-      code={pyodideCode} 
-      onClose={() => setPyodideCode(null)} 
-    />
-  </>
   );
 };
