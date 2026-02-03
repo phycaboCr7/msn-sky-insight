@@ -1,8 +1,9 @@
 import { WeatherCard } from "./WeatherCard";
 import { LocationBackground } from "./LocationBackground";
+import { AnimatedWeatherIcon } from "./AnimatedWeatherIcon";
 import { WeatherData, AirQuality } from "@/lib/weather";
 import { getFlagUrl } from "@/lib/utils";
-import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun, Wind } from "lucide-react";
+import { Wind } from "lucide-react";
 
 interface CurrentWeatherProps {
   weather: WeatherData;
@@ -37,7 +38,7 @@ const getAQIColor = (aqi: number) => {
 
 const MiniAQIBox = ({ airQuality }: { airQuality: AirQuality }) => {
   const aqi = calculateAQI(airQuality.pm2_5);
-  const { color, bg } = getAQIColor(aqi);
+  const { color } = getAQIColor(aqi);
   
   return (
     <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10">
@@ -52,30 +53,13 @@ const MiniAQIBox = ({ airQuality }: { airQuality: AirQuality }) => {
   );
 };
 
-const getWeatherIcon = (condition: string, isDay: boolean, temp?: number) => {
-  const iconSize = 80;
-  
-  if (temp && temp < 5) {
-    return <Snowflake size={iconSize} color="#e2e8f0" className="drop-shadow-lg" />;
-  } else if (condition.toLowerCase().includes('sunny') || condition.toLowerCase().includes('clear')) {
-    if (isDay) {
-      return <Sun size={iconSize} color="#fb923c" className="drop-shadow-lg" />;
-    } else {
-      return <Moon size={iconSize} color="#60a5fa" className="drop-shadow-lg" />;
-    }
-  } else if (condition.toLowerCase().includes('rain')) {
-    return <CloudRain size={iconSize} color="#60a5fa" className="-bottom-0 " />;
-  } else if (condition.toLowerCase().includes('snow')) {
-    return <CloudSnow size={iconSize} color="#e2e8f0" className="drop-shadow-lg" />;
-  } else if (condition.toLowerCase().includes('cloud')) {
-    return <Cloud size={iconSize} color="#94a3b8" className="drop-shadow-lg" />;
+// Format temperature to always show minus sign properly
+const formatTemp = (temp: number): string => {
+  const rounded = Math.round(temp);
+  if (rounded < 0) {
+    return `−${Math.abs(rounded)}`;  // Use proper minus sign (−) not hyphen (-)
   }
-  
-  if (isDay) {
-    return <Sun size={iconSize} color="#fb923c" className="drop-shadow-lg" />;
-  } else {
-    return <Moon size={iconSize} color="#60a5fa" className="drop-shadow-lg" />;
-  }
+  return `${rounded}`;
 };
 
 export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
@@ -96,12 +80,17 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
       
       <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
-          <div className="flex-shrink-0 animate-icon-glow">
-            {getWeatherIcon(current.condition.text, isDay, current.temp_c)}
+          <div className="flex-shrink-0">
+            <AnimatedWeatherIcon 
+              condition={current.condition.text} 
+              isDay={isDay} 
+              temp={current.temp_c}
+              size="lg"
+            />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <div className="text-5xl sm:text-7xl lg:text-9xl text-foreground animate-scale-in" style={{ fontFamily: "'Bodoni Moda', 'Playfair Display', Georgia, serif", fontWeight: 600, letterSpacing: '-0.02em' }}>
-              {Math.round(current.temp_c)}°
+            <div className="text-5xl sm:text-7xl lg:text-9xl text-foreground animate-scale-in whitespace-nowrap" style={{ fontFamily: "'Bodoni Moda', 'Playfair Display', Georgia, serif", fontWeight: 600, letterSpacing: '-0.02em' }}>
+              {formatTemp(current.temp_c)}°
             </div>
             <div className="text-base sm:text-xl text-muted-foreground animate-slide-up">
               {current.condition.text}
@@ -125,8 +114,8 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
           <div className="flex items-center gap-2 sm:gap-3 justify-start sm:justify-end flex-wrap">
             <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10">
               <div className="text-xs sm:text-sm text-muted-foreground">Feels like</div>
-              <div className="text-lg sm:text-xl font-semibold text-primary" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
-                {Math.round(current.feelslike_c)}°
+              <div className="text-lg sm:text-xl font-semibold text-primary whitespace-nowrap" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+                {formatTemp(current.feelslike_c)}°
               </div>
             </div>
             {current.air_quality && (
