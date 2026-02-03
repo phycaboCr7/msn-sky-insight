@@ -63,9 +63,10 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
         container: mapContainer.current,
         style: MAP_STYLES.liberty,
         center: [lon, lat],
-        zoom: 4,
+        zoom: 12, // Higher zoom for precise location
         pitch: 30,
         bearing: -15,
+        attributionControl: false, // Remove attribution
       });
 
       map.current.addControl(
@@ -80,8 +81,41 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
         setIsMapLoaded(true);
         setIsLoading(false);
         
-        // Add marker for current location
-        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
+        // Add pulsing marker for precise current location
+        const markerEl = document.createElement('div');
+        markerEl.innerHTML = `
+          <div style="position: relative; width: 24px; height: 24px;">
+            <div style="
+              position: absolute;
+              width: 24px;
+              height: 24px;
+              background: #f97316;
+              border-radius: 50%;
+              animation: pulse-ring 1.5s ease-out infinite;
+              opacity: 0.4;
+            "></div>
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 14px;
+              height: 14px;
+              background: #f97316;
+              border: 3px solid white;
+              border-radius: 50%;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            "></div>
+          </div>
+          <style>
+            @keyframes pulse-ring {
+              0% { transform: scale(1); opacity: 0.4; }
+              100% { transform: scale(2); opacity: 0; }
+            }
+          </style>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 25, closeButton: false }).setHTML(`
           <div style="color: #333; font-family: sans-serif; padding: 4px;">
             <strong>${weather.location.name}</strong><br/>
             🌡️ ${weather.current.temp_c}°C<br/>
@@ -89,7 +123,7 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
           </div>
         `);
 
-        new maplibregl.Marker({ color: '#f97316' })
+        new maplibregl.Marker({ element: markerEl, anchor: 'center' })
           .setLngLat([lon, lat])
           .setPopup(popup)
           .addTo(map.current!);
@@ -123,7 +157,34 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
         const lat = weather.location.lat;
         const lon = weather.location.lon;
         
-        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
+        const markerEl = document.createElement('div');
+        markerEl.innerHTML = `
+          <div style="position: relative; width: 24px; height: 24px;">
+            <div style="
+              position: absolute;
+              width: 24px;
+              height: 24px;
+              background: ${LAYER_CONFIG[layer].color};
+              border-radius: 50%;
+              animation: pulse-ring 1.5s ease-out infinite;
+              opacity: 0.4;
+            "></div>
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 14px;
+              height: 14px;
+              background: ${LAYER_CONFIG[layer].color};
+              border: 3px solid white;
+              border-radius: 50%;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            "></div>
+          </div>
+        `;
+
+        const popup = new maplibregl.Popup({ offset: 25, closeButton: false }).setHTML(`
           <div style="color: #333; font-family: sans-serif; padding: 4px;">
             <strong>${weather.location.name}</strong><br/>
             🌡️ ${weather.current.temp_c}°C<br/>
@@ -131,7 +192,7 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
           </div>
         `);
 
-        new maplibregl.Marker({ color: LAYER_CONFIG[layer].color })
+        new maplibregl.Marker({ element: markerEl, anchor: 'center' })
           .setLngLat([lon, lat])
           .setPopup(popup)
           .addTo(map.current!);
@@ -148,7 +209,6 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
               <Globe className="w-5 h-5 text-blue-400" />
             </div>
             <span className="text-foreground font-semibold">World Weather Map</span>
-            <span className="text-xs text-muted-foreground font-normal">(Free • No API Key)</span>
           </CardTitle>
           
           {/* Layer buttons */}
@@ -191,7 +251,7 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
         </div>
         
         <p className="text-xs text-muted-foreground mt-2 text-center">
-          📍 {weather.location.name}, {weather.location.country} • Powered by MapLibre + OpenFreeMap (100% Free)
+          📍 {weather.location.name}, {weather.location.country}
         </p>
       </CardContent>
     </Card>
