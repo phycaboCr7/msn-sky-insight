@@ -340,7 +340,66 @@ const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string;
   );
 };
 
-// PDF Generation helper - simple text with colors and emojis, no repetition
+// Run Python code via Pyodide and get a base64 PNG image
+const runPythonForImage = async (code: string): Promise<string | null> => {
+  try {
+    // Check if Pyodide is loaded
+    if (!window.pyodide) {
+      // Try to load it
+      if (!window.loadPyodide) return null;
+      window.pyodide = await window.loadPyodide({
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/"
+      });
+      await window.pyodide.loadPackage(["numpy", "matplotlib"]);
+    }
+
+    // Setup matplotlib for non-interactive backend
+    await window.pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import base64
+from io import BytesIO
+    `);
+
+    // Clean the code
+    let cleanCode = code
+      .replace(/plt\.show\(\)/g, '')
+      .replace(/plt\.savefig\([^)]+\)/g, '');
+
+    // Add capture logic
+    cleanCode += `
+_buf = BytesIO()
+plt.savefig(_buf, format='png', dpi=150, bbox_inches='tight', facecolor='white')
+_buf.seek(0)
+_pdf_graph_b64 = base64.b64encode(_buf.read()).decode('utf-8')
+plt.close('all')
+`;
+
+    await window.pyodide.runPythonAsync(cleanCode);
+    const b64 = await window.pyodide.runPythonAsync(`_pdf_graph_b64`);
+    return b64 ? `data:image/png;base64,${b64}` : null;
+  } catch (err) {
+    console.error("Failed to run Python for PDF graph:", err);
+    return null;
+  }
+};
+
+// Extract Python code blocks from markdown
+const extractPythonCodeBlocks = (content: string): string[] => {
+  const regex = /```(?:python|py)\n([\s\S]*?)```/g;
+  const blocks: string[] = [];
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    if (isPythonGraphCode(match[1])) {
+      blocks.push(match[1]);
+    }
+  }
+  return blocks;
+};
+
+// PDF Generation helper - runs Python graphs and embeds them
 const generatePDF = async (content: string, _elementRef?: HTMLElement | null, filename: string = "Weatherza_AI_Generated.pdf") => {
   try {
     const { jsPDF } = await import('jspdf');
@@ -355,31 +414,46 @@ const generatePDF = async (content: string, _elementRef?: HTMLElement | null, fi
     doc.setTextColor(255, 140, 0);
     doc.text("Weatherza AI Generated Document", margin, 20);
     
-    // Add separator line
     doc.setDrawColor(255, 140, 0);
     doc.setLineWidth(0.5);
     doc.line(margin, 25, pageWidth - margin, 25);
     
-    // Clean markdown but preserve emojis and structure
-    let cleanContent = content
-      // Remove bold markers but keep text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      // Remove italic markers but keep text
-      .replace(/\*(.*?)\*/g, '$1')
-      // Remove heading markers but keep text
-      .replace(/^#{1,6}\s+/gm, '')
-      // Remove inline code backticks
-      .replace(/`([^`]+)`/g, '$1')
-      // Remove code block markers
+    // Run Python graph code blocks and collect images
+    const pythonBlocks = extractPythonCodeBlocks(content);
+    const graphImages: Map<string, string> = new Map();
+    
+    for (const block of pythonBlocks) {
+      const img = await runPythonForImage(block);
+      if (img) {
+        graphImages.set(block.trim(), img);
+      }
+    }
+    
+    // Clean markdown - replace code blocks with placeholders or graph images
+    let cleanContent = content;
+    
+    // Replace python graph code blocks with [GRAPH_N] placeholders
+    let graphIndex = 0;
+    const graphOrder: string[] = [];
+    cleanContent = cleanContent.replace(/```(?:python|py)\n([\s\S]*?)```/g, (match, code) => {
+      if (isPythonGraphCode(code) && graphImages.has(code.trim())) {
+        graphOrder.push(code.trim());
+        return `[GRAPH_${graphIndex++}]`;
+      }
+      return '[Code block]';
+    });
+    
+    // Remove other code blocks
+    cleanContent = cleanContent
       .replace(/```[\s\S]*?```/g, '[Code block]')
-      // Remove link markdown but keep text
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/`([^`]+)`/g, '$1')
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      // Normalize multiple newlines to double newlines
       .replace(/\n{3,}/g, '\n\n')
-      // Trim whitespace
       .trim();
     
-    // Split into paragraphs (by double newlines)
     const paragraphs = cleanContent.split(/\n\n+/);
     
     doc.setFontSize(11);
@@ -388,50 +462,56 @@ const generatePDF = async (content: string, _elementRef?: HTMLElement | null, fi
     let y = 35;
     const lineHeight = 6;
     const paragraphSpacing = 4;
-    
-    // Track processed content to avoid duplicates
     const processedContent = new Set<string>();
     
     for (const paragraph of paragraphs) {
       const trimmedParagraph = paragraph.trim();
       if (!trimmedParagraph) continue;
       
-      // Skip duplicate paragraphs
       const paragraphKey = trimmedParagraph.substring(0, 100);
       if (processedContent.has(paragraphKey)) continue;
       processedContent.add(paragraphKey);
       
-      // Handle bullet points and numbered lists
+      // Check if this paragraph contains a graph placeholder
+      const graphMatch = trimmedParagraph.match(/\[GRAPH_(\d+)\]/);
+      if (graphMatch) {
+        const gIdx = parseInt(graphMatch[1]);
+        const graphKey = graphOrder[gIdx];
+        const graphImg = graphKey ? graphImages.get(graphKey) : null;
+        
+        if (graphImg) {
+          if (y > pageHeight - 130) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.addImage(graphImg, 'PNG', margin, y, maxWidth, 100);
+          y += 105;
+          continue;
+        }
+      }
+      
       const lines = trimmedParagraph.split('\n');
       
       for (const line of lines) {
         const trimmedLine = line.trim();
-        if (!trimmedLine) continue;
+        if (!trimmedLine || trimmedLine.startsWith('[Code block]')) continue;
         
-        // Check if we need a new page
         if (y > pageHeight - 25) {
           doc.addPage();
           y = 20;
         }
         
-        // Detect and style different content types
         let textToWrite = trimmedLine;
         
-        // Bullet points
         if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
           textToWrite = '• ' + trimmedLine.substring(2);
           doc.setTextColor(60, 60, 60);
-        }
-        // Numbered lists
-        else if (/^\d+\.\s/.test(trimmedLine)) {
+        } else if (/^\d+\.\s/.test(trimmedLine)) {
           doc.setTextColor(60, 60, 60);
-        }
-        // Regular text
-        else {
+        } else {
           doc.setTextColor(40, 40, 40);
         }
         
-        // Split long lines to fit page width
         const wrappedLines = doc.splitTextToSize(textToWrite, maxWidth);
         
         for (const wrappedLine of wrappedLines) {
@@ -444,7 +524,6 @@ const generatePDF = async (content: string, _elementRef?: HTMLElement | null, fi
         }
       }
       
-      // Add paragraph spacing
       y += paragraphSpacing;
     }
     
@@ -681,16 +760,33 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   // Extract text from PDF using pdfjs-dist
   const extractPdfText = async (file: File): Promise<string> => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
-    let fullText = "";
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      fullText += content.items.map((item: any) => item.str).join(" ") + "\n\n";
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      
+      let fullText = "";
+      for (let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items
+          .map((item: any) => item.str)
+          .filter((s: string) => s.trim().length > 0)
+          .join(" ");
+        if (pageText.trim()) {
+          fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+        }
+      }
+      
+      if (!fullText.trim()) {
+        // If no text found, it might be a scanned PDF - tell the user
+        return `[This PDF appears to be image-based/scanned. ${pdf.numPages} pages detected but no extractable text found. The document may contain images or scanned content that requires OCR.]`;
+      }
+      
+      return fullText.trim();
+    } catch (err) {
+      console.error("PDF extraction error:", err);
+      throw new Error("Failed to read PDF. The file may be corrupted or password-protected.");
     }
-    return fullText.trim();
   };
 
   // Extract text from DOCX using mammoth
@@ -774,7 +870,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
   };
 
-  // Speech-to-text using Web Speech API
+  // Speech-to-text using Web Speech API - continuous like ChatGPT
+  const isRecordingRef = useRef(false);
+
   const toggleRecording = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast({ 
@@ -786,7 +884,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
 
     if (isRecording) {
+      // User manually stops
+      isRecordingRef.current = false;
       recognitionRef.current?.stop();
+      recognitionRef.current = null;
       setIsRecording(false);
       setInterimTranscript("");
       return;
@@ -794,12 +895,13 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    recognition.continuous = false; // Stop after one result for cleaner transcription
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      isRecordingRef.current = true;
       setIsRecording(true);
       setInterimTranscript("");
     };
@@ -825,38 +927,34 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           return newText.trim();
         });
         setInterimTranscript("");
-        // Restart for continuous listening
-        setTimeout(() => {
-          if (recognitionRef.current && isRecording) {
-            try {
-              recognition.start();
-            } catch (e) {
-              // Already started
-            }
-          }
-        }, 100);
       }
     };
 
     recognition.onerror = (event: any) => {
       console.error("Speech recognition error:", event.error);
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+      if (event.error === 'no-speech') {
+        // Silently restart on no-speech - keep mic on
+        return;
+      }
+      if (event.error !== 'aborted') {
         toast({ 
           title: "Speech error", 
           description: `Error: ${event.error}. Please try again.`, 
           variant: "destructive" 
         });
       }
+      isRecordingRef.current = false;
       setIsRecording(false);
       setInterimTranscript("");
     };
 
     recognition.onend = () => {
-      // Auto-restart if still recording
-      if (isRecording && recognitionRef.current) {
+      // Auto-restart if user hasn't manually stopped
+      if (isRecordingRef.current) {
         try {
           recognition.start();
         } catch (e) {
+          isRecordingRef.current = false;
           setIsRecording(false);
           setInterimTranscript("");
         }
