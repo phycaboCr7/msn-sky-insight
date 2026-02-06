@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3 } from "lucide-react";
+import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -746,12 +747,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [extractedDocText, setExtractedDocText] = useState<string | null>(null);
   const [extractedDocName, setExtractedDocName] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [interimTranscript, setInterimTranscript] = useState("");
+  const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<any>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -870,102 +869,18 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
   };
 
-  // Speech-to-text using Web Speech API - continuous like ChatGPT
-  const isRecordingRef = useRef(false);
+  // Voice overlay handlers
+  const handleVoiceTranscript = (text: string) => {
+    setQuestion(text);
+  };
 
-  const toggleRecording = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast({ 
-        title: "Not supported", 
-        description: "Speech recognition is not supported in your browser. Try Chrome.", 
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    if (isRecording) {
-      // User manually stops
-      isRecordingRef.current = false;
-      recognitionRef.current?.stop();
-      recognitionRef.current = null;
-      setIsRecording(false);
-      setInterimTranscript("");
-      return;
-    }
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      isRecordingRef.current = true;
-      setIsRecording(true);
-      setInterimTranscript("");
-    };
-
-    recognition.onresult = (event: any) => {
-      let finalTranscript = '';
-      let interimText = '';
-
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          finalTranscript += result[0].transcript;
-        } else {
-          interimText += result[0].transcript;
-        }
-      }
-
-      setInterimTranscript(interimText);
-
-      if (finalTranscript) {
-        setQuestion(prev => {
-          const newText = prev ? prev + ' ' + finalTranscript : finalTranscript;
-          return newText.trim();
-        });
-        setInterimTranscript("");
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
-      if (event.error === 'no-speech') {
-        // Silently restart on no-speech - keep mic on
-        return;
-      }
-      if (event.error !== 'aborted') {
-        toast({ 
-          title: "Speech error", 
-          description: `Error: ${event.error}. Please try again.`, 
-          variant: "destructive" 
-        });
-      }
-      isRecordingRef.current = false;
-      setIsRecording(false);
-      setInterimTranscript("");
-    };
-
-    recognition.onend = () => {
-      // Auto-restart if user hasn't manually stopped
-      if (isRecordingRef.current) {
-        try {
-          recognition.start();
-        } catch (e) {
-          isRecordingRef.current = false;
-          setIsRecording(false);
-          setInterimTranscript("");
-        }
-      } else {
-        setIsRecording(false);
-        setInterimTranscript("");
-      }
-    };
-
-    recognitionRef.current = recognition;
-    recognition.start();
+  const handleVoiceSend = (text: string) => {
+    setQuestion(text);
+    // Trigger send after state update
+    setTimeout(() => {
+      const btn = document.querySelector('[data-send-btn]') as HTMLButtonElement;
+      btn?.click();
+    }, 100);
   };
 
   const askAI = async () => {
@@ -1332,44 +1247,30 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
           </Button>
 
-          {/* Voice input button with simple visualizer */}
-          <div className="relative shrink-0">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={toggleRecording}
-              className={`border-white/20 transition-all ${
-                isRecording 
-                  ? 'bg-white/10 border-white/30' 
-                  : 'hover:bg-primary/20 hover:border-primary/50'
-              }`}
-              title={isRecording ? "Stop recording" : "Start voice input"}
-            >
-              {isRecording ? (
-                <div className="flex items-center justify-center gap-[2px]">
-                  <span className="w-[3px] h-3 bg-foreground rounded-full animate-voice-bar-1" />
-                  <span className="w-[3px] h-3 bg-foreground rounded-full animate-voice-bar-2" />
-                  <span className="w-[3px] h-3 bg-foreground rounded-full animate-voice-bar-3" />
-                </div>
-              ) : (
-                <Mic className="w-4 h-4" />
-              )}
-            </Button>
-          </div>
+          {/* Voice input button - opens fullscreen overlay */}
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setVoiceOverlayOpen(true)}
+            className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
+            title="Start voice input"
+          >
+            <Mic className="w-4 h-4" />
+          </Button>
 
           <div className="flex-1 relative">
             <Textarea
-              placeholder={uploadedImage ? "Ask about this image..." : extractedDocName ? `Ask about "${extractedDocName}"...` : isRecording ? "Listening..." : "Ask me anything - math, science, coding, weather..."}
-              value={isRecording && interimTranscript ? question + (question ? ' ' : '') + interimTranscript : question}
-              onChange={(e) => !isRecording && setQuestion(e.target.value)}
+              placeholder={uploadedImage ? "Ask about this image..." : extractedDocName ? `Ask about "${extractedDocName}"...` : "Ask me anything - math, science, coding, weather..."}
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}
               className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors w-full"
               rows={2}
-              readOnly={isRecording}
             />
           </div>
           <Button 
+            data-send-btn
             onClick={askAI} 
             disabled={loading || isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
             className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
@@ -1381,6 +1282,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             )}
           </Button>
         </div>
+
+        {/* Voice Overlay */}
+        <VoiceOverlay
+          isOpen={voiceOverlayOpen}
+          onClose={() => setVoiceOverlayOpen(false)}
+          onTranscriptReady={handleVoiceTranscript}
+          onSendMessage={handleVoiceSend}
+        />
         
         {/* Pyodide Graph Modal - Now handled inside PyodideRunner component */}
         {pyodideCode && (
