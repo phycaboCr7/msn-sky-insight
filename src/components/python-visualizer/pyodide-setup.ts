@@ -13,7 +13,7 @@ _animation_frames = []
 
 def get_plot_as_base64():
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='#1a1a2e', edgecolor='none')
+    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='white', edgecolor='none', pad_inches=0.1)
     buf.seek(0)
     img_str = base64.b64encode(buf.read()).decode('utf-8')
     return img_str
