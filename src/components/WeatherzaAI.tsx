@@ -372,7 +372,7 @@ from io import BytesIO
     // Add capture logic
     cleanCode += `
 _buf = BytesIO()
-plt.savefig(_buf, format='png', dpi=150, bbox_inches='tight', facecolor='white')
+plt.savefig(_buf, format='png', dpi=150, bbox_inches='tight', facecolor='white', edgecolor='none', pad_inches=0.1, transparent=False)
 _buf.seek(0)
 _pdf_graph_b64 = base64.b64encode(_buf.read()).decode('utf-8')
 plt.close('all')

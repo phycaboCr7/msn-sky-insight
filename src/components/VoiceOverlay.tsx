@@ -17,7 +17,6 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   
   const recognitionRef = useRef<any>(null);
   const isActiveRef = useRef(false);
-  const processedResultsRef = useRef(0);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -78,10 +77,19 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     setAnalyserData(new Array(40).fill(2));
   }, []);
 
-  // Start speech recognition
+  // Start speech recognition - called directly from user gesture context
   const startRecognition = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+      console.error("SpeechRecognition not supported");
+      return;
+    }
+
+    // Stop any existing instance
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
@@ -90,66 +98,78 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      console.log("Speech recognition started");
       isActiveRef.current = true;
       setIsListening(true);
-      processedResultsRef.current = 0;
     };
 
     recognition.onresult = (event: any) => {
-      let newFinal = '';
+      let finalText = '';
       let interim = '';
 
-      // Only process results starting from what we haven't processed yet
-      for (let i = processedResultsRef.current; i < event.results.length; i++) {
+      for (let i = 0; i < event.results.length; i++) {
         const result = event.results[i];
         if (result.isFinal) {
-          newFinal += result[0].transcript;
-          processedResultsRef.current = i + 1;
+          finalText += result[0].transcript + ' ';
         } else {
           interim += result[0].transcript;
         }
       }
 
       setInterimText(interim);
-
-      if (newFinal) {
-        setTranscript(prev => {
-          const updated = prev ? prev + ' ' + newFinal : newFinal;
-          return updated.trim();
-        });
+      
+      if (finalText.trim()) {
+        // Replace entire transcript with all final results to avoid duplication
+        setTranscript(finalText.trim());
       }
     };
 
     recognition.onerror = (event: any) => {
-      if (event.error === 'no-speech') return;
-      if (event.error !== 'aborted') {
-        console.error("Speech error:", event.error);
+      console.log("Speech error:", event.error);
+      if (event.error === 'not-allowed') {
+        isActiveRef.current = false;
+        setIsListening(false);
       }
+      // For 'no-speech', 'network', etc. - onend will handle restart
     };
 
     recognition.onend = () => {
+      console.log("Speech recognition ended, active:", isActiveRef.current);
       if (isActiveRef.current) {
-        try {
-          processedResultsRef.current = 0;
-          recognition.start();
-        } catch {
-          isActiveRef.current = false;
-          setIsListening(false);
-        }
+        // Restart with a small delay to avoid rapid restart loops
+        setTimeout(() => {
+          if (isActiveRef.current && recognitionRef.current) {
+            try {
+              recognitionRef.current.start();
+            } catch (e) {
+              console.error("Failed to restart recognition:", e);
+              isActiveRef.current = false;
+              setIsListening(false);
+            }
+          }
+        }, 100);
+      } else {
+        setIsListening(false);
       }
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
+    
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error("Failed to start recognition:", e);
+    }
   }, []);
 
   // Stop speech recognition
   const stopRecognition = useCallback(() => {
     isActiveRef.current = false;
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
     setIsListening(false);
-    processedResultsRef.current = 0;
   }, []);
 
   // Start/stop when overlay opens/closes
