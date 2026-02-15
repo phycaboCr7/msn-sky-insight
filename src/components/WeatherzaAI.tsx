@@ -751,6 +751,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const voiceRecognitionRef = useRef<any>(null);
+  const voiceIsActiveRef = useRef(false);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -1247,12 +1249,57 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
           </Button>
 
-          {/* Voice input button - opens fullscreen overlay */}
+          {/* Voice input button - starts recognition from user gesture then opens overlay */}
           <Button
             type="button"
             variant="outline"
             size="icon"
-            onClick={() => setVoiceOverlayOpen(true)}
+            onClick={() => {
+              // Start recognition SYNCHRONOUSLY from user gesture
+              const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+              if (!SpeechRecognition) {
+                toast({ title: "Not supported", description: "Speech recognition is not supported in this browser.", variant: "destructive" });
+                return;
+              }
+              if (voiceRecognitionRef.current) {
+                try { voiceRecognitionRef.current.abort(); } catch {}
+              }
+              const recognition = new SpeechRecognition();
+              recognition.continuous = true;
+              recognition.interimResults = true;
+              recognition.lang = 'en-US';
+              recognition.maxAlternatives = 1;
+
+              recognition.onend = () => {
+                if (voiceIsActiveRef.current) {
+                  setTimeout(() => {
+                    if (voiceIsActiveRef.current && voiceRecognitionRef.current) {
+                      try { voiceRecognitionRef.current.start(); } catch (e) {
+                        console.error("Restart failed:", e);
+                        voiceIsActiveRef.current = false;
+                      }
+                    }
+                  }, 100);
+                }
+              };
+
+              recognition.onerror = (event: any) => {
+                if (event.error === 'not-allowed') {
+                  voiceIsActiveRef.current = false;
+                  toast({ title: "Mic blocked", description: "Please allow microphone access.", variant: "destructive" });
+                }
+              };
+
+              voiceRecognitionRef.current = recognition;
+              voiceIsActiveRef.current = true;
+              try {
+                recognition.start();
+              } catch (e) {
+                console.error("Failed to start:", e);
+                return;
+              }
+              setVoiceOverlayOpen(true);
+            }}
             className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
             title="Start voice input"
           >
@@ -1289,6 +1336,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           onClose={() => setVoiceOverlayOpen(false)}
           onTranscriptReady={handleVoiceTranscript}
           onSendMessage={handleVoiceSend}
+          recognitionRef={voiceRecognitionRef}
+          isActiveRef={voiceIsActiveRef}
         />
         
         {/* Pyodide Graph Modal - Now handled inside PyodideRunner component */}

@@ -36,21 +36,25 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
   useEffect(() => {
     if (!weather) return;
 
-    const fetchBackgroundImage = async () => {
+    // Defer background image fetch to not block initial render
+    const timeoutId = setTimeout(async () => {
       setLoading(true);
       try {
         const keywords = getWeatherKeywords(weather.current.condition.text);
         const response = await fetch(
-          `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(keywords)}&image_type=photo&orientation=horizontal&category=nature&min_width=1920&per_page=20&safesearch=true`
+          `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(keywords)}&image_type=photo&orientation=horizontal&category=nature&min_width=1920&per_page=10&safesearch=true`
         );
         
         if (response.ok) {
           const data = await response.json();
           if (data.hits && data.hits.length > 0) {
-            // Get a random image from the results
-            const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 10));
-            const imageUrl = data.hits[randomIndex].largeImageURL || data.hits[randomIndex].webformatURL;
-            setBackgroundImage(imageUrl);
+            const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 5));
+            // Use webformatURL (smaller) instead of largeImageURL for faster load
+            const imageUrl = data.hits[randomIndex].webformatURL;
+            // Preload the image before displaying
+            const img = new Image();
+            img.onload = () => setBackgroundImage(imageUrl);
+            img.src = imageUrl;
           }
         }
       } catch (error) {
@@ -58,9 +62,9 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
       } finally {
         setLoading(false);
       }
-    };
+    }, 1500); // Delay 1.5s to let main content render first
 
-    fetchBackgroundImage();
+    return () => clearTimeout(timeoutId);
   }, [weather?.current.condition.text]);
 
   if (!backgroundImage) return null;

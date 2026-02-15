@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { X, Mic, Send, ChevronUp } from "lucide-react";
+import { X, Send, ChevronUp } from "lucide-react";
 
 interface VoiceOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   onTranscriptReady: (text: string) => void;
   onSendMessage: (text: string) => void;
+  recognitionRef: React.MutableRefObject<any>;
+  isActiveRef: React.MutableRefObject<boolean>;
 }
 
-export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage }: VoiceOverlayProps) => {
+export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage, recognitionRef, isActiveRef }: VoiceOverlayProps) => {
   const [transcript, setTranscript] = useState("");
   const [interimText, setInterimText] = useState("");
   const [showText, setShowText] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [analyserData, setAnalyserData] = useState<number[]>(new Array(40).fill(2));
   
-  const recognitionRef = useRef<any>(null);
-  const isActiveRef = useRef(false);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -41,8 +41,6 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
       const updateVisualizer = () => {
         if (!analyserRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
-        
-        // Sample 40 bars from the frequency data
         const bars: number[] = [];
         const step = Math.floor(dataArray.length / 40);
         for (let i = 0; i < 40; i++) {
@@ -59,7 +57,6 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     }
   }, []);
 
-  // Stop audio analyser
   const stopAudioAnalyser = useCallback(() => {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
@@ -77,125 +74,62 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     setAnalyserData(new Array(40).fill(2));
   }, []);
 
-  // Start speech recognition - called directly from user gesture context
-  const startRecognition = useCallback(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.error("SpeechRecognition not supported");
-      return;
-    }
-
-    // Stop any existing instance
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
-      recognitionRef.current = null;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      console.log("Speech recognition started");
-      isActiveRef.current = true;
-      setIsListening(true);
-    };
-
-    recognition.onresult = (event: any) => {
-      let finalText = '';
-      let interim = '';
-
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          finalText += result[0].transcript + ' ';
-        } else {
-          interim += result[0].transcript;
-        }
-      }
-
-      setInterimText(interim);
-      
-      if (finalText.trim()) {
-        // Replace entire transcript with all final results to avoid duplication
-        setTranscript(finalText.trim());
-      }
-    };
-
-    recognition.onerror = (event: any) => {
-      console.log("Speech error:", event.error);
-      if (event.error === 'not-allowed') {
-        isActiveRef.current = false;
-        setIsListening(false);
-      }
-      // For 'no-speech', 'network', etc. - onend will handle restart
-    };
-
-    recognition.onend = () => {
-      console.log("Speech recognition ended, active:", isActiveRef.current);
-      if (isActiveRef.current) {
-        // Restart with a small delay to avoid rapid restart loops
-        setTimeout(() => {
-          if (isActiveRef.current && recognitionRef.current) {
-            try {
-              recognitionRef.current.start();
-            } catch (e) {
-              console.error("Failed to restart recognition:", e);
-              isActiveRef.current = false;
-              setIsListening(false);
-            }
-          }
-        }, 100);
-      } else {
-        setIsListening(false);
-      }
-    };
-
-    recognitionRef.current = recognition;
-    
-    try {
-      recognition.start();
-    } catch (e) {
-      console.error("Failed to start recognition:", e);
-    }
-  }, []);
-
-  // Stop speech recognition
-  const stopRecognition = useCallback(() => {
-    isActiveRef.current = false;
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
-      recognitionRef.current = null;
-    }
-    setIsListening(false);
-  }, []);
-
-  // Start/stop when overlay opens/closes
+  // Listen for recognition events to update UI
   useEffect(() => {
-    if (isOpen) {
-      setTranscript("");
-      setInterimText("");
-      setShowText(false);
-      startRecognition();
-      startAudioAnalyser();
-    } else {
-      stopRecognition();
-      stopAudioAnalyser();
+    if (!isOpen) return;
+
+    setTranscript("");
+    setInterimText("");
+    setShowText(false);
+    startAudioAnalyser();
+
+    // Poll the recognition state
+    const checkListening = () => {
+      setIsListening(isActiveRef.current);
+    };
+    const interval = setInterval(checkListening, 200);
+
+    // Attach result handler to the recognition instance
+    const recognition = recognitionRef.current;
+    if (recognition) {
+      const handleResult = (event: any) => {
+        let finalText = '';
+        let interim = '';
+        for (let i = 0; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            finalText += result[0].transcript + ' ';
+          } else {
+            interim += result[0].transcript;
+          }
+        }
+        setInterimText(interim);
+        if (finalText.trim()) {
+          setTranscript(finalText.trim());
+        }
+      };
+      recognition.onresult = handleResult;
+      setIsListening(true);
     }
 
     return () => {
-      stopRecognition();
+      clearInterval(interval);
       stopAudioAnalyser();
     };
-  }, [isOpen, startRecognition, stopRecognition, startAudioAnalyser, stopAudioAnalyser]);
+  }, [isOpen, startAudioAnalyser, stopAudioAnalyser, recognitionRef, isActiveRef]);
 
   const handleClose = () => {
     const finalText = (transcript + (interimText ? ' ' + interimText : '')).trim();
     if (finalText) {
       onTranscriptReady(finalText);
     }
+    // Stop recognition
+    isActiveRef.current = false;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    stopAudioAnalyser();
     onClose();
   };
 
@@ -204,6 +138,12 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     if (finalText) {
       onSendMessage(finalText);
     }
+    isActiveRef.current = false;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    stopAudioAnalyser();
     onClose();
   };
 
@@ -260,7 +200,6 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
 
       {/* Bottom section */}
       <div className="px-4 pb-8 space-y-4">
-        {/* See text toggle */}
         {fullText && (
           <button
             onClick={() => setShowText(!showText)}
