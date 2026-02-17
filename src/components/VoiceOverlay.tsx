@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, Send, ChevronUp } from "lucide-react";
 
 interface VoiceOverlayProps {
@@ -21,8 +22,8 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   const audioContextRef = useRef<AudioContext | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const transcriptRef = useRef("");
 
-  // Start audio analyser for waveform
   const startAudioAnalyser = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -74,16 +75,15 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     setAnalyserData(new Array(40).fill(2));
   }, []);
 
-  // Listen for recognition events to update UI
   useEffect(() => {
     if (!isOpen) return;
 
     setTranscript("");
     setInterimText("");
     setShowText(false);
+    transcriptRef.current = "";
     startAudioAnalyser();
 
-    // Poll the recognition state
     const checkListening = () => {
       setIsListening(isActiveRef.current);
     };
@@ -92,7 +92,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     // Attach result handler to the recognition instance
     const recognition = recognitionRef.current;
     if (recognition) {
-      const handleResult = (event: any) => {
+      recognition.onresult = (event: any) => {
         let finalText = '';
         let interim = '';
         for (let i = 0; i < event.results.length; i++) {
@@ -105,10 +105,10 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
         }
         setInterimText(interim);
         if (finalText.trim()) {
+          transcriptRef.current = finalText.trim();
           setTranscript(finalText.trim());
         }
       };
-      recognition.onresult = handleResult;
       setIsListening(true);
     }
 
@@ -119,11 +119,10 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   }, [isOpen, startAudioAnalyser, stopAudioAnalyser, recognitionRef, isActiveRef]);
 
   const handleClose = () => {
-    const finalText = (transcript + (interimText ? ' ' + interimText : '')).trim();
+    const finalText = (transcriptRef.current + (interimText ? ' ' + interimText : '')).trim();
     if (finalText) {
       onTranscriptReady(finalText);
     }
-    // Stop recognition
     isActiveRef.current = false;
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
@@ -134,7 +133,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   };
 
   const handleSend = () => {
-    const finalText = (transcript + (interimText ? ' ' + interimText : '')).trim();
+    const finalText = (transcriptRef.current + (interimText ? ' ' + interimText : '')).trim();
     if (finalText) {
       onSendMessage(finalText);
     }
@@ -151,8 +150,19 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
 
   const fullText = transcript + (interimText ? (transcript ? ' ' : '') + interimText : '');
 
-  return (
-    <div className="fixed inset-0 z-[200] bg-[#0d0d0d] flex flex-col animate-fade-in">
+  // Use portal to render at document.body level to escape any parent transforms
+  return createPortal(
+    <div 
+      className="fixed inset-0 flex flex-col animate-fade-in"
+      style={{ 
+        zIndex: 99999, 
+        backgroundColor: '#0d0d0d',
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        width: '100vw',
+        height: '100vh',
+      }}
+    >
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
@@ -171,28 +181,19 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
         </button>
       </div>
 
-      {/* Center content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
-        {!showText && !fullText && (
+      {/* Center content - always show transcription */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-y-auto">
+        {!fullText && (
           <h2 className="text-2xl font-medium text-white text-center mb-8">
             What can I help with?
           </h2>
         )}
 
-        {showText && fullText && (
+        {fullText && (
           <div className="w-full max-w-md mb-8">
             <p className="text-lg text-white/90 text-center leading-relaxed">
               {fullText}
-              {interimText && <span className="text-white/40">|</span>}
-            </p>
-          </div>
-        )}
-
-        {!showText && fullText && (
-          <div className="w-full max-w-md mb-8">
-            <p className="text-lg text-white/60 text-center truncate">
-              {fullText.slice(-60)}
-              {interimText && <span className="animate-pulse">...</span>}
+              {interimText && <span className="text-white/40 animate-pulse">|</span>}
             </p>
           </div>
         )}
@@ -200,16 +201,6 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
 
       {/* Bottom section */}
       <div className="px-4 pb-8 space-y-4">
-        {fullText && (
-          <button
-            onClick={() => setShowText(!showText)}
-            className="mx-auto flex items-center gap-1 px-4 py-2 rounded-full bg-white/10 text-white/70 text-sm hover:bg-white/15 transition-colors"
-          >
-            <ChevronUp className={`w-4 h-4 transition-transform ${showText ? 'rotate-180' : ''}`} />
-            {showText ? 'Hide text' : 'See text'}
-          </button>
-        )}
-
         {/* Waveform visualizer */}
         <div className="flex items-center justify-center gap-[2px] h-10 mx-auto max-w-md w-full">
           {analyserData.map((height, i) => (
@@ -242,6 +233,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
