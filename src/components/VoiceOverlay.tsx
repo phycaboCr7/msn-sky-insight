@@ -132,11 +132,10 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     onClose();
   };
 
-  const handleSend = () => {
+  const handleSend = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     const finalText = (transcriptRef.current + (interimText ? ' ' + interimText : '')).trim();
-    if (finalText) {
-      onSendMessage(finalText);
-    }
     isActiveRef.current = false;
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
@@ -144,6 +143,10 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
     }
     stopAudioAnalyser();
     onClose();
+    if (finalText) {
+      // Call after overlay is closed to avoid state conflicts
+      setTimeout(() => onSendMessage(finalText), 50);
+    }
   };
 
   if (!isOpen) return null;
