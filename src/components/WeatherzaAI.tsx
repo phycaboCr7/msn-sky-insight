@@ -877,12 +877,54 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   const handleVoiceSend = (text: string) => {
-    setQuestion(text);
-    // Trigger send after state update
-    setTimeout(() => {
-      const btn = document.querySelector('[data-send-btn]') as HTMLButtonElement;
-      btn?.click();
-    }, 100);
+    if (!text.trim()) return;
+    
+    // Build and send the message directly instead of relying on state
+    const userMessage: Message = { role: "user", content: text.trim() };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setQuestion("");
+    setLoading(true);
+    
+    // Call the AI with the voice text
+    const pm25 = weather.current.air_quality?.pm2_5;
+    const actualAQI = pm25 ? calculateAQI(pm25) : null;
+    const weatherContext = {
+      location: weather.location.name,
+      country: weather.location.country,
+      temperature: weather.current.temp_c,
+      feelsLike: weather.current.feelslike_c,
+      condition: weather.current.condition.text,
+      humidity: weather.current.humidity,
+      windSpeed: weather.current.wind_kph,
+      windDirection: weather.current.wind_dir,
+      uvIndex: weather.current.uv,
+      visibility: weather.current.vis_km,
+      pressure: weather.current.pressure_mb,
+      precipChance: weather.forecast?.forecastday[0]?.day.daily_chance_of_rain || 0,
+      maxTemp: weather.forecast?.forecastday[0]?.day.maxtemp_c,
+      minTemp: weather.forecast?.forecastday[0]?.day.mintemp_c,
+      aqi: actualAQI,
+      pm25: pm25
+    };
+    
+    const messagesForAI = updatedMessages.map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+
+    supabase.functions.invoke("weatherza-chat", {
+      body: { messages: messagesForAI, weatherContext }
+    }).then(({ data, error }) => {
+      if (error) throw error;
+      const aiReply = data?.reply || "Sorry, I couldn't process that.";
+      setMessages(prev => [...prev, { role: "assistant", content: aiReply }]);
+    }).catch((err) => {
+      console.error("Voice send error:", err);
+      setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
+    }).finally(() => {
+      setLoading(false);
+    });
   };
 
   const askAI = async () => {
