@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Send, ChevronUp } from "lucide-react";
+import { X, Send, ChevronUp, Mic } from "lucide-react";
 
 interface VoiceOverlayProps {
   isOpen: boolean;
@@ -153,7 +153,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   // Use portal to render at document.body level to escape any parent transforms
   return createPortal(
     <div 
-      className="fixed inset-0 flex flex-col animate-fade-in"
+      className="fixed inset-0 flex flex-col"
       style={{ 
         zIndex: 99999, 
         backgroundColor: '#0d0d0d',
@@ -164,73 +164,88 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
       }}
     >
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-2">
           {isListening && (
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-sm text-white/60">Listening...</span>
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-sm text-white/50 font-medium tracking-wide">Listening</span>
             </div>
           )}
         </div>
         <button
           onClick={handleClose}
-          className="p-2 rounded-full hover:bg-white/10 transition-colors"
+          className="p-2.5 rounded-full hover:bg-white/10 transition-colors"
         >
-          <X className="w-5 h-5 text-white/70" />
+          <X className="w-5 h-5 text-white/60" />
         </button>
       </div>
 
-      {/* Center content - always show transcription */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 overflow-y-auto">
+      {/* Center content - real-time transcription */}
+      <div className="flex-1 flex flex-col items-center justify-center px-8 overflow-y-auto">
         {!fullText && (
-          <h2 className="text-2xl font-medium text-white text-center mb-8">
-            What can I help with?
-          </h2>
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <Mic className="w-8 h-8 text-white/30" />
+            </div>
+            <h2 className="text-2xl font-semibold text-white/90">
+              Listening...
+            </h2>
+            <p className="text-sm text-white/40">Speak now, your words will appear here</p>
+          </div>
         )}
 
         {fullText && (
-          <div className="w-full max-w-md mb-8">
-            <p className="text-lg text-white/90 text-center leading-relaxed">
-              {fullText}
-              {interimText && <span className="text-white/40 animate-pulse">|</span>}
+          <div className="w-full max-w-lg">
+            <p className="text-xl text-white/90 text-center leading-relaxed font-light">
+              {transcript}
+              {interimText && (
+                <span className="text-white/40">{transcript ? ' ' : ''}{interimText}</span>
+              )}
+              <span className="inline-block w-0.5 h-5 bg-white/50 ml-1 animate-pulse align-middle" />
             </p>
           </div>
         )}
       </div>
 
       {/* Bottom section */}
-      <div className="px-4 pb-8 space-y-4">
+      <div className="px-6 pb-10 space-y-5">
         {/* Waveform visualizer */}
-        <div className="flex items-center justify-center gap-[2px] h-10 mx-auto max-w-md w-full">
+        <div className="flex items-center justify-center gap-[2px] h-10 mx-auto max-w-sm w-full">
           {analyserData.map((height, i) => (
             <div
               key={i}
-              className="w-[3px] rounded-full bg-white/40 transition-all duration-75"
-              style={{ height: `${Math.max(2, height)}px` }}
+              className="w-[3px] rounded-full transition-all duration-75"
+              style={{ 
+                height: `${Math.max(2, height)}px`,
+                backgroundColor: `rgba(255, 255, 255, ${0.2 + (height / 40) * 0.5})`,
+              }}
             />
           ))}
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-5">
           <button
             onClick={handleClose}
-            className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            title="Close & keep text"
+            className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/15 transition-colors flex items-center justify-center"
+            title="Cancel"
           >
-            <X className="w-5 h-5 text-white/70" />
+            <X className="w-5 h-5 text-white/60" />
           </button>
           
-          {fullText && (
-            <button
-              onClick={handleSend}
-              className="p-4 rounded-full bg-white hover:bg-white/90 transition-colors"
-              title="Send message"
-            >
-              <Send className="w-5 h-5 text-black" />
-            </button>
-          )}
+          <button
+            onClick={handleSend}
+            disabled={!fullText}
+            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+              fullText 
+                ? 'bg-white hover:bg-white/90 shadow-lg shadow-white/20 scale-100' 
+                : 'bg-white/10 scale-95 cursor-not-allowed'
+            }`}
+            title="Send message"
+          >
+            <ChevronUp className={`w-6 h-6 ${fullText ? 'text-black' : 'text-white/30'}`} />
+          </button>
         </div>
       </div>
     </div>,
