@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Send, ChevronUp, Mic } from "lucide-react";
+import { X, ChevronUp, Mic } from "lucide-react";
 
 interface VoiceOverlayProps {
   isOpen: boolean;
@@ -9,20 +9,29 @@ interface VoiceOverlayProps {
   onSendMessage: (text: string) => void;
   recognitionRef: React.MutableRefObject<any>;
   isActiveRef: React.MutableRefObject<boolean>;
+  transcriptCallbackRef: React.MutableRefObject<((final: string, interim: string) => void) | null>;
 }
 
-export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage, recognitionRef, isActiveRef }: VoiceOverlayProps) => {
+export const VoiceOverlay = ({
+  isOpen,
+  onClose,
+  onTranscriptReady,
+  onSendMessage,
+  recognitionRef,
+  isActiveRef,
+  transcriptCallbackRef,
+}: VoiceOverlayProps) => {
   const [transcript, setTranscript] = useState("");
   const [interimText, setInterimText] = useState("");
-  const [showText, setShowText] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [analyserData, setAnalyserData] = useState<number[]>(new Array(40).fill(2));
-  
+
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const transcriptRef = useRef("");
+  const interimRef = useRef("");
 
   const startAudioAnalyser = useCallback(async () => {
     try {
@@ -38,7 +47,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
       analyserRef.current = analyser;
 
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      
+
       const updateVisualizer = () => {
         if (!analyserRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
@@ -51,7 +60,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
         setAnalyserData(bars);
         animFrameRef.current = requestAnimationFrame(updateVisualizer);
       };
-      
+
       updateVisualizer();
     } catch (err) {
       console.error("Audio analyser error:", err);
@@ -68,7 +77,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
       audioContextRef.current = null;
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
     analyserRef.current = null;
@@ -78,56 +87,48 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   useEffect(() => {
     if (!isOpen) return;
 
+    // Reset state
     setTranscript("");
     setInterimText("");
-    setShowText(false);
     transcriptRef.current = "";
+    interimRef.current = "";
+    setIsListening(true);
+
     startAudioAnalyser();
 
-    const checkListening = () => {
-      setIsListening(isActiveRef.current);
+    // Register transcript callback — this is called by WeatherzaAI's onresult handler
+    transcriptCallbackRef.current = (final: string, interim: string) => {
+      if (final) {
+        transcriptRef.current = final;
+        setTranscript(final);
+      }
+      interimRef.current = interim;
+      setInterimText(interim);
     };
-    const interval = setInterval(checkListening, 200);
 
-    // Attach result handler to the recognition instance
-    const recognition = recognitionRef.current;
-    if (recognition) {
-      recognition.onresult = (event: any) => {
-        let finalText = '';
-        let interim = '';
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalText += result[0].transcript + ' ';
-          } else {
-            interim += result[0].transcript;
-          }
-        }
-        setInterimText(interim);
-        if (finalText.trim()) {
-          transcriptRef.current = finalText.trim();
-          setTranscript(finalText.trim());
-        }
-      };
-      setIsListening(true);
-    }
+    const interval = setInterval(() => {
+      setIsListening(isActiveRef.current);
+    }, 200);
 
     return () => {
       clearInterval(interval);
       stopAudioAnalyser();
+      transcriptCallbackRef.current = null;
     };
-  }, [isOpen, startAudioAnalyser, stopAudioAnalyser, recognitionRef, isActiveRef]);
+  }, [isOpen, startAudioAnalyser, stopAudioAnalyser, isActiveRef, transcriptCallbackRef]);
+
+  const getFinalText = () =>
+    (transcriptRef.current + (interimRef.current ? " " + interimRef.current : "")).trim();
 
   const handleClose = () => {
-    const finalText = (transcriptRef.current + (interimText ? ' ' + interimText : '')).trim();
-    if (finalText) {
-      onTranscriptReady(finalText);
-    }
+    const finalText = getFinalText();
+    if (finalText) onTranscriptReady(finalText);
     isActiveRef.current = false;
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
     }
+    transcriptCallbackRef.current = null;
     stopAudioAnalyser();
     onClose();
   };
@@ -135,21 +136,23 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   const handleSend = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    // Capture text BEFORE closing anything
-    const finalText = (transcriptRef.current + (interimText ? ' ' + interimText : '')).trim();
-    
-    // Stop recognition and audio
+
+    // Capture text BEFORE any cleanup
+    const finalText = getFinalText();
+
+    // Stop everything
     isActiveRef.current = false;
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
     }
+    transcriptCallbackRef.current = null;
     stopAudioAnalyser();
-    
-    // Close overlay first
+
+    // Close overlay
     onClose();
-    
-    // Send message after a tick — finalText is captured in closure, not from state
+
+    // Send after a tick so closure value is used (not stale state)
     if (finalText) {
       requestAnimationFrame(() => onSendMessage(finalText));
     }
@@ -157,19 +160,18 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
 
   if (!isOpen) return null;
 
-  const fullText = transcript + (interimText ? (transcript ? ' ' : '') + interimText : '');
+  const fullText = transcript + (interimText ? (transcript ? " " : "") + interimText : "");
 
-  // Use portal to render at document.body level to escape any parent transforms
   return createPortal(
-    <div 
+    <div
       className="fixed inset-0 flex flex-col"
-      style={{ 
-        zIndex: 99999, 
-        backgroundColor: '#0d0d0d',
-        position: 'fixed',
+      style={{
+        zIndex: 99999,
+        backgroundColor: "#0d0d0d",
+        position: "fixed",
         top: 0, left: 0, right: 0, bottom: 0,
-        width: '100vw',
-        height: '100vh',
+        width: "100vw",
+        height: "100vh",
       }}
     >
       {/* Top bar */}
@@ -197,9 +199,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
               <Mic className="w-8 h-8 text-white/30" />
             </div>
-            <h2 className="text-2xl font-semibold text-white/90">
-              Listening...
-            </h2>
+            <h2 className="text-2xl font-semibold text-white/90">Listening...</h2>
             <p className="text-sm text-white/40">Speak now, your words will appear here</p>
           </div>
         )}
@@ -209,7 +209,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
             <p className="text-xl text-white/90 text-center leading-relaxed font-light">
               {transcript}
               {interimText && (
-                <span className="text-white/40">{transcript ? ' ' : ''}{interimText}</span>
+                <span className="text-white/40">{transcript ? " " : ""}{interimText}</span>
               )}
               <span className="inline-block w-0.5 h-5 bg-white/50 ml-1 animate-pulse align-middle" />
             </p>
@@ -225,7 +225,7 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
             <div
               key={i}
               className="w-[3px] rounded-full transition-all duration-75"
-              style={{ 
+              style={{
                 height: `${Math.max(2, height)}px`,
                 backgroundColor: `rgba(255, 255, 255, ${0.2 + (height / 40) * 0.5})`,
               }}
@@ -242,18 +242,22 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
           >
             <X className="w-5 h-5 text-white/60" />
           </button>
-          
+
           <button
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
             onClick={handleSend}
-            disabled={!fullText}
+            style={{ pointerEvents: "all", touchAction: "manipulation" }}
             className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-              fullText 
-                ? 'bg-white hover:bg-white/90 shadow-lg shadow-white/20 scale-100' 
-                : 'bg-white/10 scale-95 cursor-not-allowed'
+              fullText
+                ? "bg-white hover:bg-white/90 shadow-lg shadow-white/20 scale-100 cursor-pointer"
+                : "bg-white/20 scale-95 cursor-not-allowed"
             }`}
             title="Send message"
           >
-            <ChevronUp className={`w-6 h-6 ${fullText ? 'text-black' : 'text-white/30'}`} />
+            <ChevronUp className={`w-6 h-6 ${fullText ? "text-black" : "text-white/40"}`} />
           </button>
         </div>
       </div>
