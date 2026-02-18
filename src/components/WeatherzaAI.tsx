@@ -753,6 +753,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const voiceRecognitionRef = useRef<any>(null);
   const voiceIsActiveRef = useRef(false);
+  const voiceTranscriptCallbackRef = useRef<((final: string, interim: string) => void) | null>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -1312,6 +1313,24 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               recognition.lang = 'en-US';
               recognition.maxAlternatives = 1;
 
+              // CRITICAL: Set onresult BEFORE start() so we never miss results
+              recognition.onresult = (event: any) => {
+                let finalText = '';
+                let interim = '';
+                for (let i = 0; i < event.results.length; i++) {
+                  const result = event.results[i];
+                  if (result.isFinal) {
+                    finalText += result[0].transcript + ' ';
+                  } else {
+                    interim += result[0].transcript;
+                  }
+                }
+                // Forward to the overlay via callback ref
+                if (voiceTranscriptCallbackRef.current) {
+                  voiceTranscriptCallbackRef.current(finalText.trim(), interim);
+                }
+              };
+
               recognition.onend = () => {
                 if (voiceIsActiveRef.current) {
                   setTimeout(() => {
@@ -1380,6 +1399,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           onSendMessage={handleVoiceSend}
           recognitionRef={voiceRecognitionRef}
           isActiveRef={voiceIsActiveRef}
+          transcriptCallbackRef={voiceTranscriptCallbackRef}
         />
         
         {/* Pyodide Graph Modal - Now handled inside PyodideRunner component */}
