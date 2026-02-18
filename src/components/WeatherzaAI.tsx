@@ -917,8 +917,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       body: { messages: messagesForAI, weatherContext }
     }).then(({ data, error }) => {
       if (error) throw error;
-      const aiReply = data?.reply || "Sorry, I couldn't process that.";
-      setMessages(prev => [...prev, { role: "assistant", content: aiReply }]);
+      const aiReply = data?.answer || data?.reply || "Sorry, I couldn't process that.";
+      setMessages(prev => [...prev, { role: "assistant", content: aiReply, isTyping: true }]);
     }).catch((err) => {
       console.error("Voice send error:", err);
       setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
