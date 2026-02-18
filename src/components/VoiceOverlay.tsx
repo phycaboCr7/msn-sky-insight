@@ -135,17 +135,23 @@ export const VoiceOverlay = ({ isOpen, onClose, onTranscriptReady, onSendMessage
   const handleSend = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    // Capture text BEFORE closing anything
     const finalText = (transcriptRef.current + (interimText ? ' ' + interimText : '')).trim();
+    
+    // Stop recognition and audio
     isActiveRef.current = false;
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
     }
     stopAudioAnalyser();
+    
+    // Close overlay first
     onClose();
+    
+    // Send message after a tick — finalText is captured in closure, not from state
     if (finalText) {
-      // Call after overlay is closed to avoid state conflicts
-      setTimeout(() => onSendMessage(finalText), 50);
+      requestAnimationFrame(() => onSendMessage(finalText));
     }
   };
 
