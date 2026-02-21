@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronUp, Mic } from "lucide-react";
+import { X, ChevronUp, Mic, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VoiceOverlayProps {
   isOpen: boolean;
   onClose: () => void;
   onTranscriptReady: (text: string) => void;
   onSendMessage: (text: string) => void;
-  recognitionRef: React.MutableRefObject<any>;
-  isActiveRef: React.MutableRefObject<boolean>;
-  transcriptCallbackRef: React.MutableRefObject<((final: string, interim: string) => void) | null>;
 }
 
 export const VoiceOverlay = ({
@@ -17,57 +15,28 @@ export const VoiceOverlay = ({
   onClose,
   onTranscriptReady,
   onSendMessage,
-  recognitionRef,
-  isActiveRef,
-  transcriptCallbackRef,
 }: VoiceOverlayProps) => {
   const [transcript, setTranscript] = useState("");
-  const [interimText, setInterimText] = useState("");
-  const [isListening, setIsListening] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [analyserData, setAnalyserData] = useState<number[]>(new Array(40).fill(2));
 
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const animFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const transcriptRef = useRef("");
-  const interimRef = useRef("");
 
-  const startAudioAnalyser = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const audioContext = new AudioContext();
-      audioContextRef.current = audioContext;
-      const source = audioContext.createMediaStreamSource(stream);
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 128;
-      analyser.smoothingTimeConstant = 0.7;
-      source.connect(analyser);
-      analyserRef.current = analyser;
-
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-      const updateVisualizer = () => {
-        if (!analyserRef.current) return;
-        analyserRef.current.getByteFrequencyData(dataArray);
-        const bars: number[] = [];
-        const step = Math.floor(dataArray.length / 40);
-        for (let i = 0; i < 40; i++) {
-          const val = dataArray[i * step] || 0;
-          bars.push(Math.max(2, (val / 255) * 40));
-        }
-        setAnalyserData(bars);
-        animFrameRef.current = requestAnimationFrame(updateVisualizer);
-      };
-
-      updateVisualizer();
-    } catch (err) {
-      console.error("Audio analyser error:", err);
+  const stopEverything = useCallback(() => {
+    // Stop media recorder
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try { mediaRecorderRef.current.stop(); } catch {}
     }
-  }, []);
+    mediaRecorderRef.current = null;
 
-  const stopAudioAnalyser = useCallback(() => {
+    // Stop visualizer
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -82,85 +51,216 @@ export const VoiceOverlay = ({
     }
     analyserRef.current = null;
     setAnalyserData(new Array(40).fill(2));
+    setIsRecording(false);
   }, []);
 
+  const transcribeAudio = useCallback(async (audioBlob: Blob): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", audioBlob, "recording.webm");
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/transcribe-audio`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Transcription failed: ${err}`);
+    }
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    return data.text || "";
+  }, []);
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      // Audio visualizer
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 128;
+      analyser.smoothingTimeConstant = 0.7;
+      source.connect(analyser);
+      analyserRef.current = analyser;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const updateVisualizer = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        const bars: number[] = [];
+        const step = Math.floor(dataArray.length / 40);
+        for (let i = 0; i < 40; i++) {
+          const val = dataArray[i * step] || 0;
+          bars.push(Math.max(2, (val / 255) * 40));
+        }
+        setAnalyserData(bars);
+        animFrameRef.current = requestAnimationFrame(updateVisualizer);
+      };
+      updateVisualizer();
+
+      // Media recorder
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "audio/webm";
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.start(250); // collect chunks every 250ms
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Failed to start recording:", err);
+    }
+  }, []);
+
+  // Auto-start recording when overlay opens
   useEffect(() => {
     if (!isOpen) return;
-
-    // Reset state
     setTranscript("");
-    setInterimText("");
     transcriptRef.current = "";
-    interimRef.current = "";
-    setIsListening(true);
-
-    startAudioAnalyser();
-
-    // Register transcript callback — this is called by WeatherzaAI's onresult handler
-    transcriptCallbackRef.current = (final: string, interim: string) => {
-      if (final) {
-        transcriptRef.current = final;
-        setTranscript(final);
-      }
-      interimRef.current = interim;
-      setInterimText(interim);
-    };
-
-    const interval = setInterval(() => {
-      setIsListening(isActiveRef.current);
-    }, 200);
+    startRecording();
 
     return () => {
-      clearInterval(interval);
-      stopAudioAnalyser();
-      transcriptCallbackRef.current = null;
+      stopEverything();
     };
-  }, [isOpen, startAudioAnalyser, stopAudioAnalyser, isActiveRef, transcriptCallbackRef]);
+  }, [isOpen, startRecording, stopEverything]);
 
-  const getFinalText = () =>
-    (transcriptRef.current + (interimRef.current ? " " + interimRef.current : "")).trim();
+  const stopAndTranscribe = useCallback(async (): Promise<string> => {
+    return new Promise((resolve) => {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder || recorder.state === "inactive") {
+        resolve(transcriptRef.current);
+        return;
+      }
 
-  const handleClose = () => {
-    const finalText = getFinalText();
-    if (finalText) onTranscriptReady(finalText);
-    isActiveRef.current = false;
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
-      recognitionRef.current = null;
-    }
-    transcriptCallbackRef.current = null;
-    stopAudioAnalyser();
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        audioChunksRef.current = [];
+
+        if (audioBlob.size < 1000) {
+          // Too short, probably silence
+          resolve(transcriptRef.current);
+          return;
+        }
+
+        setIsTranscribing(true);
+        try {
+          const text = await transcribeAudio(audioBlob);
+          if (text) {
+            const combined = (transcriptRef.current + " " + text).trim();
+            transcriptRef.current = combined;
+            setTranscript(combined);
+          }
+          resolve(transcriptRef.current);
+        } catch (err) {
+          console.error("Transcription error:", err);
+          resolve(transcriptRef.current);
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+
+      recorder.stop();
+    });
+  }, [transcribeAudio]);
+
+  const handleClose = async () => {
+    const text = await stopAndTranscribe();
+    stopEverything();
+    if (text) onTranscriptReady(text);
     onClose();
   };
 
-  const handleSend = (e: React.MouseEvent) => {
+  const handleSend = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
-    // Capture text BEFORE any cleanup
-    const finalText = getFinalText();
-
-    // Stop everything
-    isActiveRef.current = false;
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
-      recognitionRef.current = null;
-    }
-    transcriptCallbackRef.current = null;
-    stopAudioAnalyser();
-
-    // Close overlay
+    const text = await stopAndTranscribe();
+    stopEverything();
     onClose();
 
-    // Send after a tick so closure value is used (not stale state)
-    if (finalText) {
-      requestAnimationFrame(() => onSendMessage(finalText));
+    if (text) {
+      requestAnimationFrame(() => onSendMessage(text));
     }
   };
 
-  if (!isOpen) return null;
+  // Periodic transcription: stop recorder, transcribe, restart
+  const handleIntermediateTranscribe = useCallback(async () => {
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === "inactive") return;
 
-  const fullText = transcript + (interimText ? (transcript ? " " : "") + interimText : "");
+    return new Promise<void>((resolve) => {
+      const recorder = mediaRecorderRef.current!;
+      const stream = streamRef.current;
+
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        audioChunksRef.current = [];
+
+        if (audioBlob.size > 1000) {
+          setIsTranscribing(true);
+          try {
+            const text = await transcribeAudio(audioBlob);
+            if (text) {
+              const combined = (transcriptRef.current + " " + text).trim();
+              transcriptRef.current = combined;
+              setTranscript(combined);
+            }
+          } catch (err) {
+            console.error("Intermediate transcription error:", err);
+          } finally {
+            setIsTranscribing(false);
+          }
+        }
+
+        // Restart recording if stream is still active
+        if (stream && stream.active) {
+          try {
+            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+              ? "audio/webm;codecs=opus"
+              : "audio/webm";
+            const newRecorder = new MediaRecorder(stream, { mimeType });
+            audioChunksRef.current = [];
+            newRecorder.ondataavailable = (event) => {
+              if (event.data.size > 0) audioChunksRef.current.push(event.data);
+            };
+            newRecorder.start(250);
+            mediaRecorderRef.current = newRecorder;
+          } catch {}
+        }
+        resolve();
+      };
+
+      recorder.stop();
+    });
+  }, [transcribeAudio]);
+
+  // Auto-transcribe every 5 seconds for live feedback
+  useEffect(() => {
+    if (!isOpen || !isRecording) return;
+    const interval = setInterval(() => {
+      handleIntermediateTranscribe();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isOpen, isRecording, handleIntermediateTranscribe]);
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div
@@ -177,10 +277,16 @@ export const VoiceOverlay = ({
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-2">
-          {isListening && (
+          {isRecording && (
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-sm text-white/50 font-medium tracking-wide">Listening</span>
+              <span className="text-sm text-white/50 font-medium tracking-wide">Recording</span>
+            </div>
+          )}
+          {isTranscribing && (
+            <div className="flex items-center gap-1.5 ml-3">
+              <Loader2 className="w-3.5 h-3.5 text-white/40 animate-spin" />
+              <span className="text-sm text-white/40">Transcribing...</span>
             </div>
           )}
         </div>
@@ -192,26 +298,32 @@ export const VoiceOverlay = ({
         </button>
       </div>
 
-      {/* Center content - real-time transcription */}
+      {/* Center content - transcription */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 overflow-y-auto">
-        {!fullText && (
+        {!transcript && !isTranscribing && (
           <div className="text-center space-y-3">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
               <Mic className="w-8 h-8 text-white/30" />
             </div>
             <h2 className="text-2xl font-semibold text-white/90">Listening...</h2>
-            <p className="text-sm text-white/40">Speak now, your words will appear here</p>
+            <p className="text-sm text-white/40">Speak now — Groq Whisper will transcribe your voice</p>
           </div>
         )}
 
-        {fullText && (
+        {!transcript && isTranscribing && (
+          <div className="text-center space-y-3">
+            <Loader2 className="w-10 h-10 text-white/30 animate-spin mx-auto" />
+            <p className="text-sm text-white/40">Transcribing with Groq Whisper...</p>
+          </div>
+        )}
+
+        {transcript && (
           <div className="w-full max-w-lg">
             <p className="text-xl text-white/90 text-center leading-relaxed font-light">
               {transcript}
-              {interimText && (
-                <span className="text-white/40">{transcript ? " " : ""}{interimText}</span>
+              {isTranscribing && (
+                <span className="inline-block w-0.5 h-5 bg-white/50 ml-1 animate-pulse align-middle" />
               )}
-              <span className="inline-block w-0.5 h-5 bg-white/50 ml-1 animate-pulse align-middle" />
             </p>
           </div>
         )}
@@ -249,15 +361,20 @@ export const VoiceOverlay = ({
               e.preventDefault();
             }}
             onClick={handleSend}
+            disabled={isTranscribing}
             style={{ pointerEvents: "all", touchAction: "manipulation" }}
             className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
-              fullText
+              transcript || isRecording
                 ? "bg-white hover:bg-white/90 shadow-lg shadow-white/20 scale-100 cursor-pointer"
                 : "bg-white/20 scale-95 cursor-not-allowed"
             }`}
             title="Send message"
           >
-            <ChevronUp className={`w-6 h-6 ${fullText ? "text-black" : "text-white/40"}`} />
+            {isTranscribing ? (
+              <Loader2 className="w-6 h-6 text-black animate-spin" />
+            ) : (
+              <ChevronUp className={`w-6 h-6 ${transcript || isRecording ? "text-black" : "text-white/40"}`} />
+            )}
           </button>
         </div>
       </div>

@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.execute-visual-python]
 verify_jwt = false
+
+[functions.transcribe-audio]
+verify_jwt = false
