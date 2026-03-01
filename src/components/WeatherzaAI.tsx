@@ -291,7 +291,8 @@ const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string;
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
   return (
-    <div className="prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed weatherza-markdown overflow-visible">
+    <div className="w-full overflow-visible">
+      <div className="weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed h-auto min-h-fit">
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
@@ -337,6 +338,7 @@ const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string;
       {isTyping && !isComplete && (
         <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5" />
       )}
+      </div>
     </div>
   );
 };

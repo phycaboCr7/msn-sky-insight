@@ -224,11 +224,13 @@ All colors MUST be HSL.
   }
 }
 
-/* KaTeX Math Styling - Fixed to prevent box collapse */
+/* KaTeX Math Styling - Production-grade collapse fix */
 .weatherza-markdown {
-  overflow: visible !important;
-  min-height: auto !important;
   height: auto !important;
+  min-height: fit-content !important;
+  overflow: visible !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
   flex-shrink: 0 !important;
 }
 
@@ -236,19 +238,21 @@ All colors MUST be HSL.
   font-size: 1.1em;
   color: hsl(var(--foreground));
   display: inline;
+  flex-shrink: 0;
 }
 
+/* Fix block math */
 .weatherza-markdown .katex-display {
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background: hsl(var(--primary) / 0.1);
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  overflow-y: visible !important;
-  min-height: fit-content !important;
-  height: auto !important;
   display: block !important;
   width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+  margin: 1rem 0;
+  background: hsl(var(--primary) / 0.1);
+  border-radius: 0.5rem;
+  min-height: fit-content !important;
+  height: auto !important;
   flex-shrink: 0 !important;
 }
 
@@ -279,6 +283,12 @@ All colors MUST be HSL.
   min-height: fit-content !important;
   height: auto !important;
   flex-shrink: 0 !important;
+}
+
+/* Prevent prose from forcing layout on KaTeX */
+.prose .katex-display {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 /* Ensure the message bubble expands for math content */
