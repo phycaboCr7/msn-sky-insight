@@ -1157,7 +1157,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex gap-3 animate-fade-in ${
+                className={`flex gap-3 items-start animate-fade-in ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
@@ -1167,7 +1167,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
+                  className={`flex-1 min-w-0 max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
                       : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
