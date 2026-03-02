@@ -872,25 +872,129 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
   };
 
-  // Voice overlay handlers
-  const handleVoiceTranscript = (text: string) => {
-    setQuestion(text);
+  // Streaming helper — reads SSE from the edge function
+  const streamFromAI = async (
+    messagesForAI: any[],
+    weatherCtx: any,
+    updatedMessages: Message[]
+  ) => {
+    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
+
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx }),
+    });
+
+    if (!resp.ok) {
+      // Try to parse JSON error
+      const contentType = resp.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const errData = await resp.json();
+        throw new Error(errData.error || `Error ${resp.status}`);
+      }
+      throw new Error(`AI request failed: ${resp.status}`);
+    }
+
+    const contentType = resp.headers.get("content-type") || "";
+
+    // If it's a non-streaming JSON response (vision fallback)
+    if (contentType.includes("application/json")) {
+      const data = await resp.json();
+      const answer = data.answer || "Sorry, I couldn't generate a response.";
+      setMessages([...updatedMessages, { role: "assistant", content: answer, isTyping: true }]);
+      const chunkSize = 5;
+      const speed = 10;
+      const typingDuration = Math.ceil(answer.length / chunkSize) * speed + 300;
+      setTimeout(() => {
+        setMessages(prev => prev.map((m, i) =>
+          i === prev.length - 1 ? { ...m, isTyping: false } : m
+        ));
+      }, typingDuration);
+      return;
+    }
+
+    // Streaming SSE response
+    if (!resp.body) throw new Error("No response body");
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let assistantSoFar = "";
+    let streamDone = false;
+
+    // Add empty assistant message
+    setMessages([...updatedMessages, { role: "assistant", content: "", isTyping: false }]);
+
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") { streamDone = true; break; }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) {
+            assistantSoFar += content;
+            const snapshot = assistantSoFar;
+            setMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant") {
+                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
+              }
+              return [...prev, { role: "assistant", content: snapshot }];
+            });
+          }
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    // Final flush
+    if (textBuffer.trim()) {
+      for (let raw of textBuffer.split("\n")) {
+        if (!raw) continue;
+        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+        if (raw.startsWith(":") || raw.trim() === "") continue;
+        if (!raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) {
+            assistantSoFar += content;
+            const snapshot = assistantSoFar;
+            setMessages(prev => prev.map((m, i) =>
+              i === prev.length - 1 ? { ...m, content: snapshot } : m
+            ));
+          }
+        } catch { /* ignore */ }
+      }
+    }
   };
 
-  const handleVoiceSend = (text: string) => {
-    if (!text.trim()) return;
-    
-    // Build and send the message directly instead of relying on state
-    const userMessage: Message = { role: "user", content: text.trim() };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setQuestion("");
-    setLoading(true);
-    
-    // Call the AI with the voice text
+  const buildWeatherContext = () => {
     const pm25 = weather.current.air_quality?.pm2_5;
     const actualAQI = pm25 ? calculateAQI(pm25) : null;
-    const weatherContext = {
+    return {
       location: weather.location.name,
       country: weather.location.country,
       temperature: weather.current.temp_c,
@@ -908,39 +1012,44 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       aqi: actualAQI,
       pm25: pm25
     };
-    
-    const messagesForAI = updatedMessages.map(m => ({
-      role: m.role,
-      content: m.content
-    }));
+  };
 
-    supabase.functions.invoke("weatherza-chat", {
-      body: { messages: messagesForAI, weatherContext }
-    }).then(({ data, error }) => {
-      if (error) throw error;
-      const aiReply = data?.answer || data?.reply || "Sorry, I couldn't process that.";
-      setMessages(prev => [...prev, { role: "assistant", content: aiReply, isTyping: true }]);
-    }).catch((err) => {
-      console.error("Voice send error:", err);
-      setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
-    }).finally(() => {
-      setLoading(false);
-    });
+  // Voice overlay handlers
+  const handleVoiceTranscript = (text: string) => {
+    setQuestion(text);
+  };
+
+  const handleVoiceSend = (text: string) => {
+    if (!text.trim()) return;
+
+    const userMessage: Message = { role: "user", content: text.trim() };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setQuestion("");
+    setLoading(true);
+
+    const weatherCtx = buildWeatherContext();
+    const messagesForAI = updatedMessages.map(m => ({ role: m.role, content: m.content }));
+
+    streamFromAI(messagesForAI, weatherCtx, updatedMessages)
+      .catch((err) => {
+        console.error("Voice send error:", err);
+        setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
+      })
+      .finally(() => setLoading(false));
   };
 
   const askAI = async () => {
     if (!question.trim() && !uploadedImage && !extractedDocText) return;
 
-    // Build content for the message
     let messageContent = question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document");
-    
-    // If document text was extracted, prepend it to the message
+
     if (extractedDocText) {
       messageContent = `DOCUMENT CONTENT START\n${extractedDocText}\nDOCUMENT CONTENT END\n\n${messageContent}`;
     }
 
-    const userMessage: Message = { 
-      role: "user", 
+    const userMessage: Message = {
+      role: "user",
       content: question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document"),
       image: uploadedImage || undefined,
       documentText: extractedDocText || undefined,
@@ -953,85 +1062,19 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     setExtractedDocText(null);
     setExtractedDocName(null);
     setLoading(true);
-    
+
     try {
-      const pm25 = weather.current.air_quality?.pm2_5;
-      const actualAQI = pm25 ? calculateAQI(pm25) : null;
+      const weatherCtx = buildWeatherContext();
 
-      const weatherContext = {
-        location: weather.location.name,
-        country: weather.location.country,
-        temperature: weather.current.temp_c,
-        feelsLike: weather.current.feelslike_c,
-        condition: weather.current.condition.text,
-        humidity: weather.current.humidity,
-        windSpeed: weather.current.wind_kph,
-        windDirection: weather.current.wind_dir,
-        uvIndex: weather.current.uv,
-        visibility: weather.current.vis_km,
-        pressure: weather.current.pressure_mb,
-        precipChance: weather.forecast?.forecastday[0]?.day.daily_chance_of_rain || 0,
-        maxTemp: weather.forecast?.forecastday[0]?.day.maxtemp_c,
-        minTemp: weather.forecast?.forecastday[0]?.day.mintemp_c,
-        aqi: actualAQI,
-        pm25: pm25
-      };
-
-      // Build messages for AI - include extracted document text directly
       const messagesForAI = updatedMessages.map(m => {
         let content = m.content;
-        // If this message has document text, include it in the content
         if (m.documentText) {
           content = `DOCUMENT CONTENT START\n${m.documentText}\nDOCUMENT CONTENT END\n\nUser question: ${m.content}`;
         }
-        return {
-          role: m.role,
-          content,
-          image: m.image
-        };
+        return { role: m.role, content, image: m.image };
       });
 
-      const { data, error } = await supabase.functions.invoke('weatherza-chat', {
-        body: { 
-          messages: messagesForAI,
-          weatherContext 
-        }
-      });
-
-      if (error) {
-        console.error("Edge function error:", error);
-        throw new Error(error.message || "Failed to get AI response");
-      }
-
-      if (data?.error) {
-        if (data.error.includes("Rate limit")) {
-          toast({
-            title: "Rate Limit",
-            description: "Too many requests. Please wait a moment and try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-        throw new Error(data.error);
-      }
-
-      const assistantMessage: Message = { 
-        role: "assistant", 
-        content: data.answer || "Sorry, I couldn't generate a response.",
-        isTyping: true
-      };
-      setMessages([...updatedMessages, assistantMessage]);
-      
-      // Mark typing as complete after animation - faster calculation based on chunk size
-      const chunkSize = 5;
-      const speed = 10;
-      const typingDuration = Math.ceil((data.answer?.length || 0) / chunkSize) * speed + 300;
-      setTimeout(() => {
-        setMessages(prev => prev.map((m, i) => 
-          i === prev.length - 1 ? { ...m, isTyping: false } : m
-        ));
-      }, typingDuration);
-      
+      await streamFromAI(messagesForAI, weatherCtx, updatedMessages);
     } catch (error) {
       console.error("AI Error:", error);
       toast({
@@ -1039,7 +1082,6 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         description: "Failed to get a response. Please try again.",
         variant: "destructive",
       });
-      // Remove the user message if there was an error
       setMessages(messages);
     } finally {
       setLoading(false);

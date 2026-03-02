@@ -329,8 +329,8 @@ export const VoiceOverlay = ({
         )}
       </div>
 
-      {/* Bottom section */}
-      <div className="px-6 pb-10 space-y-5">
+      {/* Bottom section - centered with more padding from bottom */}
+      <div className="px-6 pb-16 space-y-6">
         {/* Waveform visualizer */}
         <div className="flex items-center justify-center gap-[2px] h-10 mx-auto max-w-sm w-full">
           {analyserData.map((height, i) => (
@@ -345,8 +345,8 @@ export const VoiceOverlay = ({
           ))}
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center justify-center gap-5">
+        {/* Action buttons - centered with more vertical space */}
+        <div className="flex items-center justify-center gap-6">
           <button
             onClick={handleClose}
             className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/15 transition-colors flex items-center justify-center"
@@ -363,7 +363,7 @@ export const VoiceOverlay = ({
             onClick={handleSend}
             disabled={isTranscribing}
             style={{ pointerEvents: "all", touchAction: "manipulation" }}
-            className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
               transcript || isRecording
                 ? "bg-white hover:bg-white/90 shadow-lg shadow-white/20 scale-100 cursor-pointer"
                 : "bg-white/20 scale-95 cursor-not-allowed"
@@ -371,9 +371,9 @@ export const VoiceOverlay = ({
             title="Send message"
           >
             {isTranscribing ? (
-              <Loader2 className="w-6 h-6 text-black animate-spin" />
+              <Loader2 className="w-7 h-7 text-black animate-spin" />
             ) : (
-              <ChevronUp className={`w-6 h-6 ${transcript || isRecording ? "text-black" : "text-white/40"}`} />
+              <ChevronUp className={`w-7 h-7 ${transcript || isRecording ? "text-black" : "text-white/40"}`} />
             )}
           </button>
         </div>
