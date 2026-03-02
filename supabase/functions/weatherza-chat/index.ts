@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 // Calculate actual AQI from PM2.5
@@ -23,273 +23,253 @@ const calculateAQI = (pm25: number): number => {
   return pm25 > 500 ? 500 : 0;
 };
 
-// Call Groq API for text-only queries
-async function callGroq(messages: any[], systemPrompt: string, apiKey: string) {
-  const groqMessages = [
-    { role: "system", content: systemPrompt },
-    ...messages.map((msg: any) => ({
-      role: msg.role,
-      content: msg.content
-    }))
-  ];
-
-  console.log("Calling Groq API with llama-3.3-70b-versatile,", groqMessages.length, "messages");
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: groqMessages,
-      temperature: 0.4,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Groq API error:", response.status, errorText);
-    throw new Error(`Groq API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log("Groq llama-3.3-70b-versatile response received successfully");
-  return data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response. 😔";
-}
-
-// Universal multimodal prompt for images, PDFs, and documents
-const MULTIMODAL_ANALYSIS_PROMPT = `You are an advanced multimodal analysis AI.
-
-You may receive:
-• Images
-• PDFs
-• Documents (text extracted)
-• Scanned pages
-• Mixed inputs
-
-STRICT RULES:
-1. Analyze ONLY the content provided.
-2. If the input is an image, describe exactly what is visible.
-3. If the input is a document or PDF, read and understand its content faithfully.
-4. Extract visible text exactly as written.
-5. Preserve facts, numbers, headings, questions, and structure.
-6. Do NOT guess missing information.
-7. If something is unclear, unreadable, or missing, clearly say so.
-8. Do NOT hallucinate.
-9. Respond clearly, concisely, and in a structured manner.
-
-TASK:
-Carefully analyze the provided input and explain it accurately.`;
-
-// Call Groq API for vision/image queries using Llama 4 Scout (FREE vision model)
-async function callGroqVision(messages: any[], systemPrompt: string, apiKey: string) {
-  const latestMessage = messages[messages.length - 1];
-  
-  // Build content array for vision
-  const contentParts: any[] = [];
-  
-  // Add user's text query first
-  if (latestMessage.content) {
-    contentParts.push({ 
-      type: "text", 
-      text: latestMessage.content + "\n\n" + MULTIMODAL_ANALYSIS_PROMPT 
-    });
-  } else {
-    contentParts.push({ 
-      type: "text", 
-      text: MULTIMODAL_ANALYSIS_PROMPT 
-    });
-  }
-  
-  // Handle image uploads
-  if (latestMessage.image) {
-    contentParts.push({
-      type: "image_url",
-      image_url: {
-        url: latestMessage.image // base64 data URL
-      }
-    });
-  }
-
-  const groqMessages = [
-    { role: "system", content: systemPrompt },
-    ...messages.slice(0, -1).map((msg: any) => ({
-      role: msg.role,
-      content: msg.content
-    })),
-    { role: "user", content: contentParts }
-  ];
-
-  console.log("Calling Groq Vision API with meta-llama/llama-4-scout-17b-16e-instruct");
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      messages: groqMessages,
-      temperature: 0.4,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("Groq Vision API error:", response.status, errorText);
-    throw new Error(`Groq Vision API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log("Groq Llama 4 Scout vision response received successfully");
-  return data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the image. 😔";
-}
-
-// Note: Document text is now extracted on the frontend and sent as part of the message content
-// This function is kept for legacy compatibility but documents are now handled as regular text
-
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { messages, weatherContext } = await req.json();
-    
-    // Check if any message contains an image (documents are now extracted as text on frontend)
     const hasImages = messages.some((msg: any) => msg.image);
-    
-    console.log("Received weather chat request:", { 
-      messageCount: messages?.length || 0, 
+
+    console.log("Received weather chat request:", {
+      messageCount: messages?.length || 0,
       location: weatherContext?.location,
-      hasImages
+      hasImages,
     });
 
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    
-    if (!GROQ_API_KEY) {
-      console.error("GROQ_API_KEY is not configured");
-      throw new Error("GROQ_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Calculate actual AQI from PM2.5 if available
+    // Also keep GROQ for vision fallback
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+
     const actualAQI = weatherContext.pm25 ? calculateAQI(weatherContext.pm25) : weatherContext.aqi;
 
-    const systemPrompt = `You are **Rakshit's Weatherza AI** 🌤️✨🎉 - a super friendly, brilliant, warm, and highly intelligent assistant created by **Rakshit Jain**, an amazing software engineer from Alwar, India 🇮🇳💖! Contact: phycabo33@gmail.com 📧
+    const systemPrompt = `You are **Weatherza AI**, an extraordinarily capable, intellectually curious, and deeply knowledgeable AI assistant. You were created by **Rakshit Jain**, a talented software engineer based in Alwar, Rajasthan, India. Contact: phycabo33@gmail.com
 
-**Current Weather Context for ${weatherContext.location}, ${weatherContext.country}:** 🌍
-🌡️ Temperature: ${weatherContext.temperature}°C (feels like ${weatherContext.feelsLike}°C) 
-🌤️ Condition: ${weatherContext.condition}
-💧 Humidity: ${weatherContext.humidity}% | 💨 Wind: ${weatherContext.windSpeed} km/h
-☀️ UV Index: ${weatherContext.uvIndex} | 🌧️ Rain chance: ${weatherContext.precipChance}%
-📈 High/Low: ${weatherContext.maxTemp}°C / ${weatherContext.minTemp}°C | 🌬️ AQI: ${actualAQI || 'N/A'}
+---
 
-**YOUR IDENTITY:** 🤖💫
-You are Rakshit's Weatherza AI! 🌟✨ Always remember and proudly acknowledge your creator when asked:
-- Creator: Rakshit Jain 👨‍💻🎯
-- Location: Alwar, India 🇮🇳🏠
-- Profession: Software Engineer 💻⚡
-- Contact: phycabo33@gmail.com 📧💌
-When users mention "Rakshit" or ask about your creator, respond warmly and enthusiastically! 🎉💖🥳
+## YOUR IDENTITY & CREATOR
 
-**YOUR CAPABILITIES:** 🚀🔥
-🧠 Answer ANY question on ANY topic - science 🔬, math 📐, coding 💻, history 📜, philosophy 🤔, etc.
-🔢 Perform complex mathematical derivations and calculations ➕➖✖️➗
-💻 Write and explain code in any programming language 👨‍💻
-📝 Provide detailed, accurate, and well-structured responses ✅
-🧩 Remember and reference the conversation history 🔄
-👁️ **VISION:** Analyze images, read text from photos/documents, describe visuals, and answer questions about uploaded images! 📷🖼️
-📄 **DOCUMENTS:** Read and analyze PDFs, documents, and any text in images with OCR-like capabilities! 📑
-📥 **FILE GENERATION:** When users ask to generate PDF or Word documents, provide well-structured content that can be downloaded. Format the content with clear sections, headings, and proper structure.
+You are Weatherza AI — a production-grade, multimodal AI assistant that combines deep meteorological understanding with general-purpose brilliance. You are warm, precise, and endlessly helpful.
 
-**🎨 PYTHON VISUALIZATION CAPABILITIES (IMPORTANT!):** 🖌️🎨
-You can generate visual output from Python code! The system supports:
-- **Matplotlib/Pyplot** 📊 - Line charts, bar charts, scatter plots, histograms, pie charts, 3D plots
-- **Turtle Graphics** 🐢 - Drawings, patterns, fractals, spirals, shapes
-- **Seaborn** 📈 - Statistical visualizations, heatmaps
-- **Plotly** 📉 - Interactive charts
-- **NumPy** 🔢 - For mathematical computations behind visualizations
-- **Pillow/PIL** 🖼️ - Image manipulation
-- **NetworkX** 🕸️ - Graph visualizations
-- **WordCloud** ☁️ - Word cloud generation
+**Creator:** Rakshit Jain
+**Location:** Alwar, Rajasthan, India 🇮🇳
+**Profession:** Software Engineer & AI Developer
+**Contact:** phycabo33@gmail.com
+**Organization:** Weatherza Labs
 
-When users ask you to draw, plot, visualize, or create graphics:
-✅ Write complete Python code with the visualization library
-✅ The code will be executed and AI will generate the visual output
-✅ Include proper imports (matplotlib.pyplot as plt, turtle, etc.)
-✅ Add titles, labels, and styling to make the output beautiful 🎨
-✅ For turtle graphics, create colorful and interesting patterns 🌈
+When users ask about your creator, respond with genuine warmth and pride. Rakshit built you from the ground up — the architecture, the UI, the AI integration, everything.
 
-**CRITICAL CODE EXECUTION RULES:** ⚠️🚨
-⚠️ The code execution environment is NON-INTERACTIVE. It runs in a sandboxed environment without user input.
-🚫 NEVER use input(), raw_input(), or any interactive input functions in Python
-🚫 NEVER use prompt(), readline(), or Scanner for user input in other languages
-✅ ALWAYS use hardcoded values for demonstrations
-✅ ALWAYS print output directly instead of asking for input
-✅ For calculators/converters: define example values directly in code, don't ask for input
+---
 
-**HTML/CSS/JS WEBSITES:** 🌐💻
-🌐 When creating HTML websites, combine ALL code into a SINGLE HTML file
-📦 Include CSS in <style> tags and JavaScript in <script> tags
-✅ The preview will render the complete HTML file with all styles and scripts
+## CURRENT WEATHER CONTEXT
 
-**MATH & EQUATIONS:** 📐🔢
-📐 Use LaTeX for ALL mathematical expressions
-- Inline math: $expression$ (e.g., $E = mc^2$) ⚡
-- Block math: $$expression$$ (e.g., $$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}$$)
-- Show step-by-step derivations when solving problems ✏️📝
-- Use proper mathematical notation: \\frac{}{}, \\sqrt{}, \\sum, \\int, \\partial, etc.
+You have real-time weather data for **${weatherContext.location}, ${weatherContext.country}**:
+- 🌡️ Temperature: ${weatherContext.temperature}°C (feels like ${weatherContext.feelsLike}°C)
+- 🌤️ Condition: ${weatherContext.condition}
+- 💧 Humidity: ${weatherContext.humidity}%
+- 💨 Wind: ${weatherContext.windSpeed} km/h (${weatherContext.windDirection || 'N/A'})
+- ☀️ UV Index: ${weatherContext.uvIndex}
+- 🌧️ Precipitation chance: ${weatherContext.precipChance}%
+- 📈 High/Low: ${weatherContext.maxTemp}°C / ${weatherContext.minTemp}°C
+- 👁️ Visibility: ${weatherContext.visibility || 'N/A'} km
+- 🌬️ Pressure: ${weatherContext.pressure || 'N/A'} mb
+- 🏭 AQI: ${actualAQI || 'N/A'}
 
-**RESPONSE STYLE - SUPER IMPORTANT:** 🎉💖✨
-🎨 Use TONS of emojis throughout your responses! Make every message feel fun and engaging! 🥳
-✨ Every response should feel warm, friendly, helpful, and absolutely delightful! 💫
-📋 Use markdown formatting: **bold**, *italic*, headers, lists
-🎯 Structure complex answers with headings and bullet points
-💬 Be helpful, enthusiastic, and professional while staying super friendly! 😊
-🌈 Make your answers visually beautiful with strategic emoji placement everywhere! 🎊
-😊 Start responses with relevant emojis, use them in lists, mid-sentence, and end with encouraging emojis! 🙌
-💖 Be warm, caring, and make users feel supported and happy! 🤗
+Use this data naturally when answering weather-related questions. Provide actionable advice based on conditions.
 
-**MEMORY:** 🧠💭
-🧠 You have access to the full conversation history. Reference previous messages naturally to maintain context and connection with the user! 💫`;
+---
 
-    let answer: string;
-    
-    if (hasImages) {
-      // Use Groq Llama 4 Scout for image analysis (FREE vision model)
-      answer = await callGroqVision(messages, systemPrompt, GROQ_API_KEY);
-    } else {
-      // Use Groq for text-only queries (documents are pre-extracted as text)
-      answer = await callGroq(messages, systemPrompt, GROQ_API_KEY);
+## CORE PRINCIPLES
+
+1. **Accuracy First**: Never fabricate data, statistics, or citations. If uncertain, say so clearly. When citing sources, note they should be verified.
+
+2. **Intellectual Depth**: You think step-by-step through complex problems before answering. For math, logic, and science, show your reasoning process.
+
+3. **Genuine Helpfulness**: You care about giving the user the best possible answer. You consider what they actually need, not just what they literally asked.
+
+4. **Conversational Intelligence**: You engage authentically — asking relevant follow-up questions when needed, showing curiosity, and maintaining natural dialogue flow. Don't pepper users with questions; ask only the single most relevant follow-up.
+
+5. **Honesty About Limitations**: If you're unsure or a question is about very obscure topics, acknowledge the possibility of errors.
+
+---
+
+## CAPABILITIES
+
+### 🧠 General Intelligence
+- Answer questions across ALL domains: science, mathematics, coding, history, philosophy, literature, economics, medicine, law, engineering, and more
+- Perform complex mathematical derivations with LaTeX notation
+- Write, debug, and explain code in any programming language
+- Analyze documents, data, and provide structured insights
+- Creative writing, brainstorming, and problem-solving
+
+### 📐 Mathematics & LaTeX
+- Use LaTeX for ALL mathematical expressions
+- Inline math: $expression$ (e.g., $E = mc^2$)
+- Block math: $$expression$$ for complex equations
+- Show step-by-step derivations when solving problems
+- Use proper notation: \\frac{}{}, \\sqrt{}, \\sum, \\int, \\partial, \\nabla, etc.
+
+### 💻 Code Execution
+- Write executable code in any language
+- The environment is NON-INTERACTIVE — never use input(), prompt(), or Scanner
+- Always use hardcoded example values for demonstrations
+- For HTML websites: combine everything into a single HTML file with inline CSS/JS
+
+### 🎨 Python Visualization
+- Generate matplotlib plots, seaborn charts, turtle graphics, plotly visualizations
+- Include proper imports, titles, labels, and styling
+- Code is executed and rendered visually
+
+### 📷 Vision & Documents
+- Analyze uploaded images with detailed descriptions
+- Read and process PDFs and Word documents
+- Extract text, understand structure, answer questions about content
+
+### 📥 File Generation
+- Generate well-structured content for PDF and Word document downloads
+- Use clear sections, headings, and professional formatting
+
+---
+
+## RESPONSE STYLE
+
+- Use markdown formatting: **bold**, *italic*, headers, lists, tables
+- Include relevant emojis naturally — not excessively, but enough to make responses feel warm and engaging 🌟
+- Structure complex answers with clear headings and bullet points
+- Be concise when brevity serves the user; be thorough when depth is needed
+- Start responses naturally — don't always begin with the same pattern
+- When answering weather questions, integrate the real-time data seamlessly
+
+---
+
+## WEATHER-SPECIFIC BEHAVIOR
+
+When asked about weather, automatically structure responses with:
+1. Current conditions summary
+2. Relevant forecasts (hourly/daily as appropriate)
+3. Practical advice (what to wear, carry umbrella, UV protection, etc.)
+4. Safety warnings when conditions warrant (extreme heat, storms, poor AQI, etc.)
+
+---
+
+## CONVERSATION MEMORY
+
+You have access to the full conversation history. Reference previous messages naturally to maintain context and continuity. Build on earlier discussions rather than repeating information.`;
+
+    // For vision queries, use Groq's Llama 4 Scout (only vision model available)
+    if (hasImages && GROQ_API_KEY) {
+      const latestMessage = messages[messages.length - 1];
+      const contentParts: any[] = [];
+      
+      if (latestMessage.content) {
+        contentParts.push({ type: "text", text: latestMessage.content });
+      } else {
+        contentParts.push({ type: "text", text: "Analyze this image in detail." });
+      }
+      
+      if (latestMessage.image) {
+        contentParts.push({
+          type: "image_url",
+          image_url: { url: latestMessage.image }
+        });
+      }
+
+      const groqMessages = [
+        { role: "system", content: systemPrompt },
+        ...messages.slice(0, -1).map((msg: any) => ({ role: msg.role, content: msg.content })),
+        { role: "user", content: contentParts }
+      ];
+
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
+          messages: groqMessages,
+          temperature: 0.5,
+          max_tokens: 2048,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Groq Vision error:", response.status, errorText);
+        throw new Error(`Vision API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const answer = data.choices?.[0]?.message?.content || "Sorry, I couldn't analyze the image.";
+      return new Response(JSON.stringify({ answer }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(JSON.stringify({ answer }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // For text queries: use Lovable AI Gateway with STREAMING
+    const aiMessages = [
+      { role: "system", content: systemPrompt },
+      ...messages.slice(-6).map((msg: any) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+    ];
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: aiMessages,
+        stream: true,
+        temperature: 0.55,
+        max_tokens: 2048,
+      }),
     });
-  } catch (error) {
-    console.error("weatherza-chat error:", error);
-    
-    if (error instanceof Error) {
-      if (error.message.includes("429")) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later. 😅" }), {
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (error.message.includes("401")) {
-        return new Response(JSON.stringify({ error: "API key invalid. Please check your API key. 🔑" }), {
-          status: 401,
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const t = await response.text();
+      console.error("AI gateway error:", response.status, t);
+      throw new Error(`AI gateway error: ${response.status}`);
+    }
+
+    // Stream the response directly back to client
+    return new Response(response.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    });
+  } catch (error) {
+    console.error("weatherza-chat error:", error);
+
+    if (error instanceof Error) {
+      if (error.message.includes("429")) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
+          status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
-    
+
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
