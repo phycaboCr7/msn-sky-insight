@@ -1139,7 +1139,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
+    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl" style={{ overflow: 'visible' }}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -1195,11 +1195,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="space-y-4">
         {/* Chat Messages */}
         {messages.length > 0 && (
-          <div className="h-[400px] max-h-[400px] min-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
+          <div className="weatherza-chat-container min-h-[200px] max-h-[500px] space-y-3 p-2 rounded-xl bg-black/20 border border-white/5" style={{ paddingBottom: '16px' }}>
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex gap-3 items-start animate-fade-in ${
+                className={`weatherza-message-row animate-fade-in ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
@@ -1209,12 +1209,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`flex-1 min-w-0 max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
+                  className={`weatherza-bubble weatherza-message-bubble ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
                       : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
                   }`}
-                  style={{ overflow: 'visible', minHeight: 'fit-content' }}
                 >
                   {msg.role === "assistant" ? (
                     <div ref={index === messages.length - 1 ? lastMessageRef : undefined}>
