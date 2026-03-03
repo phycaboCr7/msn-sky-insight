@@ -224,48 +224,15 @@ All colors MUST be HSL.
   }
 }
 
-/* ===== Weatherza Chat Layout System ===== */
-
-.weatherza-chat-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.weatherza-message-row {
-  display: flex;
-  width: 100%;
-  align-items: flex-start;
-  margin-bottom: 12px;
-  gap: 0.75rem;
-}
-
-.weatherza-bubble {
-  max-width: 75%;
-  padding: 16px;
-  border-radius: 20px;
-  overflow: visible !important;
-  word-break: break-word;
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-@media (max-width: 640px) {
-  .weatherza-bubble {
-    max-width: 92%;
-  }
-}
-
 /* KaTeX Math Styling - Production-grade collapse fix */
 .weatherza-markdown {
   width: 100%;
-  overflow: visible !important;
   height: auto !important;
-  min-height: fit-content;
+  min-height: fit-content !important;
+  overflow: visible !important;
   word-break: break-word;
   overflow-wrap: anywhere;
+  flex-shrink: 0 !important;
 }
 
 .weatherza-markdown p {
@@ -279,25 +246,26 @@ All colors MUST be HSL.
   border-radius: 8px;
 }
 
-.weatherza-markdown code {
-  font-family: monospace;
-}
-
 .weatherza-markdown .katex {
   font-size: 1.1em;
   color: hsl(var(--foreground));
   max-width: 100%;
+  flex-shrink: 0;
 }
 
+/* Fix block math - horizontal scroll for large equations */
 .weatherza-markdown .katex-display {
-  display: block;
+  display: block !important;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   margin: 1rem 0;
   background: hsl(var(--primary) / 0.1);
   border-radius: 0.5rem;
+  min-height: fit-content !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
 }
 
 .weatherza-markdown .katex-display > .katex {
@@ -314,27 +282,33 @@ All colors MUST be HSL.
   color: inherit;
 }
 
+/* Prevent KaTeX from collapsing parent containers */
 .weatherza-markdown .katex-html {
   overflow: visible !important;
   height: auto !important;
+  min-height: fit-content !important;
 }
 
+/* All children must not flex-shrink */
 .weatherza-markdown * {
-  flex-shrink: 0 !important;
+  flex-shrink: 0;
 }
 
 .weatherza-markdown p:has(.katex),
 .weatherza-markdown div:has(.katex) {
   overflow: visible !important;
+  min-height: fit-content !important;
   height: auto !important;
+  flex-shrink: 0 !important;
 }
 
+/* Prevent prose from forcing layout on KaTeX */
 .prose .katex-display {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
-/* Message bubble stability */
+/* Ensure the message bubble expands for math content */
 .weatherza-message-bubble {
   overflow: visible !important;
   min-height: fit-content !important;
@@ -345,6 +319,7 @@ All colors MUST be HSL.
 
 .weatherza-message-bubble .prose {
   overflow: visible !important;
+  min-height: fit-content !important;
   height: auto !important;
 }
 

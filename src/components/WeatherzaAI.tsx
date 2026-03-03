@@ -924,55 +924,69 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     const decoder = new TextDecoder();
     let textBuffer = "";
     let assistantSoFar = "";
+    let streamDone = false;
 
-    // Add empty assistant message immediately — loading indicator hides once content arrives
-    setMessages([...updatedMessages, { role: "assistant", content: "" }]);
-    // Hide loading as soon as stream starts (writing animation shows via empty content)
-    setLoading(false);
+    // Add empty assistant message
+    setMessages([...updatedMessages, { role: "assistant", content: "", isTyping: false }]);
 
-    const processLine = (line: string) => {
-      if (line.endsWith("\r")) line = line.slice(0, -1);
-      if (!line.startsWith("data: ")) return false;
-      const jsonStr = line.slice(6).trim();
-      if (jsonStr === "[DONE]") return true; // signal done
-      try {
-        const parsed = JSON.parse(jsonStr);
-        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-        if (content) {
-          assistantSoFar += content;
-          const snapshot = assistantSoFar;
-          setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1] = { ...updated[updated.length - 1], content: snapshot };
-            return updated;
-          });
-        }
-      } catch {
-        // Ignore malformed chunks
-      }
-      return false;
-    };
-
-    while (true) {
+    while (!streamDone) {
       const { done, value } = await reader.read();
       if (done) break;
       textBuffer += decoder.decode(value, { stream: true });
 
       let newlineIndex: number;
       while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-        const line = textBuffer.slice(0, newlineIndex);
+        let line = textBuffer.slice(0, newlineIndex);
         textBuffer = textBuffer.slice(newlineIndex + 1);
-        if (line.trim() === "" || line.startsWith(":")) continue;
-        const isDone = processLine(line);
-        if (isDone) return;
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") { streamDone = true; break; }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) {
+            assistantSoFar += content;
+            const snapshot = assistantSoFar;
+            setMessages(prev => {
+              const last = prev[prev.length - 1];
+              if (last?.role === "assistant") {
+                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
+              }
+              return [...prev, { role: "assistant", content: snapshot }];
+            });
+          }
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
       }
     }
 
-    // Flush remaining buffer
+    // Final flush
     if (textBuffer.trim()) {
-      for (const line of textBuffer.split("\n")) {
-        if (!line.trim() || line.startsWith(":")) continue;
-        processLine(line);
+      for (let raw of textBuffer.split("\n")) {
+        if (!raw) continue;
+        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+        if (raw.startsWith(":") || raw.trim() === "") continue;
+        if (!raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) {
+            assistantSoFar += content;
+            const snapshot = assistantSoFar;
+            setMessages(prev => prev.map((m, i) =>
+              i === prev.length - 1 ? { ...m, content: snapshot } : m
+            ));
+          }
+        } catch { /* ignore */ }
       }
     }
   };
@@ -1181,11 +1195,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="space-y-4">
         {/* Chat Messages */}
         {messages.length > 0 && (
-          <div className="flex flex-col min-h-[200px] max-h-[500px] overflow-y-auto overflow-x-hidden space-y-3 p-2 pb-4 rounded-xl bg-black/20 border border-white/5">
+          <div className="h-[400px] max-h-[400px] min-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`weatherza-message-row animate-fade-in ${
+                className={`flex gap-3 items-start animate-fade-in ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
@@ -1195,11 +1209,12 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`weatherza-bubble weatherza-message-bubble ${
+                  className={`flex-1 min-w-0 max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
                       : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
                   }`}
+                  style={{ overflow: 'visible', minHeight: 'fit-content' }}
                 >
                   {msg.role === "assistant" ? (
                     <div ref={index === messages.length - 1 ? lastMessageRef : undefined}>
@@ -1231,7 +1246,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 )}
               </div>
             ))}
-            {loading && !messages.some(m => m.role === "assistant" && m.content === "") && (
+            {loading && (
               <div className="flex gap-3 justify-start animate-fade-in">
                 <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary animate-pulse" />
