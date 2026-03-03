@@ -924,69 +924,55 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     const decoder = new TextDecoder();
     let textBuffer = "";
     let assistantSoFar = "";
-    let streamDone = false;
 
-    // Add empty assistant message
-    setMessages([...updatedMessages, { role: "assistant", content: "", isTyping: false }]);
+    // Add empty assistant message immediately — loading indicator hides once content arrives
+    setMessages([...updatedMessages, { role: "assistant", content: "" }]);
+    // Hide loading as soon as stream starts (writing animation shows via empty content)
+    setLoading(false);
 
-    while (!streamDone) {
+    const processLine = (line: string) => {
+      if (line.endsWith("\r")) line = line.slice(0, -1);
+      if (!line.startsWith("data: ")) return false;
+      const jsonStr = line.slice(6).trim();
+      if (jsonStr === "[DONE]") return true; // signal done
+      try {
+        const parsed = JSON.parse(jsonStr);
+        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+        if (content) {
+          assistantSoFar += content;
+          const snapshot = assistantSoFar;
+          setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { ...updated[updated.length - 1], content: snapshot };
+            return updated;
+          });
+        }
+      } catch {
+        // Ignore malformed chunks
+      }
+      return false;
+    };
+
+    while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       textBuffer += decoder.decode(value, { stream: true });
 
       let newlineIndex: number;
       while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-        let line = textBuffer.slice(0, newlineIndex);
+        const line = textBuffer.slice(0, newlineIndex);
         textBuffer = textBuffer.slice(newlineIndex + 1);
-
-        if (line.endsWith("\r")) line = line.slice(0, -1);
-        if (line.startsWith(":") || line.trim() === "") continue;
-        if (!line.startsWith("data: ")) continue;
-
-        const jsonStr = line.slice(6).trim();
-        if (jsonStr === "[DONE]") { streamDone = true; break; }
-
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-          if (content) {
-            assistantSoFar += content;
-            const snapshot = assistantSoFar;
-            setMessages(prev => {
-              const last = prev[prev.length - 1];
-              if (last?.role === "assistant") {
-                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
-              }
-              return [...prev, { role: "assistant", content: snapshot }];
-            });
-          }
-        } catch {
-          textBuffer = line + "\n" + textBuffer;
-          break;
-        }
+        if (line.trim() === "" || line.startsWith(":")) continue;
+        const isDone = processLine(line);
+        if (isDone) return;
       }
     }
 
-    // Final flush
+    // Flush remaining buffer
     if (textBuffer.trim()) {
-      for (let raw of textBuffer.split("\n")) {
-        if (!raw) continue;
-        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
-        if (raw.startsWith(":") || raw.trim() === "") continue;
-        if (!raw.startsWith("data: ")) continue;
-        const jsonStr = raw.slice(6).trim();
-        if (jsonStr === "[DONE]") continue;
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-          if (content) {
-            assistantSoFar += content;
-            const snapshot = assistantSoFar;
-            setMessages(prev => prev.map((m, i) =>
-              i === prev.length - 1 ? { ...m, content: snapshot } : m
-            ));
-          }
-        } catch { /* ignore */ }
+      for (const line of textBuffer.split("\n")) {
+        if (!line.trim() || line.startsWith(":")) continue;
+        processLine(line);
       }
     }
   };
@@ -1139,7 +1125,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl" style={{ overflow: 'visible' }}>
+    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -1195,7 +1181,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="space-y-4">
         {/* Chat Messages */}
         {messages.length > 0 && (
-          <div className="weatherza-chat-container min-h-[200px] max-h-[500px] space-y-3 p-2 rounded-xl bg-black/20 border border-white/5" style={{ paddingBottom: '16px' }}>
+          <div className="flex flex-col min-h-[200px] max-h-[500px] overflow-y-auto overflow-x-hidden space-y-3 p-2 pb-4 rounded-xl bg-black/20 border border-white/5">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -1245,7 +1231,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 )}
               </div>
             ))}
-            {loading && (
+            {loading && !messages.some(m => m.role === "assistant" && m.content === "") && (
               <div className="flex gap-3 justify-start animate-fade-in">
                 <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary animate-pulse" />
