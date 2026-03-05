@@ -28,6 +28,7 @@ interface WeatherzaAIProps {
 }
 
 interface Message {
+  id: string;
   role: "user" | "assistant";
   content: string;
   isTyping?: boolean;
@@ -35,6 +36,9 @@ interface Message {
   documentText?: string; // Extracted text from document (for AI)
   documentName?: string; // Original document name (for display)
 }
+
+let msgIdCounter = 0;
+const genMsgId = () => `msg-${Date.now()}-${++msgIdCounter}`;
 
 // Calculate actual AQI from PM2.5
 const calculateAQI = (pm25: number): number => {
@@ -905,7 +909,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     if (contentType.includes("application/json")) {
       const data = await resp.json();
       const answer = data.answer || "Sorry, I couldn't generate a response.";
-      setMessages([...updatedMessages, { role: "assistant", content: answer, isTyping: true }]);
+      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: true }]);
       const chunkSize = 5;
       const speed = 10;
       const typingDuration = Math.ceil(answer.length / chunkSize) * speed + 300;
@@ -927,8 +931,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     let streamDone = false;
     let lastChunkTime = Date.now();
 
-    // Add empty assistant message
-    setMessages([...updatedMessages, { role: "assistant", content: "", isTyping: false }]);
+    // Add empty assistant message with stable ID
+    const assistantId = genMsgId();
+    setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
 
     // Watchdog: if no chunk for 8 seconds, abort gracefully
     const watchdog = setInterval(() => {
@@ -969,7 +974,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 if (last?.role === "assistant") {
                   return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
                 }
-                return [...prev, { role: "assistant", content: snapshot }];
+                return [...prev, { id: assistantId, role: "assistant", content: snapshot }];
               });
             }
           } catch {
@@ -1037,7 +1042,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const handleVoiceSend = (text: string) => {
     if (!text.trim()) return;
 
-    const userMessage: Message = { role: "user", content: text.trim() };
+    const userMessage: Message = { id: genMsgId(), role: "user", content: text.trim() };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setQuestion("");
@@ -1049,7 +1054,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     streamFromAI(messagesForAI, weatherCtx, updatedMessages)
       .catch((err) => {
         console.error("Voice send error:", err);
-        setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
+        setMessages(prev => [...prev, { id: genMsgId(), role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
       })
       .finally(() => setLoading(false));
   };
@@ -1064,6 +1069,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
 
     const userMessage: Message = {
+      id: genMsgId(),
       role: "user",
       content: question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document"),
       image: uploadedImage || undefined,
@@ -1207,16 +1213,21 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Chat Messages */}
-        {messages.length > 0 && (
-          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
-            {messages.map((msg, index) => (
+      <CardContent>
+        {/* Chat Viewport — fixed height, flex column, no collapse */}
+        <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
+          {/* Messages Scroll Area */}
+          <div 
+            className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
+            style={{ minHeight: 0 }}
+          >
+            {messages.map((msg) => (
               <div
-                key={index}
-                className={`flex gap-3 items-start animate-fade-in ${
+                key={msg.id}
+                className={`weatherza-message-row flex gap-3 items-start weatherza-msg-appear ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
+                style={{ willChange: 'transform', transform: 'translateZ(0)' }}
               >
                 {msg.role === "assistant" && (
                   <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
@@ -1224,15 +1235,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`flex-1 min-w-0 max-w-[75%] sm:max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
+                  className={`weatherza-message-bubble max-w-[72%] sm:max-w-[75%] p-3 rounded-2xl transition-all duration-300 ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
                       : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
                   }`}
-                  style={{ minHeight: 'fit-content' }}
                 >
                   {msg.role === "assistant" ? (
-                    <div ref={index === messages.length - 1 ? lastMessageRef : undefined}>
+                    <div ref={msg === messages[messages.length - 1] ? lastMessageRef : undefined}>
                       <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} />
                     </div>
                   ) : (
@@ -1280,7 +1290,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             )}
             <div ref={messagesEndRef} />
           </div>
-        )}
+
+          {/* Input Bar — pinned at bottom, never moves */}
+          <div className="flex-shrink-0 pt-3 space-y-3" style={{ zIndex: 10 }}>
 
         {/* Image Preview */}
         {uploadedImage && (
@@ -1392,6 +1404,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           onTranscriptReady={handleVoiceTranscript}
           onSendMessage={handleVoiceSend}
         />
+          </div>{/* close input bar */}
+        </div>{/* close chat viewport */}
         
         {/* Pyodide Graph Modal - Now handled inside PyodideRunner component */}
         {pyodideCode && (

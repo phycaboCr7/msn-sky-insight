@@ -308,6 +308,27 @@ All colors MUST be HSL.
   margin-bottom: 1rem;
 }
 
+/* Chat viewport — stable fixed-height flex container */
+.weatherza-chat-viewport {
+  min-height: 0 !important; /* CRITICAL: prevents flex collapse */
+}
+
+/* Messages scroll area — the ONLY scrolling element */
+.weatherza-messages-scroll {
+  min-height: 0 !important; /* CRITICAL: prevents flex collapse */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Message row animation */
+.weatherza-msg-appear {
+  animation: weatherza-msg-in 160ms ease-out;
+}
+
+@keyframes weatherza-msg-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* Ensure the message bubble expands for math content but stays inside scroll container */
 .weatherza-message-bubble {
   overflow-x: auto !important;
@@ -317,6 +338,8 @@ All colors MUST be HSL.
   flex-shrink: 0 !important;
   word-break: break-word;
   overflow-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.6;
 }
 
 .weatherza-message-bubble .prose {
