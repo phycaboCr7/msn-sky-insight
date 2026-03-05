@@ -1213,16 +1213,21 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Chat Messages */}
-        {messages.length > 0 && (
-          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
-            {messages.map((msg, index) => (
+      <CardContent>
+        {/* Chat Viewport — fixed height, flex column, no collapse */}
+        <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
+          {/* Messages Scroll Area */}
+          <div 
+            className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
+            style={{ minHeight: 0 }}
+          >
+            {messages.map((msg) => (
               <div
-                key={index}
-                className={`flex gap-3 items-start animate-fade-in ${
+                key={msg.id}
+                className={`weatherza-message-row flex gap-3 items-start weatherza-msg-appear ${
                   msg.role === "user" ? "justify-end" : "justify-start"
                 }`}
+                style={{ willChange: 'transform', transform: 'translateZ(0)' }}
               >
                 {msg.role === "assistant" && (
                   <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
@@ -1230,15 +1235,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`flex-1 min-w-0 max-w-[75%] sm:max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
+                  className={`weatherza-message-bubble max-w-[72%] sm:max-w-[75%] p-3 rounded-2xl transition-all duration-300 ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
                       : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
                   }`}
-                  style={{ minHeight: 'fit-content' }}
                 >
                   {msg.role === "assistant" ? (
-                    <div ref={index === messages.length - 1 ? lastMessageRef : undefined}>
+                    <div ref={msg === messages[messages.length - 1] ? lastMessageRef : undefined}>
                       <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} />
                     </div>
                   ) : (
@@ -1286,7 +1290,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             )}
             <div ref={messagesEndRef} />
           </div>
-        )}
+
+          {/* Input Bar — pinned at bottom, never moves */}
+          <div className="flex-shrink-0 pt-3 space-y-3" style={{ zIndex: 10 }}>
 
         {/* Image Preview */}
         {uploadedImage && (
