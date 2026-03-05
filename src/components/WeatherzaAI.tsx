@@ -28,6 +28,7 @@ interface WeatherzaAIProps {
 }
 
 interface Message {
+  id: string;
   role: "user" | "assistant";
   content: string;
   isTyping?: boolean;
@@ -35,6 +36,9 @@ interface Message {
   documentText?: string; // Extracted text from document (for AI)
   documentName?: string; // Original document name (for display)
 }
+
+let msgIdCounter = 0;
+const genMsgId = () => `msg-${Date.now()}-${++msgIdCounter}`;
 
 // Calculate actual AQI from PM2.5
 const calculateAQI = (pm25: number): number => {
@@ -905,7 +909,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     if (contentType.includes("application/json")) {
       const data = await resp.json();
       const answer = data.answer || "Sorry, I couldn't generate a response.";
-      setMessages([...updatedMessages, { role: "assistant", content: answer, isTyping: true }]);
+      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: true }]);
       const chunkSize = 5;
       const speed = 10;
       const typingDuration = Math.ceil(answer.length / chunkSize) * speed + 300;
@@ -927,8 +931,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     let streamDone = false;
     let lastChunkTime = Date.now();
 
-    // Add empty assistant message
-    setMessages([...updatedMessages, { role: "assistant", content: "", isTyping: false }]);
+    // Add empty assistant message with stable ID
+    const assistantId = genMsgId();
+    setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
 
     // Watchdog: if no chunk for 8 seconds, abort gracefully
     const watchdog = setInterval(() => {
@@ -969,7 +974,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 if (last?.role === "assistant") {
                   return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
                 }
-                return [...prev, { role: "assistant", content: snapshot }];
+                return [...prev, { id: assistantId, role: "assistant", content: snapshot }];
               });
             }
           } catch {
@@ -1037,7 +1042,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const handleVoiceSend = (text: string) => {
     if (!text.trim()) return;
 
-    const userMessage: Message = { role: "user", content: text.trim() };
+    const userMessage: Message = { id: genMsgId(), role: "user", content: text.trim() };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
     setQuestion("");
@@ -1049,7 +1054,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     streamFromAI(messagesForAI, weatherCtx, updatedMessages)
       .catch((err) => {
         console.error("Voice send error:", err);
-        setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
+        setMessages(prev => [...prev, { id: genMsgId(), role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
       })
       .finally(() => setLoading(false));
   };
@@ -1064,6 +1069,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
 
     const userMessage: Message = {
+      id: genMsgId(),
       role: "user",
       content: question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document"),
       image: uploadedImage || undefined,
