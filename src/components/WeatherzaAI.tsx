@@ -925,46 +925,61 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     let textBuffer = "";
     let assistantSoFar = "";
     let streamDone = false;
+    let lastChunkTime = Date.now();
 
     // Add empty assistant message
     setMessages([...updatedMessages, { role: "assistant", content: "", isTyping: false }]);
 
-    while (!streamDone) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      textBuffer += decoder.decode(value, { stream: true });
+    // Watchdog: if no chunk for 8 seconds, abort gracefully
+    const watchdog = setInterval(() => {
+      if (Date.now() - lastChunkTime > 8000 && !streamDone) {
+        console.warn("Stream watchdog: no data for 8s, finalizing");
+        streamDone = true;
+        reader.cancel().catch(() => {});
+      }
+    }, 2000);
 
-      let newlineIndex: number;
-      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-        let line = textBuffer.slice(0, newlineIndex);
-        textBuffer = textBuffer.slice(newlineIndex + 1);
+    try {
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        lastChunkTime = Date.now();
+        textBuffer += decoder.decode(value, { stream: true });
 
-        if (line.endsWith("\r")) line = line.slice(0, -1);
-        if (line.startsWith(":") || line.trim() === "") continue;
-        if (!line.startsWith("data: ")) continue;
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
 
-        const jsonStr = line.slice(6).trim();
-        if (jsonStr === "[DONE]") { streamDone = true; break; }
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
 
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-          if (content) {
-            assistantSoFar += content;
-            const snapshot = assistantSoFar;
-            setMessages(prev => {
-              const last = prev[prev.length - 1];
-              if (last?.role === "assistant") {
-                return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
-              }
-              return [...prev, { role: "assistant", content: snapshot }];
-            });
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") { streamDone = true; break; }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantSoFar += content;
+              const snapshot = assistantSoFar;
+              setMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.role === "assistant") {
+                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m);
+                }
+                return [...prev, { role: "assistant", content: snapshot }];
+              });
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
           }
-        } catch {
-          textBuffer = line + "\n" + textBuffer;
-          break;
         }
       }
+    } finally {
+      clearInterval(watchdog);
     }
 
     // Final flush
@@ -1195,7 +1210,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="space-y-4">
         {/* Chat Messages */}
         {messages.length > 0 && (
-          <div className="h-[400px] max-h-[400px] min-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5 flex-shrink-0">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -1209,12 +1224,12 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   </div>
                 )}
                 <div
-                  className={`flex-1 min-w-0 max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
+                  className={`flex-1 min-w-0 max-w-[75%] sm:max-w-[85%] p-3 rounded-2xl transition-all duration-300 weatherza-message-bubble ${
                     msg.role === "user"
                       ? "bg-primary/20 border border-primary/30 text-foreground"
                       : "bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20"
                   }`}
-                  style={{ overflow: 'visible', minHeight: 'fit-content' }}
+                  style={{ minHeight: 'fit-content' }}
                 >
                   {msg.role === "assistant" ? (
                     <div ref={index === messages.length - 1 ? lastMessageRef : undefined}>
