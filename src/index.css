@@ -308,17 +308,20 @@ All colors MUST be HSL.
   margin-bottom: 1rem;
 }
 
-/* Ensure the message bubble expands for math content */
+/* Ensure the message bubble expands for math content but stays inside scroll container */
 .weatherza-message-bubble {
-  overflow: visible !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
   min-height: fit-content !important;
   height: auto !important;
   flex-shrink: 0 !important;
-  contain: none !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .weatherza-message-bubble .prose {
-  overflow: visible !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
   min-height: fit-content !important;
   height: auto !important;
 }

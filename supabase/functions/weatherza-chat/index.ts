@@ -232,7 +232,7 @@ You have access to the full conversation history. Reference previous messages na
         messages: aiMessages,
         stream: true,
         temperature: 0.55,
-        max_tokens: 2048,
+        max_tokens: 4096,
       }),
     });
 

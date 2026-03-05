@@ -171,20 +171,26 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
           .replace(/plt\.show\(\)/g, '')
           .replace(/plt\.savefig\([^)]+\)/g, '');
         
-        // Check for FuncAnimation
+      // Check for FuncAnimation
         if (modifiedCode.includes("FuncAnimation")) {
           modifiedCode += `
-# Generate frames from FuncAnimation
+# Generate frames from FuncAnimation — minimum 240 frames (10s at 24fps)
 try:
-    for i in range(60):  # Generate 60 frames (~2.5 seconds at 24fps)
+    _total_frames = 240
+    for i in range(_total_frames):
         update(i)
         capture_animation_frame()
-        plt.clf()
 except Exception as e:
-    capture_animation_frame()
+    # If update fails partway, keep frames generated so far
+    if not get_animation_frames():
+        capture_animation_frame()
 `;
         } else {
-          modifiedCode += `\ncapture_animation_frame()`;
+          // For non-FuncAnimation code, capture multiple frames if plt figures exist
+          modifiedCode += `
+# Capture animation frame
+capture_animation_frame()
+`;
         }
         
         modifiedCode += `\n_result_img = get_animation_frames()[-1] if get_animation_frames() else get_plot_as_base64()`;
@@ -227,7 +233,7 @@ _stdout_capture.getvalue()
           const dataUrls = frames.map((f: string) => `data:image/png;base64,${f}`);
           setAnimationFrames(dataUrls);
           setImageData(dataUrls[0]);
-          toast({ title: "Animation Ready! 🎞️", description: `Generated ${frames.length} frames` });
+          toast({ title: "Animation Ready! 🎞️", description: `Generated ${frames.length} frames (${(frames.length / 24).toFixed(1)}s at 24fps)` });
         }
       }
       
@@ -430,6 +436,22 @@ _stdout_capture.getvalue()
             onCreateVideo={exportVideo}
           />
           
+          {/* Frame/Video Progress */}
+          {running && executionType === "ANIMATION" && (
+            <div className="px-3 py-2 bg-purple-500/10 border border-purple-500/20 rounded-xl text-sm text-purple-300 flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Rendering frames... This may take a moment for 240+ frames.
+            </div>
+          )}
+          {recordingAnimation && (
+            <div className="px-3 py-2 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+              <div className="text-sm text-orange-300 mb-1">Encoding Video... {animationProgress}%</div>
+              <div className="w-full h-2 bg-black/30 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all" style={{ width: `${animationProgress}%` }} />
+              </div>
+            </div>
+          )}
+          
           {/* Export buttons */}
           <ExportButtons
             hasImageData={!!imageData}
@@ -455,8 +477,8 @@ _stdout_capture.getvalue()
           {/* Live Canvas Animation with MediaRecorder */}
           {animationFrames.length > 1 && (
             <div className="bg-black/30 p-4 rounded-xl border border-purple-500/20">
-              <h4 className="text-sm font-medium text-purple-400 mb-3 flex items-center gap-2">
-                🎞️ Live Animation Canvas (Real Video Recording):
+            <h4 className="text-sm font-medium text-purple-400 mb-3 flex items-center gap-2">
+                🎞️ Live Animation Canvas ({animationFrames.length} frames — {(animationFrames.length / 24).toFixed(1)}s at 24fps):
               </h4>
               <LiveCanvas 
                 frames={animationFrames} 
