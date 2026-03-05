@@ -1404,6 +1404,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           onTranscriptReady={handleVoiceTranscript}
           onSendMessage={handleVoiceSend}
         />
+          </div>{/* close input bar */}
+        </div>{/* close chat viewport */}
         
         {/* Pyodide Graph Modal - Now handled inside PyodideRunner component */}
         {pyodideCode && (
