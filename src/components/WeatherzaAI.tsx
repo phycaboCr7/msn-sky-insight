@@ -406,319 +406,128 @@ const extractPythonCodeBlocks = (content: string): string[] => {
   return blocks;
 };
 
-// PDF Generation helper - runs Python graphs and embeds them
+// PDF Generation — HTML → Canvas → PDF pipeline
 const generatePDF = async (content: string, _elementRef?: HTMLElement | null, filename: string = "Weatherza_AI_Generated.pdf") => {
-  try {
-    const { jsPDF } = await import('jspdf');
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 15;
-    const maxWidth = pageWidth - margin * 2;
+  const { jsPDF } = await import('jspdf');
+  const { createRoot } = await import('react-dom/client');
+  const React = await import('react');
 
-    // Add title
-    doc.setFontSize(20);
-    doc.setTextColor(255, 140, 0);
-    doc.text("Weatherza AI Generated Document", margin, 20);
-
-    doc.setDrawColor(255, 140, 0);
-    doc.setLineWidth(0.5);
-    doc.line(margin, 25, pageWidth - margin, 25);
-
-    // Run Python graph code blocks and collect images
-    const pythonBlocks = extractPythonCodeBlocks(content);
-    const graphImages: Map<string, string> = new Map();
-    for (const block of pythonBlocks) {
-      const img = await runPythonForImage(block);
-      if (img) graphImages.set(block.trim(), img);
-    }
-
-    // --- Render math expressions to images via KaTeX + html2canvas ---
-    const renderMathToImage = async (mathStr: string, displayMode: boolean): Promise<string | null> => {
-      try {
-        const katex = (await import('katex')).default;
-        const container = document.createElement('div');
-        container.style.cssText = 'position:fixed;left:-9999px;top:0;background:white;padding:16px;font-size:16px;max-width:600px;';
-        container.innerHTML = katex.renderToString(mathStr, { displayMode, throwOnError: false, output: 'html' });
-        document.body.appendChild(container);
-        const canvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff' });
-        document.body.removeChild(container);
-        return canvas.toDataURL('image/png');
-      } catch { return null; }
-    };
-
-    // --- Parse markdown tables ---
-    const parseMarkdownTable = (tableStr: string): { headers: string[]; rows: string[][] } | null => {
-      const lines = tableStr.trim().split('\n').filter(l => l.trim());
-      if (lines.length < 2) return null;
-      const parseRow = (line: string) => line.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length);
-      const headers = parseRow(lines[0]);
-      if (headers.length === 0) return null;
-      // skip separator line (line[1])
-      const rows: string[][] = [];
-      for (let i = 2; i < lines.length; i++) {
-        const cells = parseRow(lines[i]);
-        if (cells.length > 0) rows.push(cells);
-      }
-      return { headers, rows };
-    };
-
-    // --- Draw table in PDF ---
-    const drawTable = (table: { headers: string[]; rows: string[][] }, startY: number): number => {
-      const colCount = table.headers.length;
-      const colWidth = maxWidth / colCount;
-      const cellPadding = 3;
-      const rowHeight = 8;
-      let y = startY;
-
-      // Check page space
-      const neededHeight = (table.rows.length + 1) * rowHeight + 10;
-      if (y + neededHeight > pageHeight - 25) {
-        doc.addPage();
-        y = 20;
-      }
-
-      // Draw header row
-      doc.setFillColor(255, 140, 0);
-      doc.rect(margin, y - rowHeight + cellPadding, maxWidth, rowHeight, 'F');
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(255, 255, 255);
-      for (let c = 0; c < colCount; c++) {
-        const cellText = doc.splitTextToSize(table.headers[c] || '', colWidth - cellPadding * 2);
-        doc.text(cellText[0] || '', margin + c * colWidth + cellPadding, y);
-      }
-      y += rowHeight;
-
-      // Draw data rows
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      for (let r = 0; r < table.rows.length; r++) {
-        if (y > pageHeight - 25) {
-          doc.addPage();
-          y = 20;
-        }
-        // Alternate row background
-        if (r % 2 === 0) {
-          doc.setFillColor(245, 245, 245);
-          doc.rect(margin, y - rowHeight + cellPadding, maxWidth, rowHeight, 'F');
-        }
-        // Draw cell borders
-        doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.2);
-        doc.rect(margin, y - rowHeight + cellPadding, maxWidth, rowHeight, 'S');
-
-        doc.setTextColor(40, 40, 40);
-        for (let c = 0; c < colCount; c++) {
-          const cellText = doc.splitTextToSize(table.rows[r][c] || '', colWidth - cellPadding * 2);
-          doc.text(cellText[0] || '', margin + c * colWidth + cellPadding, y);
-        }
-        y += rowHeight;
-      }
-      return y + 4;
-    };
-
-    // --- Tokenize content into segments ---
-    type Segment = 
-      | { type: 'text'; value: string }
-      | { type: 'table'; value: string }
-      | { type: 'math_block'; value: string }
-      | { type: 'graph'; index: number };
-
-    let workingContent = content;
-
-    // Replace python graph blocks with placeholders
-    let graphIndex = 0;
-    const graphOrder: string[] = [];
-    workingContent = workingContent.replace(/```(?:python|py)\n([\s\S]*?)```/g, (_match, code) => {
-      if (isPythonGraphCode(code) && graphImages.has(code.trim())) {
-        graphOrder.push(code.trim());
-        return `\n[GRAPH_${graphIndex++}]\n`;
-      }
-      return '\n[Code block]\n';
-    });
-    workingContent = workingContent.replace(/```[\s\S]*?```/g, '\n[Code block]\n');
-
-    // Split into segments: tables, display math, and text
-    const segments: Segment[] = [];
-    // Regex for markdown tables (header | sep | rows) and display math
-    const segmentRegex = /((?:^\|.+\|[ \t]*\n){2,}(?:^\|.+\|[ \t]*(?:\n|$))*)|(\$\$[\s\S]*?\$\$)/gm;
-    let lastIdx = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = segmentRegex.exec(workingContent)) !== null) {
-      if (match.index > lastIdx) {
-        segments.push({ type: 'text', value: workingContent.slice(lastIdx, match.index) });
-      }
-      if (match[1]) {
-        segments.push({ type: 'table', value: match[1] });
-      } else if (match[2]) {
-        segments.push({ type: 'math_block', value: match[2].replace(/^\$\$|\$\$$/g, '').trim() });
-      }
-      lastIdx = match.index + match[0].length;
-    }
-    if (lastIdx < workingContent.length) {
-      segments.push({ type: 'text', value: workingContent.slice(lastIdx) });
-    }
-
-    // Expand text segments to extract graph placeholders and inline math
-    const expandedSegments: Segment[] = [];
-    for (const seg of segments) {
-      if (seg.type !== 'text') {
-        expandedSegments.push(seg);
-        continue;
-      }
-      // Split on graph placeholders
-      const parts = seg.value.split(/(\[GRAPH_\d+\])/);
-      for (const part of parts) {
-        const gm = part.match(/^\[GRAPH_(\d+)\]$/);
-        if (gm) {
-          expandedSegments.push({ type: 'graph', index: parseInt(gm[1]) });
-        } else if (part.trim()) {
-          expandedSegments.push({ type: 'text', value: part });
-        }
-      }
-    }
-
-    // --- Render segments ---
-    doc.setFontSize(11);
-    doc.setTextColor(40, 40, 40);
-
-    let y = 35;
-    const lineHeight = 6;
-    const paragraphSpacing = 4;
-
-    for (const seg of expandedSegments) {
-      // --- Graph ---
-      if (seg.type === 'graph') {
-        const graphKey = graphOrder[seg.index];
-        const graphImg = graphKey ? graphImages.get(graphKey) : null;
-        if (graphImg) {
-          if (y > pageHeight - 130) { doc.addPage(); y = 20; }
-          doc.addImage(graphImg, 'PNG', margin, y, maxWidth, 100);
-          y += 105;
-        }
-        continue;
-      }
-
-      // --- Table ---
-      if (seg.type === 'table') {
-        const table = parseMarkdownTable(seg.value);
-        if (table) {
-          y = drawTable(table, y);
-        }
-        continue;
-      }
-
-      // --- Display math ---
-      if (seg.type === 'math_block') {
-        const mathImg = await renderMathToImage(seg.value, true);
-        if (mathImg) {
-          if (y > pageHeight - 60) { doc.addPage(); y = 20; }
-          // Calculate aspect ratio
-          const img = new window.Image();
-          img.src = mathImg;
-          await new Promise(r => { img.onload = r; });
-          const imgW = Math.min(maxWidth, 160);
-          const imgH = (img.height / img.width) * imgW;
-          doc.addImage(mathImg, 'PNG', margin, y, imgW, Math.min(imgH, 80));
-          y += Math.min(imgH, 80) + 6;
-        } else {
-          // Fallback: render as text
-          const wrappedLines = doc.splitTextToSize(seg.value, maxWidth);
-          for (const wl of wrappedLines) {
-            if (y > pageHeight - 25) { doc.addPage(); y = 20; }
-            doc.text(wl, margin, y);
-            y += lineHeight;
-          }
-        }
-        continue;
-      }
-
-      // --- Text (may contain inline math $...$) ---
-      const textValue = (seg as { type: 'text'; value: string }).value;
-      // Clean markdown formatting
-      let cleaned = textValue
-        .replace(/\*\*(.*?)\*\*/g, '$1')
-        .replace(/\*(.*?)\*/g, '$1')
-        .replace(/^#{1,6}\s+/gm, '')
-        .replace(/`([^`]+)`/g, '$1')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
-
-      if (!cleaned) continue;
-
-      // Split by inline math $...$
-      const inlineParts = cleaned.split(/(\$[^$\n]+\$)/g);
-
-      for (const part of inlineParts) {
-        const inlineMathMatch = part.match(/^\$([^$]+)\$$/);
-        if (inlineMathMatch) {
-          // Render inline math as image
-          const mathImg = await renderMathToImage(inlineMathMatch[1], false);
-          if (mathImg) {
-            if (y > pageHeight - 30) { doc.addPage(); y = 20; }
-            const img = new window.Image();
-            img.src = mathImg;
-            await new Promise(r => { img.onload = r; });
-            const imgH = Math.min(12, (img.height / img.width) * 40);
-            doc.addImage(mathImg, 'PNG', margin, y - 4, 40, imgH);
-            y += imgH + 2;
-          } else {
-            doc.text(inlineMathMatch[1], margin, y);
-            y += lineHeight;
-          }
-          continue;
-        }
-
-        // Regular text paragraphs
-        const paragraphs = part.split(/\n\n+/);
-        for (const paragraph of paragraphs) {
-          const lines = paragraph.split('\n');
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (!trimmedLine || trimmedLine === '[Code block]') continue;
-
-            if (y > pageHeight - 25) { doc.addPage(); y = 20; }
-
-            let textToWrite = trimmedLine;
-            if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
-              textToWrite = '• ' + trimmedLine.substring(2);
-              doc.setTextColor(60, 60, 60);
-            } else if (/^\d+\.\s/.test(trimmedLine)) {
-              doc.setTextColor(60, 60, 60);
-            } else {
-              doc.setTextColor(40, 40, 40);
-            }
-
-            const wrappedLines = doc.splitTextToSize(textToWrite, maxWidth);
-            for (const wrappedLine of wrappedLines) {
-              if (y > pageHeight - 25) { doc.addPage(); y = 20; }
-              doc.text(wrappedLine, margin, y);
-              y += lineHeight;
-            }
-          }
-          y += paragraphSpacing;
-        }
-      }
-    }
-
-    // Footer on all pages
-    const pageCount = doc.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(9);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`Generated by Rakshit's Weatherza AI`, margin, pageHeight - 10);
-      doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin - 25, pageHeight - 10);
-    }
-
-    doc.save(filename);
-  } catch (err) {
-    console.error("PDF generation error:", err);
-    throw err;
+  // 1. Run python graphs and collect base64 images
+  const pythonBlocks = extractPythonCodeBlocks(content);
+  const graphImages: Map<string, string> = new Map();
+  for (const block of pythonBlocks) {
+    const img = await runPythonForImage(block);
+    if (img) graphImages.set(block.trim(), img);
   }
+
+  // 2. Replace python code blocks with image tags in content
+  let exportContent = content;
+  exportContent = exportContent.replace(/```(?:python|py)\n([\s\S]*?)```/g, (_match, code: string) => {
+    if (isPythonGraphCode(code) && graphImages.has(code.trim())) {
+      return `\n![Graph](${graphImages.get(code.trim())})\n`;
+    }
+    return '```\n' + code + '\n```';
+  });
+
+  // 3. Create hidden export container
+  const container = document.createElement('div');
+  container.id = 'pdf-export-container';
+  container.style.cssText = `
+    position: fixed; left: -99999px; top: 0; width: 900px;
+    background: white; padding: 40px; color: #222;
+    font-family: 'Segoe UI', Arial, sans-serif; font-size: 15px; line-height: 1.7;
+  `;
+
+  // 4. Add export-specific styles
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    #pdf-export-container table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    #pdf-export-container th, #pdf-export-container td { border: 1px solid #444; padding: 8px 12px; text-align: left; }
+    #pdf-export-container thead th { background: #f2f2f2; font-weight: 700; }
+    #pdf-export-container tbody tr:nth-child(even) { background: #fafafa; }
+    #pdf-export-container h1, #pdf-export-container h2, #pdf-export-container h3 { color: #ff8c00; margin: 18px 0 8px; }
+    #pdf-export-container h1 { font-size: 24px; } #pdf-export-container h2 { font-size: 20px; } #pdf-export-container h3 { font-size: 17px; }
+    #pdf-export-container ul, #pdf-export-container ol { padding-left: 24px; margin: 8px 0; }
+    #pdf-export-container li { margin: 4px 0; }
+    #pdf-export-container pre { background: #f5f5f5; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+    #pdf-export-container code { font-family: 'Consolas', monospace; font-size: 13px; }
+    #pdf-export-container blockquote { border-left: 3px solid #ff8c00; padding-left: 12px; margin: 12px 0; color: #555; }
+    #pdf-export-container img { max-width: 100%; height: auto; margin: 12px 0; }
+    #pdf-export-container .katex-display { overflow-x: auto; margin: 16px 0; }
+    #pdf-export-container hr { border: none; border-top: 1px solid #ddd; margin: 16px 0; }
+    #pdf-export-container p { margin: 8px 0; }
+  `;
+  document.head.appendChild(styleEl);
+  document.body.appendChild(container);
+
+  // 5. Add header
+  const header = document.createElement('div');
+  header.style.cssText = 'margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #ff8c00;';
+  header.innerHTML = '<h1 style="color:#ff8c00;margin:0;font-size:22px;">Weatherza AI Generated Document</h1>';
+  container.appendChild(header);
+
+  // 6. Render markdown with KaTeX + GFM tables into the container
+  const contentDiv = document.createElement('div');
+  container.appendChild(contentDiv);
+
+  const root = createRoot(contentDiv);
+  root.render(
+    React.createElement(ReactMarkdown, {
+      remarkPlugins: [remarkMath, remarkGfm],
+      rehypePlugins: [rehypeKatex],
+      children: exportContent,
+    })
+  );
+
+  // 7. Wait for KaTeX and images to render
+  await new Promise(r => setTimeout(r, 500));
+
+  // 8. Capture with html2canvas
+  const canvas = await html2canvas(container, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    logging: false,
+  });
+
+  // 9. Cleanup DOM
+  root.unmount();
+  document.body.removeChild(container);
+  document.head.removeChild(styleEl);
+
+  // 10. Generate paginated PDF
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pdfPageWidth = pdf.internal.pageSize.getWidth();
+  const pdfPageHeight = pdf.internal.pageSize.getHeight();
+
+  const imgData = canvas.toDataURL('image/png');
+  const imgWidth = pdfPageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pdfPageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pdfPageHeight;
+  }
+
+  // 11. Add footer to all pages
+  const pageCount = pdf.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    pdf.setPage(i);
+    pdf.setFontSize(9);
+    pdf.setTextColor(150, 150, 150);
+    pdf.text("Generated by Rakshit's Weatherza AI", 15, pdfPageHeight - 8);
+    pdf.text(`Page ${i} of ${pageCount}`, pdfPageWidth - 40, pdfPageHeight - 8);
+  }
+
+  pdf.save(filename);
 };
 
 // Word Generation helper - improved emoji and text handling
