@@ -855,12 +855,82 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
   };
 
+  // Detect if the user query needs real-time search
+  const needsSearch = (text: string): boolean => {
+    const searchTriggers = [
+      'latest', 'news', 'recent', 'current events', 'today', 'breaking',
+      'stock price', 'live', 'score', 'election', 'update', 'trending',
+      'who won', 'what happened', 'search for', 'look up', 'find out',
+      'right now', 'this week', 'yesterday', 'just now',
+    ];
+    const lower = text.toLowerCase();
+    return searchTriggers.some(t => lower.includes(t));
+  };
+
+  // Call the internet search edge function
+  const performSearch = async (query: string): Promise<string | null> => {
+    try {
+      const SEARCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/internet-search`;
+      const resp = await fetch(SEARCH_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      const r = data.results;
+      if (!r) return null;
+
+      let context = "REAL-TIME INTERNET SEARCH RESULTS:\n\n";
+      if (r.answerBox) {
+        context += `**Answer:** ${r.answerBox.answer || r.answerBox.title}\n\n`;
+      }
+      if (r.knowledgeGraph) {
+        context += `**${r.knowledgeGraph.title}** (${r.knowledgeGraph.type || ''}): ${r.knowledgeGraph.description || ''}\n\n`;
+      }
+      if (r.news && r.news.length > 0) {
+        context += "**Latest News:**\n";
+        r.news.forEach((n: any) => {
+          context += `- ${n.title} (${n.source}, ${n.date || ''}): ${n.snippet}\n`;
+        });
+        context += "\n";
+      }
+      if (r.organic && r.organic.length > 0) {
+        context += "**Web Results:**\n";
+        r.organic.forEach((o: any) => {
+          context += `- ${o.title}: ${o.snippet} [Source](${o.link})\n`;
+        });
+      }
+      return context;
+    } catch (err) {
+      console.error("Search error:", err);
+      return null;
+    }
+  };
+
   // Streaming helper — reads SSE from the edge function
   const streamFromAI = async (
     messagesForAI: any[],
     weatherCtx: any,
     updatedMessages: Message[]
   ) => {
+    // Check if the latest user message needs internet search
+    const latestUserMsg = messagesForAI[messagesForAI.length - 1];
+    if (latestUserMsg?.role === "user" && needsSearch(latestUserMsg.content)) {
+      const searchResults = await performSearch(latestUserMsg.content);
+      if (searchResults) {
+        // Prepend search context to the last user message
+        messagesForAI = messagesForAI.map((m, i) =>
+          i === messagesForAI.length - 1
+            ? { ...m, content: `${searchResults}\n\nUser question: ${m.content}` }
+            : m
+        );
+      }
+    }
+
     const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
 
     const resp = await fetch(CHAT_URL, {
