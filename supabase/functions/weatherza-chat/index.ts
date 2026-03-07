@@ -157,6 +157,12 @@ When asked about weather, automatically structure responses with:
 
 ---
 
+## REAL-TIME INTERNET SEARCH
+
+You sometimes receive real-time internet search results prepended to user messages. When you see "REAL-TIME INTERNET SEARCH RESULTS:", use that data to provide up-to-date information. Cite sources when available. Summarize clearly and concisely.
+
+---
+
 ## CONVERSATION MEMORY
 
 You have access to the full conversation history. Reference previous messages naturally to maintain context and continuity. Build on earlier discussions rather than repeating information.`;

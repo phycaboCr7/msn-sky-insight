@@ -70,16 +70,26 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
   if (!backgroundImage) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-0 transition-all duration-1000 ease-in-out"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        filter: 'blur(2px) brightness(0.4)',
-        transform: 'scale(1.05)', // Reduced scale to minimize blur artifacts
-      }}
-    />
+    <>
+      {/* Cinematic animated background image */}
+      <div 
+        className="fixed inset-0 z-0 animate-cinematic-zoom"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'blur(2px) brightness(0.4)',
+        }}
+      />
+      {/* Glassmorphism overlay for readability */}
+      <div 
+        className="fixed inset-0 z-[1]"
+        style={{
+          backdropFilter: 'blur(12px)',
+          background: 'rgba(0,0,0,0.25)',
+        }}
+      />
+    </>
   );
 };
