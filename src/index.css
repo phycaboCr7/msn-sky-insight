@@ -765,3 +765,20 @@ All colors MUST be HSL.
     opacity: 0;
   }
 }
+
+/* Cinematic slow zoom animation for dynamic backgrounds */
+@keyframes cinematic-zoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-cinematic-zoom {
+  animation: cinematic-zoom 40s ease infinite;
+}
