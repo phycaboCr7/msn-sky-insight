@@ -38,6 +38,21 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
     return [];
   }, [isRain, isThunder, isSnow]);
 
+  const starParticles = useMemo(() => {
+    if (!isDay) {
+      return Array.from({ length: 35 }, (_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 80}%`,
+        size: `${1 + Math.random() * 2.5}px`,
+        opacity: 0.2 + Math.random() * 0.6,
+        delay: `${Math.random() * 4}s`,
+        duration: `${1.5 + Math.random() * 2.5}s`,
+      }));
+    }
+    return [];
+  }, [isDay]);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-[6]">
       {(isRain || isThunder) && particles.map((p) => (
