@@ -1631,17 +1631,17 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar overflow-hidden rounded-3xl" style={{ boxShadow: '0 0 20px hsl(28 100% 60% / 0.3), 0 0 40px hsl(220 80% 60% / 0.15)' }}>
+        <div className="relative group/bar rounded-[2rem]" style={{ boxShadow: '0 0 15px 2px hsl(28 100% 60% / 0.25), 0 0 35px 5px hsl(28 100% 60% / 0.15), 0 0 60px 10px hsl(220 80% 60% / 0.1)' }}>
           {/* Animated border glow - thin border only */}
           <div
             ref={glowOuterRef}
-            className="absolute inset-0 rounded-3xl pointer-events-none"
+            className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none"
             style={{
               background: 'conic-gradient(from 0deg, hsl(28 100% 60%), hsl(280 80% 55%), hsl(260 70% 50%), hsl(220 80% 60%), hsl(28 100% 60%))',
             }}
           />
           <div ref={glowInnerRef} className="hidden" />
-        <div className="relative m-[2px] bg-background backdrop-blur-2xl rounded-[22px] border-0 shadow-none p-2 flex items-end gap-2 z-10">
+        <div className="relative m-[2px] bg-background backdrop-blur-2xl rounded-[calc(2rem-2px)] border-0 shadow-none p-2 flex items-end gap-2 z-10">
           <input
             type="file"
             ref={fileInputRef}
