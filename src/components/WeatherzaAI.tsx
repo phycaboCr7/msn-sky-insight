@@ -199,18 +199,18 @@ const CodeBlock = ({
 </head>
 <body>
   <div class="header">
-    <span>🐍</span>
+    <span>[Py]</span>
     <h1>${lang.toUpperCase()} Interactive Shell</h1>
     <span id="status"></span>
   </div>
   <div class="output" id="output">
-    <div class="info-line">🐍 PYTHON Interactive Shell</div>
-    <div class="loading" id="loading">⏳ Loading Python engine (Pyodide)...</div>
+    <div class="info-line">PYTHON Interactive Shell</div>
+    <div class="loading" id="loading">Loading Python engine (Pyodide)...</div>
   </div>
   ${isPython ? '<div class="input-form" id="inputForm" style="display:none"><span class="prompt-label">&gt;&gt;&gt; </span><input type="text" id="cmdInput" placeholder="Type code here..." autocomplete="off" /></div>' : ''}
   <div class="footer">
-    <span>Press Enter to execute · ↑↓ for history · 📊 Matplotlib generates inline plots</span>
-    <span style="color: rgba(34,197,94,0.7)">⚡ Powered by Pyodide (In-Browser Python)</span>
+    <span>Press Enter to execute | Up/Down for history | Matplotlib generates inline plots</span>
+    <span style="color: rgba(34,197,94,0.7)">Powered by Pyodide (In-Browser Python)</span>
   </div>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"><\/script>
   <script>
@@ -244,7 +244,7 @@ const CodeBlock = ({
     (async function() {
       try {
         const pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
-        loading.textContent = '📦 Loading packages (numpy, matplotlib)...';
+        loading.textContent = 'Loading packages (numpy, matplotlib)...';
         await pyodide.loadPackage(['numpy', 'matplotlib', 'scipy', 'sympy']);
         await pyodide.runPythonAsync(\`
 import matplotlib
@@ -261,7 +261,7 @@ def get_plot_as_base64():
     return img_str
 \`);
         loading.remove();
-        addLine('✅ Python engine ready! NumPy, Matplotlib, SciPy, SymPy loaded.', 'info-line');
+        addLine('Python engine ready! NumPy, Matplotlib, SciPy, SymPy loaded.', 'info-line');
 
         window._pyodide = pyodide;
 
@@ -302,7 +302,7 @@ def get_plot_as_base64():
         }
       } catch (e) {
         loading.remove();
-        addLine('❌ Failed to load Python: ' + e.message, 'error-line');
+        addLine('Error: Failed to load Python: ' + e.message, 'error-line');
       }
     })();
 
@@ -332,7 +332,7 @@ def get_plot_as_base64():
         
         if (!stdout?.trim() && !hasPlot) addLine('(executed)', 'info-line');
       } catch (e) {
-        addLine('❌ ' + (e.message || String(e)).replace(/PythonError: /g, ''), 'error-line');
+        addLine('Error: ' + (e.message || String(e)).replace(/PythonError: /g, ''), 'error-line');
       }
     }
   <\/script>
