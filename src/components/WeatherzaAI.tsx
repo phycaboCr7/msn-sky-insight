@@ -1399,8 +1399,21 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     setQuestion(text);
   };
 
+  // Check if user can send a prompt
+  const canSendPrompt = (): boolean => {
+    if (isSignedIn) return true;
+    if (promptCount >= FREE_PROMPT_LIMIT) {
+      setShowSignInGate(true);
+      return false;
+    }
+    return true;
+  };
+
   const handleVoiceSend = (text: string) => {
     if (!text.trim()) return;
+    if (!canSendPrompt()) return;
+
+    if (!isSignedIn) setPromptCount(prev => prev + 1);
 
     const userMessage: Message = { id: genMsgId(), role: "user", content: text.trim() };
     const updatedMessages = [...messages, userMessage];
