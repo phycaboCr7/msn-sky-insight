@@ -885,13 +885,13 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [extractedDocName, setExtractedDocName] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
+  const [proMode, setProMode] = useState(() => localStorage.getItem('weatherza-pro-mode') === 'true');
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const glowOuterRef = useRef<HTMLDivElement>(null);
   const glowInnerRef = useRef<HTMLDivElement>(null);
-  // Voice refs removed — now using Groq Whisper via MediaRecorder in VoiceOverlay
 
   // JS-driven rotating glow animation — dual layer (sharp border + blurred glow)
   useEffect(() => {
