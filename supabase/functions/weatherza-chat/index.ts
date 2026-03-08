@@ -253,9 +253,10 @@ FORMATTING RULES (follow strictly):
     }
 
     // ─── GROQ WEATHER (fast streaming) ───
+    // Limit to last 3 messages to stay within Groq's 6000 TPM limit
     const groqMessages = [
       { role: "system", content: groqSystemPrompt },
-      ...messages.slice(-5).map((m: any) => ({ role: m.role, content: m.content })),
+      ...messages.slice(-3).map((m: any) => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 2000) : m.content })),
     ];
 
     let response: Response | null = null;
@@ -268,14 +269,18 @@ FORMATTING RULES (follow strictly):
           messages: groqMessages,
           stream: true,
           temperature: 0.5,
-          max_tokens: 8192,
+          max_tokens: 4096,
         }),
       });
 
-      if (response.status === 429 && attempt < 2) {
+      if ((response.status === 429 || response.status === 413) && attempt < 2) {
         const delay = (attempt + 1) * 2000;
-        console.log(`Rate limited, retry in ${delay}ms`);
+        console.log(`Rate limited/too large, retry in ${delay}ms`);
         await response.text();
+        if (response.status === 413) {
+          // Further reduce messages on retry
+          groqMessages.splice(1, Math.min(1, groqMessages.length - 2));
+        }
         await new Promise(r => setTimeout(r, delay));
         continue;
       }
@@ -286,6 +291,11 @@ FORMATTING RULES (follow strictly):
       if (response?.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response?.status === 413) {
+        return new Response(JSON.stringify({ error: "Message too long. Please start a new conversation or shorten your message." }), {
+          status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = response ? await response.text() : "No response";
