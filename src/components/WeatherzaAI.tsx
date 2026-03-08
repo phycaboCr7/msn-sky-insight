@@ -809,6 +809,20 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     return () => { if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current); };
   }, [messages]);
 
+  // Persist messages to localStorage (skip while typing/streaming)
+  useEffect(() => {
+    const hasTyping = messages.some(m => m.isTyping);
+    if (!hasTyping && messages.length > 0) {
+      try {
+        // Keep last 50 messages to avoid localStorage bloat
+        const toStore = messages.slice(-50).map(({ id, role, content }) => ({ id, role, content }));
+        localStorage.setItem('weatherza-chat-history', JSON.stringify(toStore));
+      } catch (e) {
+        console.error('Failed to save chat history:', e);
+      }
+    }
+  }, [messages]);
+
   // Extract text from PDF using pdfjs-dist
   const extractPdfText = async (file: File): Promise<string> => {
     try {
