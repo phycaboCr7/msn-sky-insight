@@ -1414,13 +1414,13 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden relative">
+    <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-hidden relative rounded-3xl">
       {/* AI-specific background image */}
       <AIBackground weather={weather} />
-      <CardHeader className="pb-3 relative z-10">
+      <CardHeader className="pb-2 pt-4 px-5 relative z-10">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">
+          <CardTitle className="flex items-center gap-2.5 text-lg">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-primary/25 to-purple-500/20 shadow-lg shadow-primary/10">
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <span 
@@ -1430,64 +1430,59 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               Rakshit's Weatherza AI
             </span>
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {messages.some(m => m.role === "assistant") && (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={exportToPDF}
-                  className="text-muted-foreground hover:text-primary"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
                   title="Export to PDF"
                 >
-                  <FileDown className="w-4 h-4 mr-1" />
+                  <FileDown className="w-3.5 h-3.5" />
                   PDF
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                </button>
+                <button
                   onClick={exportToWord}
-                  className="text-muted-foreground hover:text-primary"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
                   title="Export to Word"
                 >
-                  <Download className="w-4 h-4 mr-1" />
+                  <Download className="w-3.5 h-3.5" />
                   Word
-                </Button>
+                </button>
               </>
             )}
             {messages.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={clearChat}
-                className="text-muted-foreground hover:text-destructive"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
               >
-                <Trash2 className="w-4 h-4 mr-1" />
+                <Trash2 className="w-3.5 h-3.5" />
                 Clear
-              </Button>
+              </button>
             )}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="relative z-10">
+      <CardContent className="relative z-10 px-4 pb-4 pt-2">
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
         {/* Mode Selector */}
-        <div className="flex flex-wrap gap-1.5 px-2 pb-2">
+        <div className="flex gap-1 px-1 pb-3">
           {([
-            { key: 'weather', label: 'Weather', icon: CloudSun, color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/40 text-blue-400' },
-            { key: 'code', label: 'Code', icon: Code, color: 'from-green-500/20 to-emerald-500/20 border-green-500/40 text-green-400' },
-            { key: 'math', label: 'Math', icon: Calculator, color: 'from-purple-500/20 to-violet-500/20 border-purple-500/40 text-purple-400' },
-            { key: 'conversation', label: 'Chat', icon: MessageCircle, color: 'from-orange-500/20 to-amber-500/20 border-orange-500/40 text-orange-400' },
-          ] as const).map(({ key, label, icon: Icon, color }) => (
+            { key: 'weather', label: 'Weather', icon: CloudSun },
+            { key: 'code', label: 'Code', icon: Code },
+            { key: 'math', label: 'Math', icon: Calculator },
+            { key: 'conversation', label: 'Chat', icon: MessageCircle },
+          ] as const).map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setAiMode(key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
                 aiMode === key
-                  ? `bg-gradient-to-r ${color} shadow-lg scale-105`
-                  : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:border-white/20'
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105'
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
               }`}
+              style={{ fontFamily: "'Quicksand', sans-serif" }}
             >
               <Icon className="w-3.5 h-3.5" />
               {label}
@@ -1618,9 +1613,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         )}
 
-        {/* Input Area */}
-        <div className="flex gap-2 items-end">
-          {/* Hidden file input */}
+        {/* Input Area - unified bar */}
+        <div className="relative bg-black/40 backdrop-blur-2xl rounded-2xl border border-white/10 p-2 flex items-end gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -1628,32 +1622,25 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             className="hidden"
           />
-          
-          {/* File upload button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => fileInputRef.current?.click()}
-            className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
-            title="Upload image or document"
-          >
-            {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
-          </Button>
-
-          {/* Voice input button - opens Groq Whisper voice overlay */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => setVoiceOverlayOpen(true)}
-            className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
-            title="Start voice input (Groq Whisper)"
-          >
-            <Mic className="w-4 h-4" />
-          </Button>
-
-          <div className="flex-1 relative">
+          <div className="flex gap-1 self-end pb-0.5">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
+              title="Upload image or document"
+            >
+              {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setVoiceOverlayOpen(true)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
+              title="Voice input"
+            >
+              <Mic className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1">
             <Textarea
               placeholder={uploadedImage ? "Ask about this image..." : extractedDocName ? `Ask about "${extractedDocName}"...` : "Ask me anything - math, science, coding, weather..."}
               value={question}
@@ -1661,34 +1648,34 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               onKeyDown={handleKeyDown}
               onFocus={(e) => {
                 e.preventDefault();
-                // Prevent browser from scrolling the page when textarea is focused
                 const scrollY = window.scrollY;
                 requestAnimationFrame(() => {
                   window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior });
                 });
               }}
-              className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors w-full"
-              rows={2}
+              className="bg-transparent border-0 min-h-[44px] max-h-[120px] resize-none focus:ring-0 focus:border-0 focus-visible:ring-0 w-full text-sm placeholder:text-white/25"
+              style={{ fontFamily: "'Quicksand', sans-serif" }}
+              rows={1}
             />
           </div>
           {loading ? (
-            <Button
+            <button
               data-stop-btn
               onClick={stopGeneration}
-              className="px-4 self-end bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 border-0"
+              className="self-end w-10 h-10 rounded-xl flex items-center justify-center bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition-all active:scale-95"
               title="Stop generating"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
-            </Button>
+            </button>
           ) : (
-            <Button 
+            <button
               data-send-btn
-              onClick={askAI} 
+              onClick={askAI}
               disabled={isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
-              className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+              className="self-end w-10 h-10 rounded-xl flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
-            </Button>
+            </button>
           )}
         </div>
 
