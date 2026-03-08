@@ -65,11 +65,17 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/"
           });
           
-          await window.pyodide.loadPackage(["numpy", "matplotlib"]);
+          // Load core packages first
+          await window.pyodide.loadPackage(["numpy", "matplotlib", "scipy", "sympy"]);
           await window.pyodide.runPythonAsync(PYTHON_SETUP_CODE);
           
+          // Load additional packages in background (non-blocking)
+          window.pyodide.loadPackage(["networkx", "scikit-learn"]).catch(() => {
+            console.log("Optional packages (networkx, scikit-learn) not loaded");
+          });
+          
           setPyodideReady(true);
-          toast({ title: "Python Ready! 🐍", description: "Loaded NumPy, Matplotlib & Turtle" });
+          toast({ title: "Python Ready! 🐍", description: "Loaded NumPy, Matplotlib, SciPy, SymPy & Turtle" });
         } catch (err) {
           console.error("Pyodide load error:", err);
           setError("Failed to load Python environment");
