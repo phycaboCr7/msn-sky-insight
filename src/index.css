@@ -872,3 +872,17 @@ All colors MUST be HSL.
   from { --glow-angle: 0deg; }
   to { --glow-angle: 360deg; }
 }
+
+/* MapLibre popup — remove default white box and arrow */
+.maplibregl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: rgba(0,0,0,0.85) !important;
+  border-bottom-color: rgba(0,0,0,0.85) !important;
+}
