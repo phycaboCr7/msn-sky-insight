@@ -6,20 +6,129 @@ interface MoonPhaseCardProps {
   weather: WeatherData;
 }
 
-// Moon phase emoji/icon based on phase name
-const getMoonPhaseIcon = (phase: string) => {
-  const phaseMap: { [key: string]: string } = {
-    "New Moon": "🌑",
-    "Waxing Crescent": "🌒",
-    "First Quarter": "🌓",
-    "Waxing Gibbous": "🌔",
-    "Full Moon": "🌕",
-    "Waning Gibbous": "🌖",
-    "Last Quarter": "🌗",
-    "Third Quarter": "🌗",
-    "Waning Crescent": "🌘",
+// Realistic SVG moon phase renderer
+const MoonPhaseSVG = ({ phase, size = 80 }: { phase: string; size?: number }) => {
+  const r = size / 2 - 2;
+  const cx = size / 2;
+  const cy = size / 2;
+
+  // Moon surface craters for realism
+  const craters = (
+    <g opacity="0.3">
+      <circle cx={cx - r * 0.25} cy={cy - r * 0.3} r={r * 0.12} fill="#8a8a6a" />
+      <circle cx={cx + r * 0.15} cy={cy + r * 0.2} r={r * 0.18} fill="#8a8a6a" />
+      <circle cx={cx - r * 0.1} cy={cy + r * 0.45} r={r * 0.1} fill="#8a8a6a" />
+      <circle cx={cx + r * 0.35} cy={cy - r * 0.15} r={r * 0.08} fill="#8a8a6a" />
+      <circle cx={cx - r * 0.4} cy={cy + r * 0.1} r={r * 0.07} fill="#8a8a6a" />
+    </g>
+  );
+
+  const litColor = "#e8dca0";
+  const darkColor = "#3a3a3a";
+  const darkCraters = (
+    <g opacity="0.25">
+      <circle cx={cx - r * 0.25} cy={cy - r * 0.3} r={r * 0.12} fill="#2a2a2a" />
+      <circle cx={cx + r * 0.15} cy={cy + r * 0.2} r={r * 0.18} fill="#2a2a2a" />
+      <circle cx={cx - r * 0.1} cy={cy + r * 0.45} r={r * 0.1} fill="#2a2a2a" />
+      <circle cx={cx + r * 0.35} cy={cy - r * 0.15} r={r * 0.08} fill="#2a2a2a" />
+    </g>
+  );
+
+  // Get illumination shape based on phase
+  const getPhaseClip = () => {
+    switch (phase) {
+      case "New Moon":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={darkColor} />
+            {darkCraters}
+          </>
+        );
+      case "Full Moon":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={litColor} />
+            {craters}
+          </>
+        );
+      case "Waxing Crescent":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={darkColor} />
+            {darkCraters}
+            <clipPath id="waxCres"><circle cx={cx} cy={cy} r={r} /></clipPath>
+            <ellipse cx={cx + r * 0.3} cy={cy} rx={r * 0.7} ry={r} fill={litColor} clipPath="url(#waxCres)" />
+            <ellipse cx={cx + r * 0.3} cy={cy} rx={r * 0.7} ry={r} fill={litColor} clipPath="url(#waxCres)" opacity="0" />
+          </>
+        );
+      case "First Quarter":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={darkColor} />
+            {darkCraters}
+            <clipPath id="firstQ"><circle cx={cx} cy={cy} r={r} /></clipPath>
+            <rect x={cx} y={cy - r} width={r} height={r * 2} fill={litColor} clipPath="url(#firstQ)" />
+          </>
+        );
+      case "Waxing Gibbous":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={litColor} />
+            {craters}
+            <clipPath id="waxGib"><circle cx={cx} cy={cy} r={r} /></clipPath>
+            <ellipse cx={cx - r * 0.3} cy={cy} rx={r * 0.7} ry={r} fill={darkColor} clipPath="url(#waxGib)" />
+          </>
+        );
+      case "Waning Gibbous":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={litColor} />
+            {craters}
+            <clipPath id="wanGib"><circle cx={cx} cy={cy} r={r} /></clipPath>
+            <ellipse cx={cx + r * 0.3} cy={cy} rx={r * 0.7} ry={r} fill={darkColor} clipPath="url(#wanGib)" />
+          </>
+        );
+      case "Last Quarter":
+      case "Third Quarter":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={darkColor} />
+            {darkCraters}
+            <clipPath id="lastQ"><circle cx={cx} cy={cy} r={r} /></clipPath>
+            <rect x={cx - r} y={cy - r} width={r} height={r * 2} fill={litColor} clipPath="url(#lastQ)" />
+          </>
+        );
+      case "Waning Crescent":
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={darkColor} />
+            {darkCraters}
+            <clipPath id="wanCres"><circle cx={cx} cy={cy} r={r} /></clipPath>
+            <ellipse cx={cx - r * 0.3} cy={cy} rx={r * 0.7} ry={r} fill={litColor} clipPath="url(#wanCres)" />
+          </>
+        );
+      default:
+        return (
+          <>
+            <circle cx={cx} cy={cy} r={r} fill={litColor} />
+            {craters}
+          </>
+        );
+    }
   };
-  return phaseMap[phase] || "🌙";
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <defs>
+        <radialGradient id="moonGlow">
+          <stop offset="85%" stopColor="transparent" />
+          <stop offset="100%" stopColor="rgba(232,220,160,0.15)" />
+        </radialGradient>
+      </defs>
+      {getPhaseClip()}
+      <circle cx={cx} cy={cy} r={r} fill="url(#moonGlow)" />
+    </svg>
+  );
 };
 
 export const MoonPhaseCard = ({ weather }: MoonPhaseCardProps) => {
@@ -44,8 +153,8 @@ export const MoonPhaseCard = ({ weather }: MoonPhaseCardProps) => {
       
       <div className="flex flex-col items-center gap-4">
         {/* Large Moon Icon */}
-        <div className="text-6xl animate-pulse-slow">
-          {getMoonPhaseIcon(moon_phase)}
+        <div>
+          <MoonPhaseSVG phase={moon_phase} size={80} />
         </div>
         
         {/* Phase Name */}
