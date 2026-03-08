@@ -38,8 +38,11 @@ serve(async (req) => {
 
     const actualAQI = weatherContext.pm25 ? calculateAQI(weatherContext.pm25) : weatherContext.aqi;
 
-    const systemPrompt = `You are Weatherza AI by Rakshit Jain (Weatherza Labs). Contact: phycabo33@gmail.com
+    const userName = weatherContext.userName;
+    const userGreeting = userName ? `The user's name is ${userName}. Address them by name naturally.` : '';
 
+    const systemPrompt = `You are Weatherza AI by Rakshit Jain (Weatherza Labs). Contact: phycabo33@gmail.com
+${userGreeting}
 WEATHER: ${weatherContext.location}, ${weatherContext.country} | ${weatherContext.temperature}°C (feels ${weatherContext.feelsLike}°C) | ${weatherContext.condition} | 💧${weatherContext.humidity}% | 💨${weatherContext.windSpeed}km/h | UV ${weatherContext.uvIndex} | Rain ${weatherContext.precipChance}% | Hi/Lo ${weatherContext.maxTemp}°/${weatherContext.minTemp}°C | AQI ${actualAQI || 'N/A'}
 
 AVAILABLE PYTHON LIBRARIES (pre-installed in user's browser via Pyodide):
