@@ -900,8 +900,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     const animate = () => {
       angle = (angle + 0.8) % 360;
       const val = `${angle}deg`;
-      glowOuterRef.current?.style.setProperty('background', `conic-gradient(from ${val}, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)`);
-      glowInnerRef.current?.style.setProperty('background', `conic-gradient(from ${val}, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)`);
+      const gradient = `conic-gradient(from ${val}, hsl(28 100% 60%), hsl(280 80% 55%), hsl(260 70% 50%), hsl(220 80% 60%), hsl(28 100% 60%))`;
+      glowOuterRef.current?.style.setProperty('background', gradient);
       rafId = requestAnimationFrame(animate);
     };
     rafId = requestAnimationFrame(animate);
@@ -1637,10 +1637,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             ref={glowOuterRef}
             className="absolute inset-0 rounded-2xl pointer-events-none"
             style={{
-              background: 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)',
+              background: 'conic-gradient(from 0deg, hsl(28 100% 60%), hsl(280 80% 55%), hsl(260 70% 50%), hsl(220 80% 60%), hsl(28 100% 60%))',
             }}
           />
-          {/* This ref is kept for JS animation compatibility */}
           <div ref={glowInnerRef} className="hidden" />
         <div className="relative m-[2px] bg-black/80 backdrop-blur-2xl rounded-[14px] border-0 p-2 flex items-end gap-2 z-10">
           <input
