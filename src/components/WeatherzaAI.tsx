@@ -856,6 +856,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   // Extract text from DOCX using mammoth
   const extractDocxText = async (file: File): Promise<string> => {
+    const mammoth = await loadMammoth();
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer });
     return result.value;
