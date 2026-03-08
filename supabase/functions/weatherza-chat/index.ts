@@ -109,6 +109,7 @@ FORMATTING RULES (follow strictly):
 - Be concise but informative — no filler text
 - NEVER use markdown formatting (** or *) inside Python code blocks — numbers and values in code must be plain, unformatted text
 - If user asks for a graph or visualization, write clean Python code using only matplotlib and numpy with NO markdown inside the code
+- MATH/EQUATIONS: ALWAYS wrap ALL math in LaTeX delimiters. Use $...$ for inline math and $$...$$ for block equations. NEVER write equations as plain Unicode text. Write $E = mc^2$ not E = mc². Write $$\\nabla \\times \\vec{E} = -\\frac{\\partial \\vec{B}}{\\partial t}$$ not ∇ × E = -∂B/∂t. For matrices: $$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$$ not [[a,b],[c,d]].
 - ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 suggestions`;
 
     // ─── VISION ───
