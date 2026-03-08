@@ -4,23 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MessageSquare } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-interface AIAskBarProps { weather: WeatherData; apiKey?: string; }
+interface AIAskBarProps { weather: WeatherData; }
 
-export const AIAskBar = ({ weather, apiKey }: AIAskBarProps) => {
+export const AIAskBar = ({ weather }: AIAskBarProps) => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const apiKeyToUse = (typeof window !== 'undefined' && (localStorage.getItem('gemini_api_key') || "")) || "";
-  const effectiveKey = (typeof window !== 'undefined' ? (apiKey || undefined) : undefined) ?? apiKeyToUse;
-
   const askAI = async () => {
-    if (!effectiveKey) {
-      toast({ title: "API Key Required", description: "Save your Gemini API key to ask questions.", variant: "destructive" });
-      return;
-    }
     if (!question.trim()) return;
 
     setLoading(true);
@@ -40,23 +34,15 @@ export const AIAskBar = ({ weather, apiKey }: AIAskBarProps) => {
 
       const prompt = `You are a concise weather assistant. Use ONLY this current weather context ${JSON.stringify(weatherInfo)} and answer the user's question in 3-5 bullet points. Be practical and specific to the location. Question: ${question}`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${effectiveKey}` , {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.6, topK: 40, topP: 0.95, maxOutputTokens: 512 }
-        })
+      const { data, error } = await supabase.functions.invoke('gemini-proxy', {
+        body: { prompt, type: "text" },
       });
 
-      if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
-
-      const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      setAnswer(text);
+      if (error) throw error;
+      setAnswer(data?.text || "No response received.");
     } catch (e) {
       console.error(e);
-      toast({ title: "AI error", description: "Failed to get an answer. Check your API key.", variant: "destructive" });
+      toast({ title: "AI error", description: "Failed to get an answer.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
