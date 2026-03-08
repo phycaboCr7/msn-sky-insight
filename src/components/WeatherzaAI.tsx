@@ -1463,25 +1463,26 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="relative z-10">
+      <CardContent className="relative z-10 px-4 pb-4 pt-2">
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
         {/* Mode Selector */}
-        <div className="flex flex-wrap gap-1.5 px-2 pb-2">
+        <div className="flex gap-1 px-1 pb-3">
           {([
-            { key: 'weather', label: 'Weather', icon: CloudSun, color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/40 text-blue-400' },
-            { key: 'code', label: 'Code', icon: Code, color: 'from-green-500/20 to-emerald-500/20 border-green-500/40 text-green-400' },
-            { key: 'math', label: 'Math', icon: Calculator, color: 'from-purple-500/20 to-violet-500/20 border-purple-500/40 text-purple-400' },
-            { key: 'conversation', label: 'Chat', icon: MessageCircle, color: 'from-orange-500/20 to-amber-500/20 border-orange-500/40 text-orange-400' },
-          ] as const).map(({ key, label, icon: Icon, color }) => (
+            { key: 'weather', label: 'Weather', icon: CloudSun },
+            { key: 'code', label: 'Code', icon: Code },
+            { key: 'math', label: 'Math', icon: Calculator },
+            { key: 'conversation', label: 'Chat', icon: MessageCircle },
+          ] as const).map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setAiMode(key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-300 ${
                 aiMode === key
-                  ? `bg-gradient-to-r ${color} shadow-lg scale-105`
-                  : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:border-white/20'
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105'
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
               }`}
+              style={{ fontFamily: "'Quicksand', sans-serif" }}
             >
               <Icon className="w-3.5 h-3.5" />
               {label}
