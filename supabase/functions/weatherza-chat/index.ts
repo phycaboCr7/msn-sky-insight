@@ -38,13 +38,12 @@ serve(async (req) => {
       hasImages,
     });
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    if (!GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY is not configured");
     }
 
-    // Also keep GROQ for vision fallback
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    // GROQ_API_KEY already fetched above
 
     const actualAQI = weatherContext.pm25 ? calculateAQI(weatherContext.pm25) : weatherContext.aqi;
 
@@ -136,6 +135,75 @@ Use this data naturally when answering weather-related questions. Provide action
 
 ---
 
+## 🐍 PYTHON EXECUTION ENVIRONMENT — PYODIDE (CRITICAL)
+
+Your Python code runs in **Pyodide** — a WebAssembly build of CPython running inside the browser. You MUST follow these constraints strictly:
+
+### ✅ Available Libraries (pre-loaded)
+- **matplotlib** (AGG backend only — no GUI, no plt.show())
+- **numpy**
+- **math**, **io**, **base64**, **json**, **re**, **collections**, **itertools**, **functools**, **random**, **string**, **datetime**, **statistics**, **decimal**, **fractions**, **operator**, **textwrap**, **unicodedata**, **enum**, **dataclasses**, **typing**, **copy**, **pprint**, **heapq**, **bisect**
+
+### ❌ NOT Available — NEVER use these
+- **pandas** — NOT available. Use lists of dicts, numpy, or manual CSV parsing instead.
+- **seaborn** — NOT available. Use matplotlib directly for all styling.
+- **plotly** — NOT available. Use matplotlib only.
+- **scipy** — NOT available. Implement algorithms manually using numpy/math.
+- **sklearn / scikit-learn** — NOT available.
+- **requests**, **urllib**, **http** — NO network access.
+- **os**, **sys**, **subprocess**, **pathlib** — NO filesystem or OS access.
+- **tkinter**, **pygame**, **PIL/Pillow** — NO GUI or image libraries.
+- **sqlite3**, **csv** (csv module IS available for parsing strings, but no file I/O).
+- **input()**, **open()** — NO interactive input, NO file reading/writing.
+- **time.sleep()** — Does NOT actually pause; avoid for animations.
+
+### 🎨 Matplotlib Rules
+- Backend is AGG (non-interactive). Never call \`plt.show()\`.
+- Always end plots with: \`print(get_plot_as_base64())\` — this is a pre-defined helper that saves the figure and returns it as a base64 PNG string.
+- Always call \`plt.figure()\` or \`plt.subplots()\` before plotting.
+- Always call \`plt.tight_layout()\` before capturing.
+- For multiple plots, use subplots — don't create separate figures.
+
+### 🐢 Turtle Graphics
+- A custom \`SimpleTurtle\` class is pre-loaded (not the real \`turtle\` module).
+- Use: \`t = SimpleTurtle()\` or the pre-existing \`t\` / \`turtle\` variable.
+- Available methods: forward/fd, backward/bk, left/lt, right/rt, penup/pu, pendown/pd, goto, setpos, setheading/seth, circle, pencolor, speed, hideturtle/ht, width/pensize.
+- To render: call \`print(t.draw())\` at the end — returns base64 PNG.
+- done(), mainloop(), exitonclick(), bye() are all no-ops.
+- Screen() returns a dummy object.
+
+### 📊 Code Pattern for Graphs
+\`\`\`python
+import matplotlib
+matplotlib.use('AGG')
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(10, 6))
+# ... your plotting code ...
+plt.tight_layout()
+print(get_plot_as_base64())
+\`\`\`
+
+### 🐢 Code Pattern for Turtle
+\`\`\`python
+t = SimpleTurtle()
+# ... turtle drawing commands ...
+print(t.draw())
+\`\`\`
+
+### ⚠️ Common Mistakes to Avoid
+1. Do NOT \`import pandas\` — will crash. Use lists/dicts/numpy instead.
+2. Do NOT \`import seaborn\` — will crash. Style matplotlib manually.
+3. Do NOT call \`plt.show()\` — will do nothing or error.
+4. Do NOT use \`input()\` — environment is non-interactive.
+5. Do NOT use \`open()\` — no filesystem access.
+6. Do NOT \`import requests\` — no network in browser.
+7. Do NOT use \`time.sleep()\` for delays — it blocks the browser thread.
+8. Always \`print()\` your final output — the system captures stdout.
+
+---
+
 ## RESPONSE STYLE
 
 - Use markdown formatting: **bold**, *italic*, headers, lists, tables
@@ -218,27 +286,27 @@ You have access to the full conversation history. Reference previous messages na
       });
     }
 
-    // For text queries: use Lovable AI Gateway with STREAMING
+    // For text queries: use Groq Qwen model with STREAMING
     const aiMessages = [
       { role: "system", content: systemPrompt },
-      ...messages.slice(-6).map((msg: any) => ({
+      ...messages.slice(-8).map((msg: any) => ({
         role: msg.role,
         content: msg.content,
       })),
     ];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "qwen-qwq-32b",
         messages: aiMessages,
         stream: true,
-        temperature: 0.55,
-        max_tokens: 4096,
+        temperature: 0.6,
+        max_tokens: 8192,
       }),
     });
 
@@ -249,15 +317,9 @@ You have access to the full conversation history. Reference previous messages na
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error("Groq API error:", response.status, t);
+      throw new Error(`Groq API error: ${response.status}`);
     }
 
     // Stream the response directly back to client
