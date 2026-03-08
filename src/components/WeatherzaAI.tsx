@@ -209,8 +209,8 @@ const CodeBlock = ({
   </div>
   ${isPython ? '<div class="input-form" id="inputForm" style="display:none"><span class="prompt-label">&gt;&gt;&gt; </span><input type="text" id="cmdInput" placeholder="Type code here..." autocomplete="off" /></div>' : ''}
   <div class="footer">
-    <span>Press Enter to execute · ↑↓ for history · 📊 Matplotlib generates inline plots</span>
-    <span style="color: rgba(34,197,94,0.7)">⚡ Powered by Pyodide (In-Browser Python)</span>
+    <span>Press Enter to execute | Up/Down for history | Matplotlib generates inline plots</span>
+    <span style="color: rgba(34,197,94,0.7)">Powered by Pyodide (In-Browser Python)</span>
   </div>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"><\/script>
   <script>
