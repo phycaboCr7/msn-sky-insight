@@ -130,12 +130,19 @@ const CodeBlock = ({
   onOpenPyodide?: (code: string) => void;
 }) => {
   const [copied, setCopied] = useState(false);
+  const [editableCode, setEditableCode] = useState(children);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+
+  // Sync when children prop changes (new AI response)
+  useEffect(() => {
+    setEditableCode(children);
+  }, [children]);
 
   const lang = language?.toLowerCase() || '';
   const isRunnable = lang && (BACKEND_LANGUAGES.includes(lang) || lang === 'html');
   const usesInterpreter = INTERPRETER_LANGUAGES.includes(lang);
-  const isPythonGraph = (lang === 'python' || lang === 'py') && isPythonGraphCode(children);
+  const isPythonGraph = (lang === 'python' || lang === 'py') && isPythonGraphCode(editableCode);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(children);
