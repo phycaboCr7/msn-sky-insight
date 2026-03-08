@@ -4,9 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown, Type } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown, Type, ImageIcon } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { FontPicker, FontOption, getStoredFont, loadGoogleFont } from "@/components/FontPicker";
+import { BackgroundPicker, CustomBg, getStoredBg } from "@/components/BackgroundPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
 import ReactMarkdown from "react-markdown";
@@ -49,10 +50,15 @@ let msgIdCounter = 0;
 const genMsgId = () => `msg-${Date.now()}-${++msgIdCounter}`;
 
 // Separate background component for WeatherzaAI
-const AIBackground = ({ weather }: { weather: WeatherData }) => {
+const AIBackground = ({ weather, customBg }: { weather: WeatherData; customBg?: CustomBg | null }) => {
   const [bgImage, setBgImage] = useState<string>('');
 
   useEffect(() => {
+    // If user has a custom bg, use it
+    if (customBg?.url) {
+      setBgImage(customBg.url);
+      return;
+    }
     const fetchBg = async () => {
       try {
         const queries = ['dramatic waterfall tropical rainforest', 'volcanic eruption lava ocean', 'northern lights mountain lake reflection', 'deep ocean bioluminescent underwater', 'lightning storm dramatic landscape', 'milky way mountain silhouette night'];
@@ -72,7 +78,7 @@ const AIBackground = ({ weather }: { weather: WeatherData }) => {
       }
     };
     fetchBg();
-  }, [weather.location.name]);
+  }, [weather.location.name, customBg?.url]);
 
   if (!bgImage) return null;
 
@@ -893,6 +899,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [proMode, setProMode] = useState(() => localStorage.getItem('weatherza-pro-mode') === 'true');
   const [chatFont, setChatFont] = useState<FontOption>(() => getStoredFont());
   const [fontPickerOpen, setFontPickerOpen] = useState(false);
+  const [customBg, setCustomBg] = useState<CustomBg | null>(() => getStoredBg());
+  const [bgPickerOpen, setBgPickerOpen] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -1535,7 +1543,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   return (
     <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-visible relative rounded-3xl">
       {/* AI-specific background image */}
-      <AIBackground weather={weather} />
+      <AIBackground weather={weather} customBg={customBg} />
       <CardHeader className="pb-2 pt-4 px-5 relative z-10">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2.5 text-lg">
@@ -1864,16 +1872,28 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             </button>
             {/* Font picker button — beside mic, signed-in only */}
             {isSignedIn && (
-              <button
-                type="button"
-                onClick={() => setFontPickerOpen(!fontPickerOpen)}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  fontPickerOpen ? 'bg-primary/30 text-primary' : 'bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary'
-                }`}
-                title="Choose chat font"
-              >
-                <Type className="w-4 h-4" />
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setFontPickerOpen(!fontPickerOpen)}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                    fontPickerOpen ? 'bg-primary/30 text-primary' : 'bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary'
+                  }`}
+                  title="Choose chat font"
+                >
+                  <Type className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBgPickerOpen(!bgPickerOpen)}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                    bgPickerOpen ? 'bg-primary/30 text-primary' : 'bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary'
+                  }`}
+                  title="Set background image"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </button>
+              </>
             )}
           </div>
           <div className="flex-1">
@@ -1950,6 +1970,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           onClose={() => setFontPickerOpen(false)}
           selectedFont={chatFont}
           onSelectFont={(font) => { setChatFont(font); setFontPickerOpen(false); }}
+        />
+
+        {/* Background Picker Overlay */}
+        <BackgroundPicker
+          isOpen={bgPickerOpen}
+          onClose={() => setBgPickerOpen(false)}
+          currentBg={customBg}
+          onSelectBg={(bg) => { setCustomBg(bg); setBgPickerOpen(false); }}
         />
       </CardContent>
     </Card>
