@@ -338,7 +338,7 @@ const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string;
 
   return (
     <div className="w-full overflow-visible">
-      <div className="weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed h-auto min-h-fit">
+      <div className="weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-relaxed h-auto min-h-fit" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
