@@ -1414,13 +1414,13 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden relative">
+    <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-hidden relative rounded-3xl">
       {/* AI-specific background image */}
       <AIBackground weather={weather} />
-      <CardHeader className="pb-3 relative z-10">
+      <CardHeader className="pb-2 pt-4 px-5 relative z-10">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">
+          <CardTitle className="flex items-center gap-2.5 text-lg">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-primary/25 to-purple-500/20 shadow-lg shadow-primary/10">
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <span 
@@ -1430,41 +1430,35 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               Rakshit's Weatherza AI
             </span>
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {messages.some(m => m.role === "assistant") && (
               <>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={exportToPDF}
-                  className="text-muted-foreground hover:text-primary"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
                   title="Export to PDF"
                 >
-                  <FileDown className="w-4 h-4 mr-1" />
+                  <FileDown className="w-3.5 h-3.5" />
                   PDF
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                </button>
+                <button
                   onClick={exportToWord}
-                  className="text-muted-foreground hover:text-primary"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
                   title="Export to Word"
                 >
-                  <Download className="w-4 h-4 mr-1" />
+                  <Download className="w-3.5 h-3.5" />
                   Word
-                </Button>
+                </button>
               </>
             )}
             {messages.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={clearChat}
-                className="text-muted-foreground hover:text-destructive"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
               >
-                <Trash2 className="w-4 h-4 mr-1" />
+                <Trash2 className="w-3.5 h-3.5" />
                 Clear
-              </Button>
+              </button>
             )}
           </div>
         </div>
