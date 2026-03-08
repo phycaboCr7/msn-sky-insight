@@ -28,7 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, weatherContext, mode = 'weather' } = await req.json();
+    const { messages, weatherContext, mode = 'weather', isPro = false } = await req.json();
     const hasImages = messages.some((msg: any) => msg.image);
 
     console.log("Chat request:", { count: messages?.length || 0, location: weatherContext?.location, hasImages, mode });
