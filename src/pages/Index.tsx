@@ -215,6 +215,10 @@ const Index = () => {
                 <SunPhaseCard weather={weather} />
               </Suspense>
               
+              <Suspense fallback={<CardSkeleton />}>
+                <StockWidget />
+              </Suspense>
+              
               <Suspense fallback={<CardSkeleton className="col-span-full" />}>
                 <WorldMap weather={weather} />
               </Suspense>
