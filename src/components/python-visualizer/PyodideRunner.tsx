@@ -178,7 +178,7 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
           .replace(/plt\.savefig\([^)]+\)/g, '');
         
       // Check for FuncAnimation
-        if (modifiedCode.includes("FuncAnimation")) {
+        if (modifiedCode.includes("FuncAnimation") || modifiedCode.includes("def update(") || modifiedCode.includes("def update (")) {
           modifiedCode += `
 # Generate frames from FuncAnimation — minimum 240 frames (10s at 24fps)
 try:
