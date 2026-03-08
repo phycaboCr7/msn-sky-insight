@@ -44,56 +44,43 @@ const scaleSegments = [
   { label: "Hazar...", max: 500, color: "bg-rose-700" },
 ];
 
-// Indian monuments SVG silhouette for background
 const MonumentsSilhouette = () => (
   <svg
-    className="absolute bottom-0 left-0 right-0 w-full opacity-[0.12]"
+    className="absolute bottom-0 left-0 right-0 w-full h-[60%] opacity-[0.08]"
     viewBox="0 0 800 180"
     fill="currentColor"
     preserveAspectRatio="xMidYMax slice"
     style={{ color: "white" }}
   >
-    {/* Taj Mahal center */}
     <path d="M360,180 L360,90 Q365,60 380,45 Q390,30 400,20 Q410,30 420,45 Q435,60 440,90 L440,180 Z" />
     <ellipse cx="400" cy="42" rx="12" ry="18" />
     <rect x="396" y="20" width="8" height="8" />
-    {/* Dome top finial */}
     <line x1="400" y1="12" x2="400" y2="22" stroke="currentColor" strokeWidth="2" />
-    {/* Left minaret */}
     <rect x="340" y="70" width="10" height="110" />
     <ellipse cx="345" cy="70" rx="7" ry="10" />
-    {/* Right minaret */}
     <rect x="450" y="70" width="10" height="110" />
     <ellipse cx="455" cy="70" rx="7" ry="10" />
-    {/* India Gate left */}
     <rect x="120" y="100" width="12" height="80" />
     <rect x="168" y="100" width="12" height="80" />
     <rect x="118" y="95" width="64" height="12" rx="3" />
     <path d="M130,95 Q150,70 170,95" />
-    {/* Qutub Minar */}
     <path d="M680,180 L688,50 Q692,40 696,35 Q700,40 704,50 L712,180 Z" />
     <rect x="686" y="70" width="20" height="3" rx="1" />
     <rect x="684" y="100" width="24" height="3" rx="1" />
     <rect x="682" y="130" width="28" height="3" rx="1" />
-    {/* Hawa Mahal right */}
     <rect x="550" y="90" width="50" height="90" rx="2" />
     <path d="M550,90 Q555,80 560,85 Q565,75 570,80 Q575,70 580,80 Q585,75 590,85 Q595,80 600,90" />
     <rect x="558" y="100" width="8" height="10" rx="3" />
     <rect x="574" y="100" width="8" height="10" rx="3" />
     <rect x="558" y="118" width="8" height="10" rx="3" />
     <rect x="574" y="118" width="8" height="10" rx="3" />
-    <rect x="558" y="136" width="8" height="10" rx="3" />
-    <rect x="574" y="136" width="8" height="10" rx="3" />
-    {/* Temple left far */}
     <rect x="30" y="120" width="40" height="60" />
     <path d="M25,120 Q50,75 75,120" />
     <path d="M35,120 Q50,90 65,120" />
-    {/* Small domes / distant cityscape */}
     <rect x="230" y="150" width="30" height="30" />
     <ellipse cx="245" cy="150" rx="18" ry="12" />
     <rect x="270" y="140" width="20" height="40" />
     <ellipse cx="280" cy="140" rx="12" ry="8" />
-    {/* Ground line */}
     <rect x="0" y="175" width="800" height="5" />
   </svg>
 );
@@ -104,99 +91,106 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
 
   const actualAQI = calculateAQI(airQuality.pm2_5, airQuality.pm10, airQuality.o3, airQuality.no2);
   const aqiLevel = getAQILevel(actualAQI);
-
   const markerPercent = Math.min((actualAQI / 500) * 100, 100);
 
   return (
-    <div className={`rounded-3xl overflow-hidden animate-fade-in shadow-xl border border-white/10 bg-gradient-to-br ${aqiLevel.gradient} relative`}>
+    <div className={`rounded-3xl overflow-visible animate-fade-in shadow-xl border border-white/10 bg-gradient-to-br ${aqiLevel.gradient} relative`}>
       {/* Monument silhouette background */}
-      <MonumentsSilhouette />
+      <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+        <MonumentsSilhouette />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+      </div>
 
-      {/* Gradient overlay for depth */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
-
-      {/* Top section */}
-      <div className="relative p-5 sm:p-6 z-10">
-        <div className="flex items-start justify-between gap-4">
-          {/* Left: AQI value & details */}
-          <div className="flex-1 space-y-3">
-            {/* Live AQI badge */}
-            <div className="flex items-center gap-2">
+      {/* Main content */}
+      <div className="relative z-10 p-5 sm:p-6">
+        {/* Top row: Live AQI badge + Air Quality status + Boy */}
+        <div className="flex items-start gap-3">
+          {/* Left column: AQI data */}
+          <div className="flex-1 min-w-0">
+            {/* Live badge */}
+            <div className="flex items-center gap-2 mb-3">
               <span className={`w-2.5 h-2.5 rounded-full ${aqiLevel.dotColor} animate-pulse shadow-lg`} />
               <span className="text-[11px] font-bold text-white/70 uppercase tracking-widest">Live AQI</span>
             </div>
 
-            {/* Big AQI number + status */}
-            <div className="flex items-start justify-between">
-              <div>
-                <span className={`text-7xl sm:text-8xl font-bold ${aqiLevel.color} leading-none drop-shadow-lg`} style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+            {/* AQI number row with status to the right */}
+            <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
+              <div className="flex-shrink-0">
+                <span
+                  className={`text-6xl sm:text-7xl md:text-8xl font-bold ${aqiLevel.color} leading-none drop-shadow-lg`}
+                  style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
+                >
                   {actualAQI}
                 </span>
-                <div className="text-[10px] text-white/40 mt-1">AQI (US)</div>
+                <div className="text-[10px] text-white/40 mt-0.5">AQI (US)</div>
               </div>
-              <div className="text-right mt-1">
-                <div className="text-xs text-white/60 mb-1">Air Quality is</div>
-                <span className={`text-sm font-extrabold ${aqiLevel.color} px-3 py-1 rounded-full border-2 border-current/30 backdrop-blur-sm`} style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
+
+              <div className="flex-shrink-0">
+                <div className="text-xs sm:text-sm text-white/60 mb-1">Air Quality is</div>
+                <span
+                  className={`text-sm sm:text-base font-extrabold ${aqiLevel.color} px-3 py-1 rounded-full border-2 border-current/30 backdrop-blur-sm inline-block`}
+                  style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+                >
                   {aqiLevel.label}
                 </span>
               </div>
             </div>
 
             {/* PM values */}
-            <div className="flex gap-6 mt-1">
-              <div className="text-xs text-white/70">
+            <div className="flex gap-4 sm:gap-6 mt-4">
+              <div className="text-xs sm:text-sm text-white/70">
                 <span className="font-bold text-white">PM2.5 : </span>{airQuality.pm2_5.toFixed(0)} µg/m³
               </div>
-              <div className="text-xs text-white/70">
+              <div className="text-xs sm:text-sm text-white/70">
                 <span className="font-bold text-white">PM10 : </span>{airQuality.pm10.toFixed(0)} µg/m³
-              </div>
-            </div>
-
-            {/* Scale bar */}
-            <div className="mt-3 space-y-1.5">
-              <div className="flex text-[9px] sm:text-[10px] text-white/50 font-medium">
-                {scaleSegments.map((seg) => (
-                  <span key={seg.label} className="flex-1 truncate pr-1">{seg.label}</span>
-                ))}
-              </div>
-              <div className="relative h-3 rounded-full overflow-hidden flex shadow-inner">
-                {scaleSegments.map((seg) => (
-                  <div key={seg.label} className={`flex-1 ${seg.color}`} />
-                ))}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full border-2 border-black/60 shadow-lg transition-all duration-500"
-                  style={{ left: `${markerPercent}%`, transform: 'translate(-50%, -50%)' }}
-                />
-              </div>
-              <div className="flex justify-between text-[9px] text-white/30 font-medium">
-                <span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span><span>301+</span>
               </div>
             </div>
           </div>
 
-          {/* Right: Character image */}
-          <div className="flex-shrink-0 w-24 h-28 sm:w-32 sm:h-36 relative">
+          {/* Boy character - positioned to never clip */}
+          <div className="flex-shrink-0 relative -mt-2 -mr-1 sm:-mt-3 sm:-mr-2">
             <img
               src={aqiLevel.image}
               alt="AQI character"
-              className="w-full h-full object-contain drop-shadow-2xl"
+              className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 object-contain drop-shadow-2xl"
             />
+          </div>
+        </div>
+
+        {/* Scale bar */}
+        <div className="mt-4 space-y-1.5">
+          <div className="flex text-[9px] sm:text-[10px] text-white/50 font-medium">
+            {scaleSegments.map((seg) => (
+              <span key={seg.label} className="flex-1 truncate pr-1">{seg.label}</span>
+            ))}
+          </div>
+          <div className="relative h-3 rounded-full overflow-hidden flex shadow-inner">
+            {scaleSegments.map((seg) => (
+              <div key={seg.label} className={`flex-1 ${seg.color}`} />
+            ))}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full border-2 border-black/60 shadow-lg transition-all duration-500"
+              style={{ left: `${markerPercent}%`, transform: 'translate(-50%, -50%)' }}
+            />
+          </div>
+          <div className="flex justify-between text-[9px] text-white/30 font-medium">
+            <span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span><span>301+</span>
           </div>
         </div>
       </div>
 
-      {/* Bottom section - pollutant banner */}
+      {/* Bottom pollutant banner */}
       <div className="relative z-10 bg-black/30 backdrop-blur-md px-5 sm:px-6 py-3 flex items-center justify-between gap-3 border-t border-white/10 rounded-b-3xl">
-        <div className="flex items-center gap-4">
-          <Wind className="w-4 h-4 text-white/50" />
-          <div className="text-xs text-white/70">
+        <div className="flex items-center gap-3 sm:gap-5">
+          <Wind className="w-4 h-4 text-white/50 flex-shrink-0" />
+          <div className="text-[11px] sm:text-xs text-white/70">
             <span className="font-bold text-white">O₃:</span> {airQuality.o3.toFixed(1)} µg/m³
           </div>
-          <div className="text-xs text-white/70">
+          <div className="text-[11px] sm:text-xs text-white/70">
             <span className="font-bold text-white">NO₂:</span> {airQuality.no2.toFixed(1)} µg/m³
           </div>
         </div>
-        <div className="text-xs text-white/70">
+        <div className="text-[11px] sm:text-xs text-white/70">
           <span className="font-bold text-white">SO₂:</span> {airQuality.so2?.toFixed(1) ?? '—'} µg/m³
         </div>
       </div>
