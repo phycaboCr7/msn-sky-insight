@@ -405,10 +405,10 @@ Use markdown formatting. Give actionable weather advice. Be concise but helpful.
         },
         body: JSON.stringify({
           model: "meta-llama/llama-4-maverick-17b-128e-instruct",
-          messages: aiMessages,
+          messages: groqMessages,
           stream: true,
           temperature: 0.6,
-          max_tokens: 8192,
+          max_tokens: 4096,
         }),
       });
 
