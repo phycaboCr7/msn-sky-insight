@@ -20,18 +20,42 @@ interface DetailItemProps {
   label: string;
   value: string;
   subtitle?: string | React.ReactNode;
+  highlight?: boolean;
 }
 
-const DetailItem = ({ icon, label, value, subtitle }: DetailItemProps) => (
-  <div className="group relative flex items-center gap-3 p-4 rounded-lg bg-muted/20 hover:bg-muted/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(251,146,60,0.3)] hover:scale-[1.03] hover:border hover:border-primary/20 isolate">
-    <div className="text-primary group-hover:drop-shadow-[0_0_8px_rgba(251,146,60,0.5)] transition-all duration-300">
-      {icon}
+const DetailItem = ({ icon, label, value, subtitle, highlight }: DetailItemProps) => (
+  <div className={`
+    group relative flex flex-col gap-1.5 p-4 rounded-2xl transition-all duration-300
+    hover:scale-[1.02] isolate
+    ${highlight
+      ? 'bg-primary/8 border border-primary/20 shadow-lg shadow-primary/5'
+      : 'bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/10'
+    }
+  `}>
+    {/* Label row */}
+    <div className="flex items-center gap-2">
+      <div className={`transition-all duration-300 ${highlight ? 'text-primary' : 'text-primary/70 group-hover:text-primary'}`}>
+        {icon}
+      </div>
+      <span className="text-xs text-muted-foreground font-medium tracking-wide" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+        {label}
+      </span>
     </div>
-    <div className="flex-1">
-      <div className="text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors">{label}</div>
-      <div className="text-lg font-semibold text-foreground group-hover:text-primary/90 transition-colors" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>{value}</div>
-      {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
+
+    {/* Value */}
+    <div
+      className="text-2xl font-bold text-foreground leading-none"
+      style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
+    >
+      {value}
     </div>
+
+    {/* Subtitle */}
+    {subtitle && (
+      <div className="text-[11px] text-muted-foreground" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+        {subtitle}
+      </div>
+    )}
   </div>
 );
 
@@ -49,64 +73,66 @@ export const WeatherDetails = ({ weather }: WeatherDetailsProps) => {
   const uvInfo = getUVLevel(current.uv);
 
   return (
-    <WeatherCard className="p-6 col-span-full lg:col-span-2">
-      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>Weather Details</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <WeatherCard className="p-5 sm:p-6 col-span-full lg:col-span-2">
+      <h3
+        className="text-lg font-bold text-foreground mb-5"
+        style={{ fontFamily: "'Playfair Display', serif" }}
+      >
+        Weather Details
+      </h3>
+      <div className="grid grid-cols-2 gap-3">
         <DetailItem
-          icon={<Thermometer size={20} />}
+          icon={<Thermometer size={16} />}
           label="Feels like"
           value={`${Math.round(current.feelslike_c)}°C`}
           subtitle={`Actual: ${Math.round(current.temp_c)}°C`}
         />
         
         <DetailItem
-          icon={<Droplets size={20} />}
+          icon={<Droplets size={16} />}
           label="Humidity"
           value={`${current.humidity}%`}
           subtitle="Relative humidity"
         />
         
         <DetailItem
-          icon={<Wind size={20} />}
+          icon={<Wind size={16} />}
           label="Wind"
           value={`${Math.round(current.wind_kph)} km/h`}
-          subtitle={`${current.wind_dir} • Gusts ${Math.round(current.gust_kph)} km/h`}
+          subtitle={`${current.wind_dir} · Gusts ${Math.round(current.gust_kph)} km/h`}
+          highlight={current.wind_kph > 20}
         />
         
         <DetailItem
-          icon={<Eye size={20} />}
+          icon={<Eye size={16} />}
           label="Visibility"
           value={`${current.vis_km} km`}
           subtitle="Clear view distance"
         />
         
         <DetailItem
-          icon={<Gauge size={20} />}
+          icon={<Gauge size={16} />}
           label="Pressure"
           value={`${current.pressure_mb} mb`}
           subtitle="Atmospheric pressure"
         />
         
         <DetailItem
-          icon={<Sun size={20} />}
+          icon={<Sun size={16} />}
           label="UV Index"
           value={current.uv.toString()}
-          subtitle={
-            <span className={uvInfo.color}>
-              {uvInfo.level}
-            </span>
-          }
+          subtitle={<span className={uvInfo.color}>{uvInfo.level}</span>}
         />
         
         <DetailItem
-          icon={<CloudRain size={20} />}
+          icon={<CloudRain size={16} />}
           label="Precipitation"
           value={`${current.precip_mm} mm`}
           subtitle="Last hour"
         />
         
         <DetailItem
-          icon={<Navigation size={20} />}
+          icon={<Navigation size={16} />}
           label="Dew Point"
           value={`${Math.round(current.dewpoint_c)}°C`}
           subtitle="Condensation point"
