@@ -40,12 +40,12 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
       try {
         const keywords = getWeatherKeywords(weather.current.condition.text);
         const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
-          body: { query: keywords, category: 'nature', min_width: 1920, per_page: 10 },
+          body: { query: keywords, category: 'nature', min_width: 1920, per_page: 20, image_type: 'photo', editors_choice: true },
         });
         
         if (!error && data?.hits && data.hits.length > 0) {
-          const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 5));
-          const imageUrl = data.hits[randomIndex].webformatURL;
+          const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 10));
+          const imageUrl = data.hits[randomIndex].largeImageURL || data.hits[randomIndex].webformatURL;
           const img = new Image();
           img.onload = () => setBackgroundImage(imageUrl);
           img.src = imageUrl;
