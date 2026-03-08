@@ -302,7 +302,7 @@ def get_plot_as_base64():
         }
       } catch (e) {
         loading.remove();
-        addLine('❌ Failed to load Python: ' + e.message, 'error-line');
+        addLine('Error: Failed to load Python: ' + e.message, 'error-line');
       }
     })();
 
