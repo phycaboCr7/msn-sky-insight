@@ -141,8 +141,10 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
     setAnimationProgress(0);
     
     try {
+      // Sanitize markdown artifacts from AI-generated code (e.g. **100** → 100)
+      let modifiedCode = code.replace(/\*\*(\d+(?:\.\d+)?)\*\*/g, '$1');
+      
       // Inject slider values
-      let modifiedCode = code;
       for (const slider of sliders) {
         const varPattern = new RegExp(`^${slider.name}\\s*=\\s*[^\\n]+`, 'm');
         if (varPattern.test(modifiedCode)) {
