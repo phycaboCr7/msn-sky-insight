@@ -20,7 +20,11 @@ export const detectExecutionType = (code: string): ExecutionType => {
   if (metadataType) return metadataType;
   
   if (code.includes("turtle") || code.includes("Turtle")) return "TURTLE";
-  if (code.includes("FuncAnimation") || code.includes("animation.") || code.includes("def update(") || code.includes("def update (") || /@output_type:\s*animation/i.test(code)) return "ANIMATION";
+  if (code.includes("FuncAnimation") || code.includes("animation.") || 
+      code.includes("def update(") || code.includes("def update (") ||
+      code.includes("def animate(") || code.includes("def animate (") ||
+      code.includes("def draw_frame(") ||
+      /@output_type:\s*animation/i.test(code)) return "ANIMATION";
   if (code.includes("plt.plot") || code.includes("plt.scatter") || code.includes("plt.bar") || 
       code.includes("plt.pie") || code.includes("plt.hist") || code.includes("plt.imshow")) return "STATIC_GRAPH";
   if (code.includes("simulate") || code.includes("time.sleep") || 
