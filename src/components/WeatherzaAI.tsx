@@ -1631,12 +1631,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar rounded-full mb-3">
-          {/* Outer glow - radial gradient layer */}
-          <div className="absolute inset-[-16px] rounded-full pointer-events-none z-0" style={{
-            background: 'radial-gradient(ellipse 120% 200% at center, hsl(28 100% 60% / 0.3) 0%, hsl(28 100% 55% / 0.15) 25%, hsl(220 80% 60% / 0.08) 50%, transparent 75%)',
-            filter: 'blur(10px)',
-          }} />
+        <div className="relative group/bar rounded-full mb-3" style={{
+          boxShadow: '0 0 15px 3px hsl(28 100% 60% / 0.35), 0 0 40px 8px hsl(28 100% 55% / 0.2), 0 0 80px 16px hsl(28 100% 50% / 0.1), 0 0 120px 30px hsl(220 80% 60% / 0.06)',
+        }}>
           {/* Animated border glow - thin border only */}
           <div
             ref={glowOuterRef}
