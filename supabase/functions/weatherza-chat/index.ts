@@ -106,6 +106,8 @@ FORMATTING RULES (follow strictly):
 - Keep paragraphs SHORT — max 2-3 lines each
 - Use compact bullet lists, NOT long paragraphs
 - Be concise but informative — no filler text
+- NEVER use markdown formatting (** or *) inside Python code blocks — numbers and values in code must be plain, unformatted text
+- If user asks for a graph or visualization, write clean Python code using only matplotlib and numpy with NO markdown inside the code
 - ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 suggestions`;
 
     // ─── VISION ───
