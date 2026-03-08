@@ -1631,17 +1631,17 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar rounded-[2rem]" style={{ boxShadow: '0 0 15px 2px hsl(28 100% 60% / 0.25), 0 0 35px 5px hsl(28 100% 60% / 0.15), 0 0 60px 10px hsl(220 80% 60% / 0.1)' }}>
+        <div className="relative group/bar rounded-full" style={{ boxShadow: '0 0 12px 0 hsl(28 100% 60% / 0.3), 0 0 30px 0 hsl(28 100% 60% / 0.15), 0 0 50px 0 hsl(220 80% 60% / 0.1)' }}>
           {/* Animated border glow - thin border only */}
           <div
             ref={glowOuterRef}
-            className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none"
+            className="absolute inset-[-1px] rounded-full pointer-events-none"
             style={{
               background: 'conic-gradient(from 0deg, hsl(28 100% 60%), hsl(280 80% 55%), hsl(260 70% 50%), hsl(220 80% 60%), hsl(28 100% 60%))',
             }}
           />
           <div ref={glowInnerRef} className="hidden" />
-        <div className="relative m-[2px] bg-background backdrop-blur-2xl rounded-[calc(2rem-2px)] border-0 shadow-none p-2 flex items-end gap-2 z-10">
+        <div className="relative m-[2px] bg-background backdrop-blur-2xl rounded-full border-0 shadow-none p-2 flex items-end gap-2 z-10">
           <input
             type="file"
             ref={fileInputRef}
@@ -1653,7 +1653,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
               title="Upload image or document"
             >
               {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
@@ -1661,7 +1661,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             <button
               type="button"
               onClick={() => setVoiceOverlayOpen(true)}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
               title="Voice input"
             >
               <Mic className="w-4 h-4" />
@@ -1689,7 +1689,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             <button
               data-stop-btn
               onClick={stopGeneration}
-              className="self-end w-10 h-10 rounded-xl flex items-center justify-center bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition-all active:scale-95"
+              className="self-end w-10 h-10 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition-all active:scale-95"
               title="Stop generating"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
@@ -1699,7 +1699,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               data-send-btn
               onClick={askAI}
               disabled={isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
-              className="self-end w-10 h-10 rounded-xl flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="self-end w-10 h-10 rounded-full flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
             </button>
