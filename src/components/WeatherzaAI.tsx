@@ -1227,7 +1227,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode }),
+      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode, isPro: proMode }),
       signal: controller.signal,
     });
 
