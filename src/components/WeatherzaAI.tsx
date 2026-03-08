@@ -1431,7 +1431,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-hidden relative rounded-3xl">
+    <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-visible relative rounded-3xl">
       {/* AI-specific background image */}
       <AIBackground weather={weather} />
       <CardHeader className="pb-2 pt-4 px-5 relative z-10">
@@ -1631,11 +1631,16 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar rounded-full" style={{ boxShadow: '0 0 12px 0 hsl(28 100% 60% / 0.3), 0 0 30px 0 hsl(28 100% 60% / 0.15), 0 0 50px 0 hsl(220 80% 60% / 0.1)' }}>
+        <div className="relative group/bar rounded-full">
+          {/* Outer glow - separate layer outside overflow-hidden parent */}
+          <div className="absolute inset-[-12px] rounded-full pointer-events-none z-0" style={{
+            background: 'radial-gradient(ellipse at center, hsl(28 100% 60% / 0.25) 0%, hsl(28 100% 60% / 0.12) 30%, hsl(220 80% 60% / 0.06) 60%, transparent 80%)',
+            filter: 'blur(8px)',
+          }} />
           {/* Animated border glow - thin border only */}
           <div
             ref={glowOuterRef}
-            className="absolute inset-[-1px] rounded-full pointer-events-none"
+            className="absolute inset-0 rounded-full pointer-events-none z-[1]"
             style={{
               background: 'conic-gradient(from 0deg, hsl(28 100% 60%), hsl(280 80% 55%), hsl(260 70% 50%), hsl(220 80% 60%), hsl(28 100% 60%))',
             }}
@@ -1699,7 +1704,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               data-send-btn
               onClick={askAI}
               disabled={isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
-              className="self-end w-10 h-10 rounded-full flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="self-end w-10 h-10 rounded-full flex items-center justify-center text-white transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{
+                background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(28 100% 45%))',
+                boxShadow: '0 0 12px hsl(28 100% 55% / 0.4), 0 4px 8px hsl(28 100% 40% / 0.3)',
+              }}
             >
               <Send className="w-4 h-4" />
             </button>
