@@ -34,6 +34,17 @@ const CardSkeleton = ({ className = "" }: { className?: string }) => (
   </div>
 );
 
+// Section label component
+const SectionLabel = ({ label, className = "" }: { label: string; className?: string }) => (
+  <div className={`col-span-full flex items-center gap-3 mt-2 ${className}`}>
+    <div className="section-divider flex-1" />
+    <span className="text-xs uppercase tracking-widest text-muted-foreground/60 font-medium whitespace-nowrap" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+      {label}
+    </span>
+    <div className="section-divider flex-1" />
+  </div>
+);
+
 const Index = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,12 +94,10 @@ const Index = () => {
         },
         (error) => {
           console.error("Geolocation error:", error);
-          // Fallback to a default location instead of showing blank screen
           fetchWeather("New Delhi");
         }
       );
     } else {
-      // Fallback to default location
       fetchWeather("New Delhi");
     }
   };
@@ -100,16 +109,13 @@ const Index = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Keep page pinned to top until user interacts
   useEffect(() => {
     if (!weather) return;
     
-    // Immediately scroll to top
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    // Keep forcing scroll top for a few seconds while lazy components load
     const intervals = [100, 300, 600, 1000, 1500, 2000];
     const timers = intervals.map(ms =>
       setTimeout(() => {
@@ -119,14 +125,12 @@ const Index = () => {
       }, ms)
     );
 
-    // Release scroll lock after user scrolls intentionally
     const handleUserScroll = () => {
       scrollLockRef.current = false;
     };
     window.addEventListener('wheel', handleUserScroll, { once: true });
     window.addEventListener('touchmove', handleUserScroll, { once: true });
 
-    // Auto-release after 3s
     const releaseTimer = setTimeout(() => {
       scrollLockRef.current = false;
     }, 3000);
@@ -197,66 +201,104 @@ const Index = () => {
 
           {weather && (
             <>
-              <CurrentWeather weather={weather} />
+              <div className="col-span-full lg:col-span-2 animate-fade-in stagger-1">
+                <CurrentWeather weather={weather} />
+              </div>
               
               <Suspense fallback={<CardSkeleton />}>
-                <WeatherAdvice weather={weather} />
+                <div className="animate-fade-in stagger-2">
+                  <WeatherAdvice weather={weather} />
+                </div>
               </Suspense>
               
               <Suspense fallback={<CardSkeleton />}>
-                <AirQualityCard weather={weather} />
+                <div className="animate-fade-in stagger-3">
+                  <AirQualityCard weather={weather} />
+                </div>
               </Suspense>
               
               <Suspense fallback={<CardSkeleton />}>
-                <MoonPhaseCard weather={weather} />
+                <div className="animate-fade-in stagger-4">
+                  <MoonPhaseCard weather={weather} />
+                </div>
               </Suspense>
               
               <Suspense fallback={<CardSkeleton />}>
-                <SunPhaseCard weather={weather} />
+                <div className="animate-fade-in stagger-5">
+                  <SunPhaseCard weather={weather} />
+                </div>
               </Suspense>
               
               <Suspense fallback={<CardSkeleton />}>
-                <StockWidget country={weather?.location?.country} />
+                <div className="animate-fade-in stagger-6">
+                  <StockWidget country={weather?.location?.country} />
+                </div>
               </Suspense>
+              
+              <SectionLabel label="Forecast" className="stagger-7 animate-fade-in" />
               
               <Suspense fallback={<CardSkeleton className="col-span-full" />}>
-                <WorldMap weather={weather} />
+                <div className="col-span-full animate-fade-in stagger-7">
+                  <HourlyForecast weather={weather} />
+                </div>
+              </Suspense>
+
+              <Suspense fallback={<CardSkeleton />}>
+                <div className="animate-fade-in stagger-8">
+                  <DailyForecast weather={weather} />
+                </div>
               </Suspense>
               
-              <Suspense fallback={<CardSkeleton />}>
-                <TemperatureChart weather={weather} />
-              </Suspense>
-              
-              <Suspense fallback={<CardSkeleton />}>
-                <HourlyForecast weather={weather} />
-              </Suspense>
-              
-              <Suspense fallback={<CardSkeleton />}>
-                <HumidityChart weather={weather} />
-              </Suspense>
-              
-              <Suspense fallback={<CardSkeleton />}>
-                <UVIndexChart weather={weather} />
-              </Suspense>
-              
-              <Suspense fallback={<CardSkeleton />}>
-                <WindChart weather={weather} />
-              </Suspense>
-              
-              <Suspense fallback={<CardSkeleton />}>
-                <WeatherDetails weather={weather} />
-              </Suspense>
-              
-              <Suspense fallback={<CardSkeleton />}>
-                <DailyForecast weather={weather} />
-              </Suspense>
-              
-              <Suspense fallback={<CardSkeleton />}>
-                <MonthlyChart weather={weather} />
-              </Suspense>
+              <SectionLabel label="Details" className="stagger-9 animate-fade-in" />
               
               <Suspense fallback={<CardSkeleton className="col-span-full" />}>
-                <WeatherzaAI weather={weather} />
+                <div className="col-span-full animate-fade-in stagger-9">
+                  <WorldMap weather={weather} />
+                </div>
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <div className="animate-fade-in stagger-10">
+                  <TemperatureChart weather={weather} />
+                </div>
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <div className="animate-fade-in stagger-11">
+                  <HumidityChart weather={weather} />
+                </div>
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <div className="animate-fade-in stagger-12">
+                  <UVIndexChart weather={weather} />
+                </div>
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <div className="animate-fade-in stagger-13">
+                  <WindChart weather={weather} />
+                </div>
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <div className="animate-fade-in stagger-13">
+                  <WeatherDetails weather={weather} />
+                </div>
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <div className="animate-fade-in stagger-14">
+                  <MonthlyChart weather={weather} />
+                </div>
+              </Suspense>
+              
+              <SectionLabel label="Insights" className="stagger-14 animate-fade-in" />
+              
+              <Suspense fallback={<CardSkeleton className="col-span-full" />}>
+                <div className="col-span-full animate-fade-in stagger-15">
+                  <WeatherzaAI weather={weather} />
+                </div>
               </Suspense>
             </>
           )}

@@ -62,7 +62,7 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
               key={hour.time}
               className={`flex-shrink-0 w-16 sm:w-20 flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-lg transition-all hover:scale-105 ${
                 isNow 
-                  ? 'bg-primary/10 border border-primary/20 ring-1 ring-primary/30' 
+                  ? 'bg-gradient-to-b from-primary/20 to-primary/5 border border-primary/30 ring-1 ring-primary/20 shadow-glow' 
                   : 'hover:bg-muted/50 border border-transparent'
               }`}
             >
