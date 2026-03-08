@@ -178,7 +178,7 @@ const Index = () => {
           </h1>
           {currentTime && (
             <div 
-              className="text-2xl sm:text-3xl mb-2 bg-gradient-to-r from-foreground/80 via-primary/70 to-foreground/80 bg-clip-text text-transparent"
+              className="text-2xl sm:text-3xl mb-2 text-foreground"
               style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
             >
               {currentTime}
