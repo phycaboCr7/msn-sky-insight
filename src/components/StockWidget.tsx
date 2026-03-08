@@ -38,8 +38,15 @@ export const StockWidget = ({ country }: StockWidgetProps) => {
         setDetectedCurrency(currency);
       }
       setQuote(q);
-      setChartData(chart);
-      setActiveTab("1D");
+      // If 1D chart is empty (weekend/after-hours), try 5D
+      if (chart.length < 2) {
+        const chart5d = await getChartData(sym, "5D");
+        setChartData(chart5d);
+        setActiveTab("5D");
+      } else {
+        setChartData(chart);
+        setActiveTab("1D");
+      }
     } catch {
       setError("Failed to fetch stock data");
     } finally {
