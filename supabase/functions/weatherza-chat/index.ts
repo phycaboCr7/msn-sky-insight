@@ -56,39 +56,40 @@ ANIMATION RULES (CRITICAL — follow exactly):
 Your code runs in Pyodide (WebAssembly Python in-browser), NOT on a local machine. There is NO filesystem, NO ffmpeg, NO pillow, NO video writers.
 To create a browser-runnable animation:
 1. Add "# @output_type: animation" as the FIRST line
-2. Import only numpy and matplotlib.pyplot — do NOT import matplotlib.animation, it is NOT needed
-3. Create fig, ax = plt.subplots() globally
-4. Initialize any state variables globally (e.g. current_psi = psi_initial.copy())
-5. Define a function: def update(frame): — this is called automatically for frame 0 to 239 (240 frames, 10s at 24fps)
-6. Inside update(): use ax.clear(), then re-draw the plot, then re-apply labels/limits/title
-7. Use "global" keyword for any state that changes between frames
-8. Do NOT call plt.show(), ani.save(), FuncAnimation(), or print(get_plot_as_base64())
-9. Do NOT use file I/O, ani.save(), or any export code — the browser handles video export
-10. Complex numpy operations (FFT, linalg, random, etc.) all work fine
+2. Import ONLY numpy and matplotlib.pyplot — do NOT import matplotlib.animation, do NOT use FuncAnimation
+3. Create fig, ax = plt.subplots() globally — use ONLY 2D plots (plot, bar, scatter, fill_between, etc.)
+4. NEVER use 3D plots (bar3d, plot_surface, add_subplot(projection='3d')) — they have rendering bugs in Pyodide
+5. Initialize any state variables globally (e.g. current_data = initial_data.copy())
+6. Define exactly: def update(frame): — this function name MUST be "update", not "animate" or anything else
+7. Inside update(): call ax.clear() FIRST, then re-draw the plot, then re-apply labels/limits/title
+8. Use "global" keyword for any state that changes between frames
+9. Do NOT call plt.show(), ani.save(), FuncAnimation(), animation.FuncAnimation(), or print(get_plot_as_base64())
+10. Do NOT import matplotlib.animation — it is not needed and causes errors
+11. When slicing arrays by frame index, always guard against empty arrays: use max(1, frame) or if frame > 0 checks
+12. Complex numpy operations (FFT, linalg, random, etc.) all work fine
 
-COMPLETE ANIMATION EXAMPLE:
+COMPLETE ANIMATION EXAMPLE (temperature bars growing over time):
 \`\`\`python
 # @output_type: animation
 import numpy as np
 import matplotlib.pyplot as plt
 
+years = np.arange(2013, 2024)
+max_temps = np.array([38.4, 39.2, 40.1, 40.5, 41.2, 42.1, 42.5, 41.8, 42.3, 43.2, 43.5])
 fig, ax = plt.subplots(figsize=(10, 6))
-x = np.linspace(0, 2*np.pi, 200)
-phase = 0.0
 
 def update(frame):
-    global phase
     ax.clear()
-    phase = frame * 2 * np.pi / 240
-    ax.plot(x, np.sin(x + phase), 'cyan', linewidth=2)
-    ax.plot(x, np.cos(x + phase), 'magenta', linewidth=2, linestyle='--')
-    ax.set_xlim(0, 2*np.pi)
-    ax.set_ylim(-1.5, 1.5)
-    ax.set_title(f'Traveling Wave — Frame {frame}/240')
-    ax.set_xlabel('x')
-    ax.set_ylabel('Amplitude')
-    ax.legend(['sin', 'cos'])
-    ax.grid(True, alpha=0.3)
+    progress = min(1.0, frame / 200)
+    n_bars = max(1, int(progress * len(years)))
+    colors = plt.cm.YlOrRd(np.linspace(0.3, 0.9, n_bars))
+    ax.bar(years[:n_bars], max_temps[:n_bars] * min(1.0, (frame + 1) / 30), color=colors)
+    ax.set_xlim(2012, 2024)
+    ax.set_ylim(0, 50)
+    ax.set_title(f'Alwar Max Temperature Trend — Frame {frame}/240')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Temperature (°C)')
+    ax.grid(True, alpha=0.3, axis='y')
 \`\`\`
 
 If the user asks for a "browser runnable" version or "HTML version", write Python with # @output_type: animation — do NOT switch to HTML/CSS/JS unless explicitly asked for a web page.
