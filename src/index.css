@@ -933,3 +933,44 @@ pre::-webkit-scrollbar-track, code::-webkit-scrollbar-track {
   border-top-color: rgba(0,0,0,0.85) !important;
   border-bottom-color: rgba(0,0,0,0.85) !important;
 }
+
+/* MapLibre controls — dark theme */
+.maplibregl-ctrl-group {
+  background: hsl(220 25% 10% / 0.9) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(220 20% 25% / 0.5) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px hsl(0 0% 0% / 0.4) !important;
+  overflow: hidden;
+}
+
+.maplibregl-ctrl-group button {
+  background: transparent !important;
+  color: hsl(210 40% 90%) !important;
+  border-bottom: 1px solid hsl(220 20% 20% / 0.5) !important;
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.maplibregl-ctrl-group button:last-child {
+  border-bottom: none !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background: hsl(28 100% 60% / 0.15) !important;
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1) brightness(1.5);
+}
+
+.maplibregl-ctrl-attrib {
+  background: hsl(220 25% 10% / 0.7) !important;
+  color: hsl(210 20% 60%) !important;
+  font-size: 10px !important;
+  border-radius: 8px 0 0 0 !important;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: hsl(28 100% 60% / 0.7) !important;
+}
