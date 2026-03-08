@@ -27,12 +27,12 @@ const calculateAQI = (pm25: number, pm10: number, o3: number, no2: number): numb
 };
 
 const getAQILevel = (aqi: number) => {
-  if (aqi <= 50) return { label: "Good", color: "text-green-400", dotColor: "bg-green-400", image: aqiBoyGood, gradient: "from-[#0a2a1a] via-[#0d3325] to-[#071f13]" };
-  if (aqi <= 100) return { label: "Moderate", color: "text-yellow-400", dotColor: "bg-yellow-400", image: aqiBoyModerate, gradient: "from-[#2a1f0a] via-[#33250d] to-[#1f1507]" };
-  if (aqi <= 150) return { label: "Unhealthy for Sensitive", color: "text-orange-400", dotColor: "bg-orange-400", image: aqiBoyUnhealthy, gradient: "from-[#2a150a] via-[#3d1a0f] to-[#1f0e07]" };
-  if (aqi <= 200) return { label: "Unhealthy", color: "text-red-400", dotColor: "bg-red-400", image: aqiBoyUnhealthy, gradient: "from-[#3d0a1a] via-[#5c1035] to-[#2a0712]" };
-  if (aqi <= 300) return { label: "Very Unhealthy", color: "text-purple-400", dotColor: "bg-purple-400", image: aqiBoyHazardous, gradient: "from-[#1f0a2a] via-[#2d1040] to-[#15071f]" };
-  return { label: "Hazardous", color: "text-rose-500", dotColor: "bg-rose-500", image: aqiBoyHazardous, gradient: "from-[#3d0a0a] via-[#5c1010] to-[#2a0707]" };
+  if (aqi <= 50) return { label: "Good", color: "text-green-400", dotColor: "bg-green-400", image: aqiBoyGood, bgFrom: "#071f13", bgTo: "#1a4a30" };
+  if (aqi <= 100) return { label: "Moderate", color: "text-yellow-400", dotColor: "bg-yellow-400", image: aqiBoyModerate, bgFrom: "#1f1507", bgTo: "#4a3a1a" };
+  if (aqi <= 150) return { label: "Unhealthy for Sensitive", color: "text-orange-400", dotColor: "bg-orange-400", image: aqiBoyUnhealthy, bgFrom: "#1f0e07", bgTo: "#4a2a1a" };
+  if (aqi <= 200) return { label: "Unhealthy", color: "text-red-400", dotColor: "bg-red-400", image: aqiBoyUnhealthy, bgFrom: "#2a0712", bgTo: "#6b1a3a" };
+  if (aqi <= 300) return { label: "Very Unhealthy", color: "text-purple-400", dotColor: "bg-purple-400", image: aqiBoyHazardous, bgFrom: "#15071f", bgTo: "#3d1a55" };
+  return { label: "Hazardous", color: "text-rose-500", dotColor: "bg-rose-500", image: aqiBoyHazardous, bgFrom: "#2a0707", bgTo: "#5c1a1a" };
 };
 
 const scaleSegments = [
@@ -94,11 +94,14 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
   const markerPercent = Math.min((actualAQI / 500) * 100, 100);
 
   return (
-    <div className={`rounded-3xl overflow-visible animate-fade-in shadow-xl border border-white/10 bg-gradient-to-br ${aqiLevel.gradient} relative`}>
+    <div
+      className="rounded-3xl overflow-visible animate-fade-in shadow-xl border border-white/10 relative"
+      style={{ background: `linear-gradient(to bottom, ${aqiLevel.bgFrom} 0%, ${aqiLevel.bgTo} 100%)` }}
+    >
       {/* Monument silhouette background */}
       <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
         <MonumentsSilhouette />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/[0.04] via-transparent to-black/20" />
       </div>
 
       {/* Main content */}
