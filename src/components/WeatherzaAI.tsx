@@ -764,9 +764,24 @@ const isPythonGraphCode = (code: string): boolean => {
   return graphIndicators.some(indicator => code.includes(indicator));
 };
 
+// Load messages from localStorage
+const loadStoredMessages = (): Message[] => {
+  try {
+    const stored = localStorage.getItem('weatherza-chat-history');
+    if (stored) {
+      const parsed = JSON.parse(stored) as Message[];
+      // Strip isTyping flag from stored messages
+      return parsed.map(m => ({ ...m, isTyping: false }));
+    }
+  } catch (e) {
+    console.error('Failed to load chat history:', e);
+  }
+  return [];
+};
+
 export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [pyodideCode, setPyodideCode] = useState<string | null>(null);
