@@ -1632,7 +1632,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
         {/* Input Area - unified bar */}
         <div className="relative group/bar rounded-full mb-3" style={{
-          boxShadow: '0 0 15px 3px hsl(28 100% 60% / 0.35), 0 0 40px 8px hsl(28 100% 55% / 0.2), 0 0 80px 16px hsl(28 100% 50% / 0.1), 0 0 120px 30px hsl(220 80% 60% / 0.06)',
+          boxShadow: '0 0 6px 1px hsl(28 100% 60% / 0.2), 0 0 14px 2px hsl(28 100% 55% / 0.1), 0 0 24px 4px hsl(220 80% 60% / 0.05)',
         }}>
           {/* Animated border glow - thin border only */}
           <div
