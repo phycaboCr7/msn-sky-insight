@@ -16,12 +16,16 @@ export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
 
   if (!weather.forecast?.forecastday[0]?.hour) return null;
 
-  const currentHour = new Date().getHours();
-  const hourlyData = weather.forecast.forecastday[0].hour
-    .slice(currentHour, currentHour + 12)
-    .concat(
-      weather.forecast.forecastday[1]?.hour?.slice(0, Math.max(0, 12 - (24 - currentHour))) || []
-    );
+  // Use the location's local time, not browser time
+  const locationTime = new Date(weather.location.localtime);
+  const currentHour = locationTime.getHours();
+  const allHours = [
+    ...(weather.forecast.forecastday[0]?.hour || []),
+    ...(weather.forecast.forecastday[1]?.hour || []),
+  ];
+  const hourlyData = allHours
+    .filter(h => new Date(h.time) >= locationTime)
+    .slice(0, 12);
 
   // Find temp range for gradient coloring
   const temps = hourlyData.map(h => h.temp_c);
