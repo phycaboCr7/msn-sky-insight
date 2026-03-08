@@ -173,26 +173,40 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
       else if (executionType === "ANIMATION") {
         await window.pyodide.runPythonAsync(`clear_animation_frames()`);
         
+        // Strip display calls
         modifiedCode = modifiedCode
           .replace(/plt\.show\(\)/g, '')
           .replace(/plt\.savefig\([^)]+\)/g, '');
         
-      // Check for FuncAnimation
-        if (modifiedCode.includes("FuncAnimation") || modifiedCode.includes("def update(") || modifiedCode.includes("def update (")) {
+        // Strip FuncAnimation-related code (we handle frame generation ourselves)
+        modifiedCode = modifiedCode
+          .replace(/import\s+matplotlib\.animation\s+as\s+animation/g, '')
+          .replace(/from\s+matplotlib\.animation\s+import\s+\*/g, '')
+          .replace(/from\s+matplotlib\.animation\s+import\s+FuncAnimation/g, '')
+          .replace(/ani\s*=\s*animation\.FuncAnimation\([^)]*\)/g, '')
+          .replace(/ani\s*=\s*FuncAnimation\([^)]*\)/g, '')
+          .replace(/ani\.save\([^)]*\)/g, '');
+
+        // Detect the animation function name (update, animate, or draw_frame)
+        const funcNameMatch = modifiedCode.match(/def\s+(update|animate|draw_frame)\s*\(\s*\w+\s*\)/);
+        const animFuncName = funcNameMatch ? funcNameMatch[1] : null;
+        
+        if (animFuncName) {
           modifiedCode += `
-# Generate frames from FuncAnimation — minimum 240 frames (10s at 24fps)
+# Generate animation frames — 240 frames (10s at 24fps)
 try:
     _total_frames = 240
-    for i in range(_total_frames):
-        update(i)
+    for _frame_i in range(_total_frames):
+        ${animFuncName}(_frame_i)
         capture_animation_frame()
-except Exception as e:
-    # If update fails partway, keep frames generated so far
+except Exception as _anim_err:
+    print(f"Animation error at frame: {_anim_err}")
+    # Keep frames generated so far
     if not get_animation_frames():
         capture_animation_frame()
 `;
         } else {
-          // For non-FuncAnimation code, capture multiple frames if plt figures exist
+          // No recognized animation function, just capture current state
           modifiedCode += `
 # Capture animation frame
 capture_animation_frame()
