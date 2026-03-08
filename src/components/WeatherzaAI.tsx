@@ -1862,6 +1862,19 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             >
               <Mic className="w-4 h-4" />
             </button>
+            {/* Font picker button — beside mic, signed-in only */}
+            {isSignedIn && (
+              <button
+                type="button"
+                onClick={() => setFontPickerOpen(!fontPickerOpen)}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                  fontPickerOpen ? 'bg-primary/30 text-primary' : 'bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary'
+                }`}
+                title="Choose chat font"
+              >
+                <Type className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <div className="flex-1">
             <Textarea
