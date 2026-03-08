@@ -12,25 +12,26 @@ const MoonPhaseSVG = ({ phase, size = 80 }: { phase: string; size?: number }) =>
   const cx = size / 2;
   const cy = size / 2;
 
-  // Moon surface craters for realism
+  // Moon surface details (warm tan patches on lit side)
   const craters = (
-    <g opacity="0.3">
-      <circle cx={cx - r * 0.25} cy={cy - r * 0.3} r={r * 0.12} fill="#8a8a6a" />
-      <circle cx={cx + r * 0.15} cy={cy + r * 0.2} r={r * 0.18} fill="#8a8a6a" />
-      <circle cx={cx - r * 0.1} cy={cy + r * 0.45} r={r * 0.1} fill="#8a8a6a" />
-      <circle cx={cx + r * 0.35} cy={cy - r * 0.15} r={r * 0.08} fill="#8a8a6a" />
-      <circle cx={cx - r * 0.4} cy={cy + r * 0.1} r={r * 0.07} fill="#8a8a6a" />
+    <g opacity="0.45">
+      <ellipse cx={cx - r * 0.15} cy={cy - r * 0.2} rx={r * 0.18} ry={r * 0.14} fill="#d4b896" />
+      <ellipse cx={cx + r * 0.2} cy={cy + r * 0.15} rx={r * 0.22} ry={r * 0.16} fill="#c9a87a" />
+      <ellipse cx={cx - r * 0.05} cy={cy + r * 0.4} rx={r * 0.13} ry={r * 0.09} fill="#d4b896" />
+      <ellipse cx={cx + r * 0.3} cy={cy - r * 0.35} rx={r * 0.1} ry={r * 0.12} fill="#c9a87a" />
+      <ellipse cx={cx - r * 0.35} cy={cy + r * 0.15} rx={r * 0.09} ry={r * 0.07} fill="#d4b896" />
+      <ellipse cx={cx + r * 0.1} cy={cy - r * 0.5} rx={r * 0.08} ry={r * 0.06} fill="#c9a87a" />
     </g>
   );
 
-  const litColor = "#e8dca0";
-  const darkColor = "#3a3a3a";
+  const litColor = "#f0e6c8";       // warm cream
+  const darkColor = "#2d4a4e";      // dark teal
   const darkCraters = (
-    <g opacity="0.25">
-      <circle cx={cx - r * 0.25} cy={cy - r * 0.3} r={r * 0.12} fill="#2a2a2a" />
-      <circle cx={cx + r * 0.15} cy={cy + r * 0.2} r={r * 0.18} fill="#2a2a2a" />
-      <circle cx={cx - r * 0.1} cy={cy + r * 0.45} r={r * 0.1} fill="#2a2a2a" />
-      <circle cx={cx + r * 0.35} cy={cy - r * 0.15} r={r * 0.08} fill="#2a2a2a" />
+    <g opacity="0.3">
+      <ellipse cx={cx - r * 0.2} cy={cy - r * 0.25} rx={r * 0.14} ry={r * 0.1} fill="#1e3538" />
+      <ellipse cx={cx + r * 0.15} cy={cy + r * 0.2} rx={r * 0.18} ry={r * 0.12} fill="#1e3538" />
+      <ellipse cx={cx - r * 0.1} cy={cy + r * 0.4} rx={r * 0.1} ry={r * 0.07} fill="#1e3538" />
+      <ellipse cx={cx + r * 0.3} cy={cy - r * 0.15} rx={r * 0.08} ry={r * 0.06} fill="#1e3538" />
     </g>
   );
 
