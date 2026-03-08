@@ -40,6 +40,48 @@ interface Message {
 let msgIdCounter = 0;
 const genMsgId = () => `msg-${Date.now()}-${++msgIdCounter}`;
 
+// Separate background component for WeatherzaAI
+const AIBackground = ({ weather }: { weather: WeatherData }) => {
+  const [bgImage, setBgImage] = useState<string>('');
+
+  useEffect(() => {
+    const fetchBg = async () => {
+      try {
+        const queries = ['abstract technology dark', 'futuristic space nebula', 'dark galaxy stars cosmos', 'aurora borealis night sky'];
+        const query = queries[Math.floor(Math.random() * queries.length)];
+        const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
+          body: { query, category: 'science', min_width: 1280, per_page: 20, image_type: 'photo', editors_choice: true },
+        });
+        if (!error && data?.hits?.length > 0) {
+          const idx = Math.floor(Math.random() * Math.min(data.hits.length, 10));
+          const url = data.hits[idx].largeImageURL || data.hits[idx].webformatURL;
+          const img = new window.Image();
+          img.onload = () => setBgImage(url);
+          img.src = url;
+        }
+      } catch (e) {
+        console.error('AIBackground fetch error:', e);
+      }
+    };
+    fetchBg();
+  }, [weather.location.name]);
+
+  if (!bgImage) return null;
+
+  return (
+    <div
+      className="absolute inset-0 z-0 transition-opacity duration-1000"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        opacity: 0.25,
+        filter: 'brightness(0.6)',
+      }}
+    />
+  );
+};
+
 // Calculate actual AQI from PM2.5
 const calculateAQI = (pm25: number): number => {
   const breakpoints = [
@@ -1214,8 +1256,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
-      <CardHeader className="pb-3">
+    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden relative">
+      {/* AI-specific background image */}
+      <AIBackground weather={weather} />
+      <CardHeader className="pb-3 relative z-10">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">
@@ -1267,7 +1311,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
           {/* Messages Scroll Area */}

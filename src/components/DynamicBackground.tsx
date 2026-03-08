@@ -10,21 +10,21 @@ const getWeatherKeywords = (condition: string) => {
   const lowerCondition = condition.toLowerCase();
   
   if (lowerCondition.includes('sunny') || lowerCondition.includes('clear')) {
-    return 'sunny sky landscape';
+    return 'golden hour sunset mesmerizing sky';
   } else if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) {
-    return 'rain drops weather';
+    return 'dramatic rain storm cinematic';
   } else if (lowerCondition.includes('cloud')) {
-    return 'cloudy sky atmosphere';
+    return 'dramatic clouds aerial cinematic sky';
   } else if (lowerCondition.includes('storm') || lowerCondition.includes('thunder')) {
-    return 'thunderstorm lightning';
+    return 'epic thunderstorm lightning dramatic sky';
   } else if (lowerCondition.includes('snow')) {
-    return 'snow winter landscape';
+    return 'magical winter snowfall dreamy landscape';
   } else if (lowerCondition.includes('fog') || lowerCondition.includes('mist')) {
-    return 'fog misty landscape';
+    return 'mystical fog ethereal forest';
   } else if (lowerCondition.includes('wind')) {
-    return 'windy trees autumn';
+    return 'dramatic wind sweeping landscape cinematic';
   } else {
-    return 'beautiful landscape nature';
+    return 'mesmerizing nature landscape cinematic';
   }
 };
 
@@ -40,12 +40,12 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
       try {
         const keywords = getWeatherKeywords(weather.current.condition.text);
         const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
-          body: { query: keywords, category: 'nature', min_width: 1920, per_page: 10 },
+          body: { query: keywords, category: 'nature', min_width: 1920, per_page: 20, image_type: 'photo', editors_choice: true },
         });
         
         if (!error && data?.hits && data.hits.length > 0) {
-          const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 5));
-          const imageUrl = data.hits[randomIndex].webformatURL;
+          const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 10));
+          const imageUrl = data.hits[randomIndex].largeImageURL || data.hits[randomIndex].webformatURL;
           const img = new Image();
           img.onload = () => setBackgroundImage(imageUrl);
           img.src = imageUrl;
@@ -71,14 +71,13 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          filter: 'blur(2px) brightness(0.4)',
+          filter: 'brightness(0.45)',
         }}
       />
       <div 
         className="fixed inset-0 z-[1]"
         style={{
-          backdropFilter: 'blur(12px)',
-          background: 'rgba(0,0,0,0.25)',
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.4) 100%)',
         }}
       />
     </>
