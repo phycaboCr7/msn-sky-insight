@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -885,16 +885,30 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [extractedDocName, setExtractedDocName] = useState<string | null>(null);
   const [isExtracting, setIsExtracting] = useState(false);
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
+  const [proMode, setProMode] = useState(() => localStorage.getItem('weatherza-pro-mode') === 'true');
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const glowOuterRef = useRef<HTMLDivElement>(null);
   const glowInnerRef = useRef<HTMLDivElement>(null);
-  // Voice refs removed — now using Groq Whisper via MediaRecorder in VoiceOverlay
 
-  // JS-driven rotating glow animation — dual layer (sharp border + blurred glow)
+  // Pro Mode toggle handler
+  const toggleProMode = () => {
+    const next = !proMode;
+    setProMode(next);
+    localStorage.setItem('weatherza-pro-mode', String(next));
+    toast({ title: next ? "⚡ Pro Mode Activated" : "Pro Mode Off", description: next ? "Enhanced glow & premium experience enabled." : "Standard mode restored." });
+  };
+
+  // JS-driven rotating glow animation — only active in Pro Mode
   useEffect(() => {
+    if (!proMode) {
+      // Clear glow when pro mode is off
+      if (glowOuterRef.current) glowOuterRef.current.style.background = 'transparent';
+      if (glowInnerRef.current) glowInnerRef.current.style.background = 'transparent';
+      return;
+    }
     let angle = 0;
     let rafId: number;
     const animate = () => {
@@ -907,7 +921,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     };
     rafId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafId);
-  }, []);
+  }, [proMode]);
 
   // Auto-scroll chat container only — debounced to prevent shaking during streaming
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1449,6 +1463,26 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             </span>
           </CardTitle>
           <div className="flex items-center gap-1">
+            {/* Pro Mode Toggle */}
+            <button
+              onClick={toggleProMode}
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-300 ${
+                proMode
+                  ? 'text-white shadow-lg shadow-primary/30'
+                  : 'text-muted-foreground hover:text-primary hover:bg-white/5'
+              }`}
+              style={proMode ? {
+                background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(280 70% 50%), hsl(260 70% 55%))',
+                boxShadow: '0 0 12px hsl(28 100% 60% / 0.4), 0 0 24px hsl(280 70% 50% / 0.2)',
+              } : undefined}
+              title={proMode ? "Disable Pro Mode" : "Enable Pro Mode"}
+            >
+              <Zap className={`w-3.5 h-3.5 ${proMode ? 'fill-current' : ''}`} />
+              Pro
+              {proMode && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-400 shadow-lg shadow-green-400/50" style={{ animation: 'pulse 2s infinite' }} />
+              )}
+            </button>
             {messages.some(m => m.role === "assistant") && (
               <>
                 <button
@@ -1632,7 +1666,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar rounded-full mb-3 p-[2px]">
+        <div className={`relative group/bar rounded-full mb-3 p-[2px] transition-all duration-500 ${!proMode ? 'border border-white/15' : ''}`}>
           {/* Blurred glow layer — sits behind everything */}
           <div
             ref={glowInnerRef}
