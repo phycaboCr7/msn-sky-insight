@@ -1610,10 +1610,71 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 Clear
               </button>
             )}
+            {/* Auth: Sign in / User info */}
+            {isSignedIn ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-primary font-semibold truncate max-w-[80px]">{authUser.name}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
+                  title="Sign out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleGoogleSignIn}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                Sign in
+              </button>
+            )}
+            {/* Free prompt counter for non-signed-in users */}
+            {!isSignedIn && (
+              <span className="text-[10px] text-muted-foreground/70 px-1">
+                {remainingFreePrompts}/{FREE_PROMPT_LIMIT} free
+              </span>
+            )}
           </div>
         </div>
       </CardHeader>
       <CardContent className="relative z-10 px-4 pb-8 pt-2 overflow-visible">
+        {/* Sign-in gate overlay */}
+        {showSignInGate && !isSignedIn && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md rounded-3xl">
+            <div className="text-center p-8 max-w-sm">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/30 to-purple-500/20 flex items-center justify-center">
+                <Crown className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                Free Limit Reached
+              </h3>
+              <p className="text-muted-foreground text-sm mb-6">
+                You've used all {FREE_PROMPT_LIMIT} free prompts. Sign in with Google to unlock unlimited AI access, Pro Mode, and memory.
+              </p>
+              <button
+                onClick={handleGoogleSignIn}
+                disabled={signingIn}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all active:scale-95 disabled:opacity-50 text-white"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(280 70% 50%))',
+                  boxShadow: '0 0 20px hsl(28 100% 55% / 0.3)',
+                }}
+              >
+                {signingIn ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                {signingIn ? 'Signing in...' : 'Sign in with Google'}
+              </button>
+              <button
+                onClick={() => setShowSignInGate(false)}
+                className="mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh' }}>
         {/* Mode Selector */}
