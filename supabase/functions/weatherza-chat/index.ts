@@ -144,8 +144,12 @@ FORMATTING RULES (follow strictly):
     // ─── MODE ROUTING ───
     // code/math/conversation → Lovable AI Gateway (primary) → Gemini (fallback) → Groq (last resort)
     // weather → Groq (fast streaming)
+    // Auto-upgrade: if user asks for graph/code/visualization in weather mode, route to code path
+    const lastUserMsg = messages[messages.length - 1]?.content?.toLowerCase() || '';
+    const needsCodePath = /\b(graph|plot|chart|visuali[sz]|animation|animate|code|python|matplotlib|numpy|program|script|3d|bar3d)\b/i.test(lastUserMsg);
+    const effectiveMode = (mode === 'weather' && needsCodePath) ? 'code' : mode;
 
-    if (mode !== 'weather') {
+    if (effectiveMode !== 'weather') {
       const aiMessages = [
         { role: "system", content: systemPrompt },
         ...messages.slice(-4).map((m: any) => ({ role: m.role, content: m.content })),
