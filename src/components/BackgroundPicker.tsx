@@ -65,7 +65,7 @@ export const BackgroundPicker = ({ isOpen, onClose, onSelectBg, currentBg }: Bac
   };
 
   const selectImage = (hit: PixabayHit) => {
-    if (remaining <= 0 && !currentBg) return;
+    if (remaining <= 0) return;
     const bg: CustomBg = { url: hit.largeImageURL || hit.webformatURL, query: searchQuery };
     localStorage.setItem(BG_STORAGE_KEY, JSON.stringify(bg));
     const newCount = changeCount + 1;
@@ -179,7 +179,7 @@ export const BackgroundPicker = ({ isOpen, onClose, onSelectBg, currentBg }: Bac
                 <button
                   key={hit.id}
                   onClick={() => selectImage(hit)}
-                  disabled={remaining <= 0 && !currentBg}
+                  disabled={remaining <= 0}
                   className={`relative group rounded-xl overflow-hidden aspect-video border-2 transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed ${
                     isCurrentBg ? 'border-primary shadow-lg shadow-primary/20' : 'border-transparent hover:border-white/20'
                   }`}
