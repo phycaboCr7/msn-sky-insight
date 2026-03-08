@@ -48,14 +48,31 @@ export const AnimatedWeatherIcon = ({
   );
 };
 
-const SunnyIcon = ({ size }: { size: string }) => (
-  <div className={cn(
-    "forecast__sunny",
-    size === "sm" && "scale-[0.35]",
-    size === "md" && "scale-[0.6]",
-    size === "lg" && "scale-100"
-  )} />
-);
+const SunnyIcon = ({ size }: { size: string }) => {
+  // For small size, render a dedicated small sun circle instead of scaling down the 80px one
+  if (size === "sm") {
+    return (
+      <div
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, #ffdd57 30%, #ff9500 100%)',
+          boxShadow: '0 0 12px 4px rgba(255, 180, 50, 0.5), 0 0 24px 8px rgba(255, 150, 0, 0.2)',
+          animation: 'sunny-pulse 3s ease-in-out infinite',
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className={cn(
+      "forecast__sunny",
+      size === "md" && "scale-[0.6]",
+      size === "lg" && "scale-100"
+    )} />
+  );
+};
 
 const NightIcon = ({ size }: { size: string }) => (
   <div className={cn(
