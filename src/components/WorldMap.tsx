@@ -178,6 +178,15 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
           )}
           <div ref={mapContainer} className="w-full h-full" />
           
+          {/* Dark/Light toggle */}
+          <button
+            onClick={toggleMapTheme}
+            className="absolute top-3 left-3 z-10 bg-black/70 backdrop-blur-md p-2 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300"
+            title={isDarkMap ? 'Switch to light map' : 'Switch to dark map'}
+          >
+            {isDarkMap ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-blue-400" />}
+          </button>
+          
           {/* Active layer badge */}
           <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md px-3 py-2 rounded-xl text-xs border border-white/10 flex items-center gap-2">
             <div className="w-2 h-2 rounded-full" style={{ background: LAYER_CONFIG[activeLayer].color }} />
