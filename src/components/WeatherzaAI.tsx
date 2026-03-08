@@ -1152,6 +1152,15 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         } catch { /* ignore */ }
       }
     }
+    abortControllerRef.current = null;
+  };
+
+  const stopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
   };
 
   const buildWeatherContext = () => {
