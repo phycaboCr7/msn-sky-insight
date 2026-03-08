@@ -104,7 +104,15 @@ const Index = () => {
 
   useEffect(() => {
     getCurrentLocation();
+    window.scrollTo(0, 0);
   }, []);
+
+  // Always scroll to top when weather data loads
+  useEffect(() => {
+    if (weather) {
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    }
+  }, [weather]);
 
   if (initialLoading) {
     return (
