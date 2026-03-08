@@ -20,46 +20,121 @@ serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      return new Response(JSON.stringify({ error: "GEMINI_API_KEY not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const isJson = type === "json";
+    const temperature = isJson ? 0.7 : 0.6;
+    const maxTokens = isJson ? 1024 : 512;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: isJson ? 0.7 : 0.6,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: isJson ? 1024 : 512,
+    // ─── 1. Lovable AI Gateway (primary) ───
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (LOVABLE_API_KEY) {
+      try {
+        console.log("gemini-proxy: trying Lovable AI Gateway");
+        const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
           },
-        }),
-      }
-    );
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "user", content: prompt }],
+            temperature,
+            max_tokens: maxTokens,
+          }),
+        });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Gemini API error:", response.status, errText);
-      return new Response(JSON.stringify({ error: `Gemini API error: ${response.status}` }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        if (resp.ok) {
+          const data = await resp.json();
+          const text = data.choices?.[0]?.message?.content || "";
+          if (text) {
+            console.log("gemini-proxy: Lovable AI success");
+            return new Response(JSON.stringify({ text }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        } else {
+          console.warn(`gemini-proxy: Lovable AI error ${resp.status}`);
+        }
+      } catch (e) {
+        console.error("gemini-proxy: Lovable AI fetch error:", e);
+      }
     }
 
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    // ─── 2. Gemini Direct (fallback) ───
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (GEMINI_API_KEY) {
+      const models = ["gemini-2.5-flash", "gemini-2.0-flash"];
+      for (const model of models) {
+        try {
+          console.log(`gemini-proxy: trying Gemini ${model}`);
+          const resp = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature, topK: 40, topP: 0.95, maxOutputTokens: maxTokens },
+              }),
+            }
+          );
 
-    return new Response(JSON.stringify({ text }), {
+          if (resp.ok) {
+            const data = await resp.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            if (text) {
+              console.log(`gemini-proxy: Gemini ${model} success`);
+              return new Response(JSON.stringify({ text }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+          } else {
+            console.warn(`gemini-proxy: Gemini ${model} error ${resp.status}`);
+          }
+        } catch (e) {
+          console.error(`gemini-proxy: Gemini ${model} error:`, e);
+        }
+      }
+    }
+
+    // ─── 3. Groq (last resort) ───
+    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    if (GROQ_API_KEY) {
+      try {
+        console.log("gemini-proxy: trying Groq fallback");
+        const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${GROQ_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+            messages: [{ role: "user", content: prompt }],
+            temperature,
+            max_tokens: maxTokens,
+          }),
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          const text = data.choices?.[0]?.message?.content || "";
+          if (text) {
+            console.log("gemini-proxy: Groq success");
+            return new Response(JSON.stringify({ text }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        } else {
+          console.warn(`gemini-proxy: Groq error ${resp.status}`);
+        }
+      } catch (e) {
+        console.error("gemini-proxy: Groq error:", e);
+      }
+    }
+
+    return new Response(JSON.stringify({ error: "All AI models failed. Please try again." }), {
+      status: 502,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
