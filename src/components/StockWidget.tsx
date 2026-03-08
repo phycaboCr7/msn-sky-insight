@@ -73,9 +73,9 @@ export const StockWidget = ({ country }: StockWidgetProps) => {
   };
 
   useEffect(() => {
-    const sym = getRandomTopStock();
-    fetchStock(sym, "USD");
-  }, []);
+    const { symbol, currency } = getDefaultStockForCountry(country);
+    fetchStock(symbol, currency);
+  }, [country]);
 
   const handleInputChange = (val: string) => {
     setSearchInput(val);
