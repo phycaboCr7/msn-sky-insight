@@ -1389,7 +1389,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       maxTemp: weather.forecast?.forecastday[0]?.day.maxtemp_c,
       minTemp: weather.forecast?.forecastday[0]?.day.mintemp_c,
       aqi: actualAQI,
-      pm25: pm25
+      pm25: pm25,
+      userName: authUser?.name || undefined,
     };
   };
 
