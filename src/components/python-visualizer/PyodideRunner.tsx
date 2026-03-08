@@ -266,13 +266,11 @@ _stdout_capture.getvalue()
     }
   }, [pyodideReady, code, sliders, executionType, toast, animationFrames.length]);
 
-  // Run animation and generate video
+  // Run animation and generate video (auto-play is now handled inside runCode)
   const runAnimation = useCallback(async () => {
     await runCode();
-    if (animationFrames.length > 1) {
-      setIsAnimating(true);
-    }
-  }, [runCode, animationFrames.length]);
+    // Animation auto-starts inside runCode when frames are detected
+  }, [runCode]);
 
   // Export as video using real canvas-based MediaRecorder
   const exportVideo = useCallback(async () => {
