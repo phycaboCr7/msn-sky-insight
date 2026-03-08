@@ -157,7 +157,7 @@ FORMATTING RULES (follow strictly):
     if (mode !== 'weather') {
       const aiMessages = [
         { role: "system", content: systemPrompt },
-        ...messages.slice(-8).map((m: any) => ({ role: m.role, content: m.content })),
+        ...messages.slice(-4).map((m: any) => ({ role: m.role, content: m.content })),
       ];
 
       // Try Lovable AI Gateway first
