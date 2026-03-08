@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getStockQuote, getChartData, getRandomTopStock, searchStocks, getCurrencySymbol, StockQuote, ChartPoint, StockSearchResult } from "@/services/stockService";
+import { getStockQuote, getChartData, getRandomTopStock, searchStocks, getCurrencySymbol, getDefaultStockForCountry, StockQuote, ChartPoint, StockSearchResult } from "@/services/stockService";
 import { WeatherCard } from "./WeatherCard";
 import { TrendingUp, TrendingDown, Search, Loader2, BarChart3 } from "lucide-react";
 
 const TABS = ["1D", "5D", "1M", "1Y", "5Y", "Max"];
 
-export const StockWidget = () => {
+interface StockWidgetProps {
+  country?: string;
+}
+
+export const StockWidget = ({ country }: StockWidgetProps) => {
   const [quote, setQuote] = useState<StockQuote | null>(null);
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [loading, setLoading] = useState(true);
