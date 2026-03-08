@@ -98,19 +98,13 @@ export const SunPhaseCard = ({ weather }: SunPhaseCardProps) => {
           {/* Sun dot */}
           {arcProgress > 0 && arcProgress < 100 && (
             <>
-              <circle cx={cx} cy={cy} r="5" fill="url(#sunGrad)" filter="url(#sunGlow)" />
+              <circle cx={cx} cy={cy} r="3" fill="#ff9500" opacity="0.3" />
+              <circle cx={cx} cy={cy} r="4.5" fill="url(#sunGrad)" />
               <defs>
                 <radialGradient id="sunGrad">
                   <stop offset="0%" stopColor="#ffdd57" />
                   <stop offset="100%" stopColor="#ff9500" />
                 </radialGradient>
-                <filter id="sunGlow">
-                  <feGaussianBlur stdDeviation="2" result="blur" />
-                  <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
               </defs>
             </>
           )}
