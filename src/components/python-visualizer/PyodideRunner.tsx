@@ -493,7 +493,7 @@ _stdout_capture.getvalue()
               <LiveCanvas 
                 frames={animationFrames} 
                 fps={24} 
-                autoPlay={false}
+                autoPlay={true}
                 onVideoReady={handleVideoReady}
               />
             </div>
