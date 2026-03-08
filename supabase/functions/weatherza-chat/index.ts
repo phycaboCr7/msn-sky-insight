@@ -306,31 +306,46 @@ You have access to the full conversation history. Reference previous messages na
       })),
     ];
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "meta-llama/llama-4-maverick-17b-128e-instruct",
-        messages: aiMessages,
-        stream: true,
-        temperature: 0.6,
-        max_tokens: 8192,
-      }),
-    });
+    // Retry logic for rate limits
+    const maxRetries = 3;
+    let response: Response | null = null;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+          messages: aiMessages,
+          stream: true,
+          temperature: 0.6,
+          max_tokens: 8192,
+        }),
+      });
 
-    if (!response.ok) {
-      if (response.status === 429) {
+      if (response.status === 429 && attempt < maxRetries - 1) {
+        const retryAfter = response.headers.get("retry-after");
+        const delay = retryAfter ? Math.min(parseInt(retryAfter) * 1000, 10000) : (attempt + 1) * 2000;
+        console.log(`Rate limited, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
+        await response.text(); // consume body
+        await new Promise(r => setTimeout(r, delay));
+        continue;
+      }
+      break;
+    }
+
+    if (!response || !response.ok) {
+      if (response?.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("Groq API error:", response.status, t);
-      throw new Error(`Groq API error: ${response.status}`);
+      const t = response ? await response.text() : "No response";
+      console.error("Groq API error:", response?.status, t);
+      throw new Error(`Groq API error: ${response?.status}`);
     }
 
     // Stream the response directly back to client
