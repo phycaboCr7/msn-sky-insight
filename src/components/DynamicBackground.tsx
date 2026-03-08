@@ -28,6 +28,8 @@ const getWeatherKeywords = (condition: string) => {
   }
 };
 
+const getCacheKey = (condition: string) => `weatherza_bg_${condition.toLowerCase().replace(/\s+/g, '_')}`;
+
 export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
   const [backgroundImage, setBackgroundImage] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -35,10 +37,20 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
   useEffect(() => {
     if (!weather) return;
 
+    const condition = weather.current.condition.text;
+    const cacheKey = getCacheKey(condition);
+    
+    // Check sessionStorage cache first
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      setBackgroundImage(cached);
+      return;
+    }
+
     const timeoutId = setTimeout(async () => {
       setLoading(true);
       try {
-        const keywords = getWeatherKeywords(weather.current.condition.text);
+        const keywords = getWeatherKeywords(condition);
         const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
           body: { query: keywords, category: 'nature', min_width: 1920, per_page: 20, image_type: 'photo', editors_choice: true },
         });
@@ -47,7 +59,10 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
           const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 10));
           const imageUrl = data.hits[randomIndex].largeImageURL || data.hits[randomIndex].webformatURL;
           const img = new Image();
-          img.onload = () => setBackgroundImage(imageUrl);
+          img.onload = () => {
+            setBackgroundImage(imageUrl);
+            try { sessionStorage.setItem(cacheKey, imageUrl); } catch {}
+          };
           img.src = imageUrl;
         }
       } catch (error) {
