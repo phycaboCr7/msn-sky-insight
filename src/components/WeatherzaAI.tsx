@@ -1126,6 +1126,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            const finishReason = parsed.choices?.[0]?.finish_reason;
             if (content) {
               assistantSoFar += content;
               const snapshot = assistantSoFar;
@@ -1136,6 +1137,13 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 }
                 return [...prev, { id: assistantId, role: "assistant", content: snapshot }];
               });
+            }
+            if (finishReason === "length") {
+              assistantSoFar += "\n\n---\n⚠️ *Response was truncated due to length limits. Ask me to continue if needed.*";
+              const snapshot = assistantSoFar;
+              setMessages(prev => prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m));
+              streamDone = true;
+              break;
             }
           } catch {
             textBuffer = line + "\n" + textBuffer;
