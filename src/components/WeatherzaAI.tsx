@@ -1233,7 +1233,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         return { role: m.role, content, image: m.image };
       });
 
-      await streamFromAI(messagesForAI, weatherCtx, updatedMessages);
+      await streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode);
     } catch (error) {
       console.error("AI Error:", error);
       toast({
