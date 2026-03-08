@@ -113,6 +113,7 @@ FORMATTING RULES (follow strictly):
               model: "google/gemini-3-flash-preview",
               messages: aiMessages,
               stream: true,
+              max_tokens: 16384,
             }),
           });
 
@@ -200,7 +201,7 @@ FORMATTING RULES (follow strictly):
           messages: groqMessages,
           stream: true,
           temperature: 0.5,
-          max_tokens: 8192,
+          max_tokens: 16384,
         }),
       });
 

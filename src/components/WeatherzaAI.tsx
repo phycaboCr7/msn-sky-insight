@@ -130,15 +130,22 @@ const CodeBlock = ({
   onOpenPyodide?: (code: string) => void;
 }) => {
   const [copied, setCopied] = useState(false);
+  const [editableCode, setEditableCode] = useState(children);
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+
+  // Sync when children prop changes (new AI response)
+  useEffect(() => {
+    setEditableCode(children);
+  }, [children]);
 
   const lang = language?.toLowerCase() || '';
   const isRunnable = lang && (BACKEND_LANGUAGES.includes(lang) || lang === 'html');
   const usesInterpreter = INTERPRETER_LANGUAGES.includes(lang);
-  const isPythonGraph = (lang === 'python' || lang === 'py') && isPythonGraphCode(children);
+  const isPythonGraph = (lang === 'python' || lang === 'py') && isPythonGraphCode(editableCode);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(children);
+    await navigator.clipboard.writeText(editableCode);
     setCopied(true);
     toast({ title: "Copied!", description: "Code copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);
@@ -146,7 +153,7 @@ const CodeBlock = ({
 
   const handleOpenPyodide = () => {
     if (onOpenPyodide) {
-      onOpenPyodide(children);
+      onOpenPyodide(editableCode);
     }
   };
 
@@ -165,7 +172,7 @@ const CodeBlock = ({
       window.open(url, '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`);
     } else {
       // For other languages, open interpreter in new tab
-      const codeData = encodeURIComponent(JSON.stringify({ code: children, language: lang }));
+      const codeData = encodeURIComponent(JSON.stringify({ code: editableCode, language: lang }));
       const interpreterHtml = `
 <!DOCTYPE html>
 <html>
@@ -223,7 +230,7 @@ const CodeBlock = ({
   <div class="output" id="output">
     <div class="info-line">🐍 ${lang.toUpperCase()} Interactive Shell</div>
     <div class="info-line">Running code...</div>
-    <div class="input-line"><span class="prompt">&gt;&gt;&gt; </span><pre style="display:inline">${children.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
+    <div class="input-line"><span class="prompt">&gt;&gt;&gt; </span><pre style="display:inline">${editableCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
     <div class="loading" id="loading">⏳ Executing...</div>
   </div>
   <div class="footer">Press Ctrl+W to close • Powered by Piston API</div>
@@ -238,7 +245,7 @@ const CodeBlock = ({
             'Content-Type': 'application/json',
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpua3Z3Z3dpandtZWFwY3lqcGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2MDc1NjIsImV4cCI6MjA4MTE4MzU2Mn0.wvFfzKNl5EQzCbzX8_xQdS6cinh7gGNEcaFfPzB8ags'
           },
-          body: JSON.stringify({ code: ${JSON.stringify(children)}, language: '${lang}' })
+          body: JSON.stringify({ code: ${JSON.stringify(editableCode)}, language: '${lang}' })
         });
         const data = await response.json();
         loading.remove();
@@ -295,9 +302,27 @@ const CodeBlock = ({
           </button>
         </div>
       </div>
-      <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50">
-        <code className="font-mono text-sm text-foreground/90">{children}</code>
-      </pre>
+      <div className="relative">
+        {isEditing ? (
+          <textarea
+            value={editableCode}
+            onChange={(e) => setEditableCode(e.target.value)}
+            className="w-full bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 font-mono text-sm text-foreground/90 resize-y min-h-[60px] outline-none focus:border-orange-400 border border-transparent"
+            style={{ minHeight: `${Math.max(60, editableCode.split('\n').length * 20 + 16)}px` }}
+            spellCheck={false}
+          />
+        ) : (
+          <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 cursor-text" onClick={() => setIsEditing(true)}>
+            <code className="font-mono text-sm text-foreground/90">{editableCode}</code>
+          </pre>
+        )}
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] bg-white/10 hover:bg-white/20 text-foreground/50 rounded transition-colors"
+        >
+          {isEditing ? '✓ Done' : '✎ Edit'}
+        </button>
+      </div>
     </div>
   );
 };
@@ -1101,6 +1126,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            const finishReason = parsed.choices?.[0]?.finish_reason;
             if (content) {
               assistantSoFar += content;
               const snapshot = assistantSoFar;
@@ -1111,6 +1137,13 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 }
                 return [...prev, { id: assistantId, role: "assistant", content: snapshot }];
               });
+            }
+            if (finishReason === "length") {
+              assistantSoFar += "\n\n---\n⚠️ *Response was truncated due to length limits. Ask me to continue if needed.*";
+              const snapshot = assistantSoFar;
+              setMessages(prev => prev.map((m, i) => i === prev.length - 1 ? { ...m, content: snapshot } : m));
+              streamDone = true;
+              break;
             }
           } catch {
             textBuffer = line + "\n" + textBuffer;
