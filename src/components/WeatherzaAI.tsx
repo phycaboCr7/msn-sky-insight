@@ -302,9 +302,27 @@ const CodeBlock = ({
           </button>
         </div>
       </div>
-      <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50">
-        <code className="font-mono text-sm text-foreground/90">{children}</code>
-      </pre>
+      <div className="relative">
+        {isEditing ? (
+          <textarea
+            value={editableCode}
+            onChange={(e) => setEditableCode(e.target.value)}
+            className="w-full bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 font-mono text-sm text-foreground/90 resize-y min-h-[60px] outline-none focus:border-orange-400 border border-transparent"
+            style={{ minHeight: `${Math.max(60, editableCode.split('\n').length * 20 + 16)}px` }}
+            spellCheck={false}
+          />
+        ) : (
+          <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 cursor-text" onClick={() => setIsEditing(true)}>
+            <code className="font-mono text-sm text-foreground/90">{editableCode}</code>
+          </pre>
+        )}
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className="absolute top-1 right-1 px-1.5 py-0.5 text-[10px] bg-white/10 hover:bg-white/20 text-foreground/50 rounded transition-colors"
+        >
+          {isEditing ? '✓ Done' : '✎ Edit'}
+        </button>
+      </div>
     </div>
   );
 };

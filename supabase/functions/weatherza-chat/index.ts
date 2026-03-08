@@ -201,7 +201,7 @@ FORMATTING RULES (follow strictly):
           messages: groqMessages,
           stream: true,
           temperature: 0.5,
-          max_tokens: 8192,
+          max_tokens: 16384,
         }),
       });
 
