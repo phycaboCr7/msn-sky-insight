@@ -27,12 +27,12 @@ const WeatherParticles = ({ condition, isDay, temp }: { condition: string; isDay
       }));
     }
     if (isSnow) {
-      return Array.from({ length: 15 }, (_, i) => ({
+      return Array.from({ length: 20 }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
-        delay: `${Math.random() * 3}s`,
-        duration: `${2 + Math.random() * 2}s`,
-        size: `${3 + Math.random() * 5}px`,
+        delay: `${Math.random() * 4}s`,
+        duration: `${3 + Math.random() * 3}s`,
+        size: `${14 + Math.random() * 14}px`,
       }));
     }
     return [];
