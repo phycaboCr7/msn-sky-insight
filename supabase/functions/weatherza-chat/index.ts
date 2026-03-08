@@ -337,7 +337,7 @@ Use markdown formatting. Give actionable weather advice. Be concise but helpful.
 
       // Convert messages to Gemini format
       const geminiContents = [];
-      for (const msg of aiMessages) {
+      for (const msg of geminiMessages) {
         if (msg.role === "system") continue;
         geminiContents.push({
           role: msg.role === "assistant" ? "model" : "user",
