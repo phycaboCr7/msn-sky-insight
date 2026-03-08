@@ -75,8 +75,8 @@ const AIBackground = ({ weather }: { weather: WeatherData }) => {
         backgroundImage: `url(${bgImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.25,
-        filter: 'brightness(0.6)',
+        opacity: 0.35,
+        filter: 'brightness(0.5) contrast(1.4) saturate(1.6) blur(3px)',
       }}
     />
   );
