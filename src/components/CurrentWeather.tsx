@@ -230,7 +230,7 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
     <WeatherCard className="p-4 sm:p-6 lg:p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
       {/* Location background image */}
       <LocationBackground weather={weather} />
-      <WeatherParticles condition={current.condition.text} isDay={isDay} />
+      <WeatherParticles condition={current.condition.text} isDay={isDay} temp={current.temp_c} />
       
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none z-5" />
