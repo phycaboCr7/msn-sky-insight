@@ -27,12 +27,12 @@ const calculateAQI = (pm25: number, pm10: number, o3: number, no2: number): numb
 };
 
 const getAQILevel = (aqi: number) => {
-  if (aqi <= 50) return { label: "Good", color: "text-green-400", dotColor: "bg-green-400", image: aqiBoyGood, gradient: "from-emerald-900/80 via-teal-800/70 to-green-900/90" };
-  if (aqi <= 100) return { label: "Moderate", color: "text-yellow-400", dotColor: "bg-yellow-400", image: aqiBoyModerate, gradient: "from-amber-900/80 via-yellow-800/70 to-orange-900/90" };
-  if (aqi <= 150) return { label: "Unhealthy for Sensitive", color: "text-orange-400", dotColor: "bg-orange-400", image: aqiBoyUnhealthy, gradient: "from-orange-900/80 via-red-800/70 to-orange-950/90" };
-  if (aqi <= 200) return { label: "Unhealthy", color: "text-red-400", dotColor: "bg-red-400", image: aqiBoyUnhealthy, gradient: "from-red-900/80 via-pink-800/70 to-red-950/90" };
-  if (aqi <= 300) return { label: "Very Unhealthy", color: "text-purple-400", dotColor: "bg-purple-400", image: aqiBoyHazardous, gradient: "from-purple-900/80 via-violet-800/70 to-purple-950/90" };
-  return { label: "Hazardous", color: "text-rose-500", dotColor: "bg-rose-500", image: aqiBoyHazardous, gradient: "from-rose-900/80 via-red-900/70 to-rose-950/90" };
+  if (aqi <= 50) return { label: "Good", color: "text-green-400", dotColor: "bg-green-400", image: aqiBoyGood, gradient: "from-[#0a2a1a] via-[#0d3325] to-[#071f13]" };
+  if (aqi <= 100) return { label: "Moderate", color: "text-yellow-400", dotColor: "bg-yellow-400", image: aqiBoyModerate, gradient: "from-[#2a1f0a] via-[#33250d] to-[#1f1507]" };
+  if (aqi <= 150) return { label: "Unhealthy for Sensitive", color: "text-orange-400", dotColor: "bg-orange-400", image: aqiBoyUnhealthy, gradient: "from-[#2a150a] via-[#3d1a0f] to-[#1f0e07]" };
+  if (aqi <= 200) return { label: "Unhealthy", color: "text-red-400", dotColor: "bg-red-400", image: aqiBoyUnhealthy, gradient: "from-[#3d0a1a] via-[#5c1035] to-[#2a0712]" };
+  if (aqi <= 300) return { label: "Very Unhealthy", color: "text-purple-400", dotColor: "bg-purple-400", image: aqiBoyHazardous, gradient: "from-[#1f0a2a] via-[#2d1040] to-[#15071f]" };
+  return { label: "Hazardous", color: "text-rose-500", dotColor: "bg-rose-500", image: aqiBoyHazardous, gradient: "from-[#3d0a0a] via-[#5c1010] to-[#2a0707]" };
 };
 
 const scaleSegments = [
