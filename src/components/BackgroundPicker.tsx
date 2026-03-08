@@ -65,7 +65,7 @@ export const BackgroundPicker = ({ isOpen, onClose, onSelectBg, currentBg }: Bac
   };
 
   const selectImage = (hit: PixabayHit) => {
-    if (remaining <= 0 && !currentBg) return;
+    if (remaining <= 0) return;
     const bg: CustomBg = { url: hit.largeImageURL || hit.webformatURL, query: searchQuery };
     localStorage.setItem(BG_STORAGE_KEY, JSON.stringify(bg));
     const newCount = changeCount + 1;
