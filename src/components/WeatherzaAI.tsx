@@ -1480,9 +1480,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="relative z-10 px-4 pb-4 pt-2">
+      <CardContent className="relative z-10 px-4 pb-8 pt-2 overflow-visible">
         {/* Chat Viewport — fixed height, flex column, no collapse */}
-        <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
+        <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh' }}>
         {/* Mode Selector */}
         <div className="flex gap-1 px-1 pb-3">
           {([
@@ -1631,11 +1631,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar rounded-full">
-          {/* Outer glow - separate layer outside overflow-hidden parent */}
-          <div className="absolute inset-[-12px] rounded-full pointer-events-none z-0" style={{
-            background: 'radial-gradient(ellipse at center, hsl(28 100% 60% / 0.25) 0%, hsl(28 100% 60% / 0.12) 30%, hsl(220 80% 60% / 0.06) 60%, transparent 80%)',
-            filter: 'blur(8px)',
+        <div className="relative group/bar rounded-full mb-3">
+          {/* Outer glow - radial gradient layer */}
+          <div className="absolute inset-[-16px] rounded-full pointer-events-none z-0" style={{
+            background: 'radial-gradient(ellipse 120% 200% at center, hsl(28 100% 60% / 0.3) 0%, hsl(28 100% 55% / 0.15) 25%, hsl(220 80% 60% / 0.08) 50%, transparent 75%)',
+            filter: 'blur(10px)',
           }} />
           {/* Animated border glow - thin border only */}
           <div
