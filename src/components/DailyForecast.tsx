@@ -1,6 +1,6 @@
 import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
-import { Cloud, Moon, CloudRain, CloudSnow, Snowflake, Sun, Droplets, Wind } from "lucide-react";
+import { Droplets } from "lucide-react";
 import { AnimatedWeatherIcon } from "./AnimatedWeatherIcon";
 
 interface DailyForecastProps {
@@ -35,7 +35,7 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
           {daysCount}-Day Forecast
         </h3>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {dailyData.map((day, index) => {
           const dayName = getDayName(day.date, index);
           const dateLabel = getDateLabel(day.date);
@@ -46,7 +46,7 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
           return (
             <div
               key={day.date}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group hover:bg-white/5 ${
+              className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group hover:bg-white/5 ${
                 isToday ? 'bg-primary/8 border border-primary/20 shadow-sm shadow-primary/5' : ''
               }`}
             >
@@ -58,8 +58,8 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
                 <div className="text-[10px] text-muted-foreground">{dateLabel}</div>
               </div>
 
-              {/* Weather icon */}
-              <div className="flex-shrink-0 w-8 flex items-center justify-center">
+              {/* Weather icon - constrained with overflow-hidden */}
+              <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center overflow-hidden">
                 <AnimatedWeatherIcon
                   condition={day.day.condition.text}
                   isDay={true}
@@ -80,22 +80,22 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
               </div>
 
               {/* Temperature bar */}
-              <div className="hidden sm:flex items-center gap-2 w-28">
-                <span className="text-[10px] text-blue-400 w-6 text-right" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+              <div className="hidden sm:flex items-center gap-2 w-32">
+                <span className="text-[10px] text-blue-400 w-7 text-right font-semibold" style={{ fontFamily: "'Bodoni Moda', serif" }}>
                   {Math.round(day.day.mintemp_c)}°
                 </span>
-                <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden relative">
+                <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden relative">
                   <div
-                    className="absolute h-full rounded-full"
+                    className="absolute h-full rounded-full transition-all duration-500"
                     style={{
                       left: `${lowPct}%`,
-                      width: `${highPct - lowPct}%`,
-                      background: `linear-gradient(90deg, hsl(215 80% 60%), hsl(25 90% 55%))`,
-                      minWidth: '8px',
+                      width: `${Math.max(highPct - lowPct, 10)}%`,
+                      background: `linear-gradient(90deg, hsl(215 80% 60%), hsl(30 90% 55%), hsl(15 90% 55%))`,
+                      minWidth: '12px',
                     }}
                   />
                 </div>
-                <span className="text-[10px] text-orange-400 w-6" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+                <span className="text-[10px] text-orange-400 w-7 font-semibold" style={{ fontFamily: "'Bodoni Moda', serif" }}>
                   {Math.round(day.day.maxtemp_c)}°
                 </span>
               </div>
