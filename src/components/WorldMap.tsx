@@ -69,6 +69,7 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
   const [activeLayer, setActiveLayer] = useState<MapLayer>('temperature');
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMap, setIsDarkMap] = useState(true);
 
   useEffect(() => {
     if (!mapContainer.current) return;
