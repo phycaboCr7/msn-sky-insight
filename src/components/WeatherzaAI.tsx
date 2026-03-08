@@ -1023,6 +1023,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
     const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
@@ -1030,6 +1033,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode }),
+      signal: controller.signal,
     });
 
     if (!resp.ok) {
