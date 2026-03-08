@@ -1214,8 +1214,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden">
-      <CardHeader className="pb-3">
+    <Card className="col-span-full bg-black/45 backdrop-blur-xl border border-white/20 shadow-xl overflow-hidden relative">
+      {/* AI-specific background image */}
+      <AIBackground weather={weather} />
+      <CardHeader className="pb-3 relative z-10">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20">

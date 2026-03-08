@@ -71,14 +71,13 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          filter: 'blur(2px) brightness(0.4)',
+          filter: 'brightness(0.45)',
         }}
       />
       <div 
         className="fixed inset-0 z-[1]"
         style={{
-          backdropFilter: 'blur(12px)',
-          background: 'rgba(0,0,0,0.25)',
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.4) 100%)',
         }}
       />
     </>
