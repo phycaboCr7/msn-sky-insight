@@ -1431,7 +1431,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   return (
-    <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-hidden relative rounded-3xl">
+    <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-visible relative rounded-3xl">
       {/* AI-specific background image */}
       <AIBackground weather={weather} />
       <CardHeader className="pb-2 pt-4 px-5 relative z-10">
