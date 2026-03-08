@@ -10,21 +10,21 @@ const getWeatherKeywords = (condition: string) => {
   const lowerCondition = condition.toLowerCase();
   
   if (lowerCondition.includes('sunny') || lowerCondition.includes('clear')) {
-    return 'sunny sky landscape';
+    return 'golden hour sunset mesmerizing sky';
   } else if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) {
-    return 'rain drops weather';
+    return 'dramatic rain storm cinematic';
   } else if (lowerCondition.includes('cloud')) {
-    return 'cloudy sky atmosphere';
+    return 'dramatic clouds aerial cinematic sky';
   } else if (lowerCondition.includes('storm') || lowerCondition.includes('thunder')) {
-    return 'thunderstorm lightning';
+    return 'epic thunderstorm lightning dramatic sky';
   } else if (lowerCondition.includes('snow')) {
-    return 'snow winter landscape';
+    return 'magical winter snowfall dreamy landscape';
   } else if (lowerCondition.includes('fog') || lowerCondition.includes('mist')) {
-    return 'fog misty landscape';
+    return 'mystical fog ethereal forest';
   } else if (lowerCondition.includes('wind')) {
-    return 'windy trees autumn';
+    return 'dramatic wind sweeping landscape cinematic';
   } else {
-    return 'beautiful landscape nature';
+    return 'mesmerizing nature landscape cinematic';
   }
 };
 
