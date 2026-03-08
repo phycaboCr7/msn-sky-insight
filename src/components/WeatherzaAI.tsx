@@ -899,6 +899,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [proMode, setProMode] = useState(() => localStorage.getItem('weatherza-pro-mode') === 'true');
   const [chatFont, setChatFont] = useState<FontOption>(() => getStoredFont());
   const [fontPickerOpen, setFontPickerOpen] = useState(false);
+  const [customBg, setCustomBg] = useState<CustomBg | null>(() => getStoredBg());
+  const [bgPickerOpen, setBgPickerOpen] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
