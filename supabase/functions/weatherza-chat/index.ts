@@ -340,7 +340,7 @@ You have access to the full conversation history. Reference previous messages na
       }
 
       // Try multiple Gemini models for reliability
-      const geminiModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
+      const geminiModels = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"];
       let geminiAnswer = "";
 
       for (const model of geminiModels) {
