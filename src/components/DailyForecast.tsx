@@ -59,7 +59,7 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
               </div>
 
               {/* Weather icon - constrained with overflow-hidden */}
-              <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center overflow-visible">
+              <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center overflow-hidden rounded-full">
                 <AnimatedWeatherIcon
                   condition={day.day.condition.text}
                   isDay={true}

@@ -38,7 +38,7 @@ export const AnimatedWeatherIcon = ({
   const weatherType = getWeatherType();
 
   return (
-    <div className={cn("forecast-icon overflow-visible flex items-center justify-center", sizeClasses[size], className)}>
+    <div className={cn("forecast-icon flex items-center justify-center", sizeClasses[size], className)}>
       {weatherType === "sunny" && <SunnyIcon size={size} />}
       {weatherType === "night" && <NightIcon size={size} />}
       {weatherType === "cloudy" && <CloudyIcon size={size} />}
@@ -51,10 +51,10 @@ export const AnimatedWeatherIcon = ({
 const SunnyIcon = ({ size }: { size: string }) => (
   <div className={cn(
     "forecast__sunny",
-    size === "sm" && "scale-[0.4]",
+    size === "sm" && "scale-[0.4] !shadow-none",
     size === "md" && "scale-[0.6]",
     size === "lg" && "scale-100"
-  )} />
+  )} style={size === "sm" ? { boxShadow: 'none' } : undefined} />
 );
 
 const NightIcon = ({ size }: { size: string }) => (
