@@ -35,6 +35,29 @@ const getAQILevel = (aqi: number) => {
   return { label: "Hazardous", color: "text-rose-500", dotColor: "bg-rose-500", image: aqiBoyHazardous, bgFrom: "#2a0707", bgTo: "#5c1a1a" };
 };
 
+// Non-linear AQI to visual position mapping
+// 6 equal-width segments, each 16.67% wide
+const getMarkerPosition = (aqi: number): number => {
+  const segments = [
+    { min: 0, max: 50 },
+    { min: 50, max: 100 },
+    { min: 100, max: 150 },
+    { min: 150, max: 200 },
+    { min: 200, max: 300 },
+    { min: 300, max: 500 },
+  ];
+  const segWidth = 100 / segments.length; // 16.67%
+
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    if (aqi <= seg.max) {
+      const fraction = (aqi - seg.min) / (seg.max - seg.min);
+      return segWidth * i + segWidth * fraction;
+    }
+  }
+  return 100;
+};
+
 const scaleSegments = [
   { label: "Good", max: 50, color: "bg-green-500" },
   { label: "Moder...", max: 100, color: "bg-yellow-500" },
@@ -91,7 +114,7 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
 
   const actualAQI = calculateAQI(airQuality.pm2_5, airQuality.pm10, airQuality.o3, airQuality.no2);
   const aqiLevel = getAQILevel(actualAQI);
-  const markerPercent = Math.min((actualAQI / 500) * 100, 100);
+  const markerPercent = getMarkerPosition(actualAQI);
 
   return (
     <div
@@ -141,16 +164,16 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
 
             {/* PM values */}
             <div className="flex gap-4 sm:gap-6 mt-4">
-              <div className="text-xs sm:text-sm text-white/70">
-                <span className="font-bold text-white">PM2.5 : </span>{airQuality.pm2_5.toFixed(0)} µg/m³
+              <div className="text-[11px] sm:text-xs text-white/70">
+                <span className="font-bold text-white">PM2.5:</span> {airQuality.pm2_5.toFixed(0)} µg/m³
               </div>
-              <div className="text-xs sm:text-sm text-white/70">
-                <span className="font-bold text-white">PM10 : </span>{airQuality.pm10.toFixed(0)} µg/m³
+              <div className="text-[11px] sm:text-xs text-white/70">
+                <span className="font-bold text-white">PM10:</span> {airQuality.pm10.toFixed(0)} µg/m³
               </div>
             </div>
           </div>
 
-          {/* Boy character - positioned to never clip */}
+          {/* Boy character */}
           <div className="flex-shrink-0 relative -mt-2 -mr-1 sm:-mt-3 sm:-mr-2">
             <img
               src={aqiLevel.image}
@@ -161,7 +184,7 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
         </div>
 
         {/* Scale bar */}
-        <div className="mt-4 space-y-1.5">
+        <div className="mt-5 space-y-1.5">
           <div className="flex text-[9px] sm:text-[10px] text-white/50 font-medium">
             {scaleSegments.map((seg) => (
               <span key={seg.label} className="flex-1 truncate pr-1">{seg.label}</span>
@@ -172,12 +195,12 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
               <div key={seg.label} className={`flex-1 ${seg.color}`} />
             ))}
             <div
-              className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full border-2 border-black/60 shadow-lg transition-all duration-500"
-              style={{ left: `${markerPercent}%`, transform: 'translate(-50%, -50%)' }}
+              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-black/60 shadow-lg transition-all duration-700"
+              style={{ left: `calc(${markerPercent}% - 8px)` }}
             />
           </div>
           <div className="flex justify-between text-[9px] text-white/30 font-medium">
-            <span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span><span>301+</span>
+            <span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span><span>500</span>
           </div>
         </div>
       </div>
