@@ -302,7 +302,7 @@ You have access to the full conversation history. Reference previous messages na
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "qwen-qwq-32b",
+        model: "meta-llama/llama-4-maverick-17b-128e-instruct",
         messages: aiMessages,
         stream: true,
         temperature: 0.6,
