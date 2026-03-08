@@ -187,6 +187,55 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
           .replace(/ani\s*=\s*FuncAnimation\([^)]*\)/g, '')
           .replace(/ani\.save\([^)]*\)/g, '');
 
+        // ─── AUTO-FIX: Convert 3D plots to 2D (bar3d crashes in Pyodide) ───
+        const has3D = /projection\s*=\s*['"]3d['"]|\.bar3d\s*\(|\.plot_surface\s*\(|\.plot_wireframe\s*\(/.test(modifiedCode);
+        if (has3D) {
+          console.log("[PyodideRunner] Detected 3D plot code — auto-converting to 2D");
+          // Replace 3D subplot creation with 2D
+          modifiedCode = modifiedCode
+            .replace(/fig\s*=\s*plt\.figure\([^)]*\)/g, 'fig, ax = plt.subplots(figsize=(12, 8))')
+            .replace(/ax\s*=\s*fig\.add_subplot\([^)]*projection\s*=\s*['"]3d['"][^)]*\)/g, '# ax already created above')
+            .replace(/ax\s*=\s*fig\.add_subplot\([^)]*\)/g, '# ax already created above');
+          // Remove 3D-only axis calls
+          modifiedCode = modifiedCode
+            .replace(/ax\.set_zlabel\([^)]*\)/g, '')
+            .replace(/ax\.set_zlim\([^)]*\)/g, '')
+            .replace(/ax\.set_yticks\(\[0,\s*1\]\)/g, '')
+            .replace(/ax\.set_yticklabels\(\[['"]Max['"],\s*['"]Min['"]\]\)/g, '')
+            .replace(/ax\.set_ylim\(-1,\s*2\)/g, '');
+
+          // Now find the animation function and completely replace it with a working 2D version
+          // Extract data arrays from the code for rewriting
+          const funcMatch = modifiedCode.match(/def\s+(update|animate|draw_frame)\s*\(\s*(\w+)\s*\):/);
+          if (funcMatch) {
+            const funcName = funcMatch[1];
+            const paramName = funcMatch[2];
+            // Remove the entire old function body
+            const funcDefRegex = new RegExp(`def\\s+${funcName}\\s*\\(\\s*${paramName}\\s*\\):[\\s\\S]*?(?=\\n(?!\\s|$)|$)`);
+            modifiedCode = modifiedCode.replace(funcDefRegex, `def ${funcName}(${paramName}):
+    ax.clear()
+    n_years = len(years) if 'years' in dir() else 11
+    x_vals = np.arange(n_years)
+    progress = min(1.0, ${paramName} / 200)
+    n_bars = max(1, int(progress * n_years))
+    scale = min(1.0, (${paramName} + 1) / 30)
+    if 'max_temps' in dir():
+        ax.bar(x_vals[:n_bars] - 0.2, max_temps[:n_bars] * scale, width=0.4, color='#4488ff', alpha=0.8, label='Max Temp')
+    if 'min_temps' in dir():
+        ax.bar(x_vals[:n_bars] + 0.2, min_temps[:n_bars] * scale, width=0.4, color='#ff4444', alpha=0.8, label='Min Temp')
+    if 'years' in dir():
+        ax.set_xticks(x_vals[:n_bars])
+        ax.set_xticklabels([str(int(y)) for y in years[:n_bars]], rotation=45)
+    ax.set_ylim(0, 50)
+    ax.set_title(f'Temperature Trend — Frame {${paramName}}/240')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Temperature (°C)')
+    ax.legend()
+    ax.grid(True, alpha=0.3, axis='y')
+`);
+          }
+        }
+
         // Detect the animation function name (update, animate, or draw_frame)
         const funcNameMatch = modifiedCode.match(/def\s+(update|animate|draw_frame)\s*\(\s*\w+\s*\)/);
         const animFuncName = funcNameMatch ? funcNameMatch[1] : null;
