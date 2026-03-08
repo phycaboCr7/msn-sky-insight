@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronUp, Mic, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface VoiceOverlayProps {
   isOpen: boolean;
@@ -16,7 +15,6 @@ export const VoiceOverlay = ({
   onTranscriptReady,
   onSendMessage,
 }: VoiceOverlayProps) => {
-  const [transcript, setTranscript] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [analyserData, setAnalyserData] = useState<number[]>(new Array(40).fill(2));
@@ -27,16 +25,13 @@ export const VoiceOverlay = ({
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const transcriptRef = useRef("");
 
   const stopEverything = useCallback(() => {
-    // Stop media recorder
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       try { mediaRecorderRef.current.stop(); } catch {}
     }
     mediaRecorderRef.current = null;
 
-    // Stop visualizer
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
@@ -109,7 +104,7 @@ export const VoiceOverlay = ({
       };
       updateVisualizer();
 
-      // Media recorder
+      // Media recorder — collect all audio in one go
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : "audio/webm";
@@ -122,7 +117,7 @@ export const VoiceOverlay = ({
         }
       };
 
-      recorder.start(250); // collect chunks every 250ms
+      recorder.start(250);
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
     } catch (err) {
@@ -133,132 +128,67 @@ export const VoiceOverlay = ({
   // Auto-start recording when overlay opens
   useEffect(() => {
     if (!isOpen) return;
-    setTranscript("");
-    transcriptRef.current = "";
+    audioChunksRef.current = [];
     startRecording();
-
-    return () => {
-      stopEverything();
-    };
+    return () => stopEverything();
   }, [isOpen, startRecording, stopEverything]);
 
-  const stopAndTranscribe = useCallback(async (): Promise<string> => {
-    return new Promise((resolve) => {
-      const recorder = mediaRecorderRef.current;
-      if (!recorder || recorder.state === "inactive") {
-        resolve(transcriptRef.current);
-        return;
-      }
-
-      recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        audioChunksRef.current = [];
-
-        if (audioBlob.size < 1000) {
-          // Too short, probably silence
-          resolve(transcriptRef.current);
-          return;
-        }
-
-        setIsTranscribing(true);
-        try {
-          const text = await transcribeAudio(audioBlob);
-          if (text) {
-            const combined = (transcriptRef.current + " " + text).trim();
-            transcriptRef.current = combined;
-            setTranscript(combined);
-          }
-          resolve(transcriptRef.current);
-        } catch (err) {
-          console.error("Transcription error:", err);
-          resolve(transcriptRef.current);
-        } finally {
-          setIsTranscribing(false);
-        }
-      };
-
-      recorder.stop();
-    });
-  }, [transcribeAudio]);
-
-  const handleClose = async () => {
-    const text = await stopAndTranscribe();
+  const handleClose = () => {
     stopEverything();
-    if (text) onTranscriptReady(text);
     onClose();
   };
 
+  // Send: stop recording → transcribe entire audio → send
   const handleSend = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
-    const text = await stopAndTranscribe();
-    stopEverything();
-    onClose();
-
-    if (text) {
-      requestAnimationFrame(() => onSendMessage(text));
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === "inactive") {
+      stopEverything();
+      onClose();
+      return;
     }
-  };
 
-  // Periodic transcription: stop recorder, transcribe, restart
-  const handleIntermediateTranscribe = useCallback(async () => {
-    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === "inactive") return;
+    const recorder = mediaRecorderRef.current;
 
-    return new Promise<void>((resolve) => {
-      const recorder = mediaRecorderRef.current!;
-      const stream = streamRef.current;
-
-      recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        audioChunksRef.current = [];
-
-        if (audioBlob.size > 1000) {
-          setIsTranscribing(true);
-          try {
-            const text = await transcribeAudio(audioBlob);
-            if (text) {
-              const combined = (transcriptRef.current + " " + text).trim();
-              transcriptRef.current = combined;
-              setTranscript(combined);
-            }
-          } catch (err) {
-            console.error("Intermediate transcription error:", err);
-          } finally {
-            setIsTranscribing(false);
-          }
-        }
-
-        // Restart recording if stream is still active
-        if (stream && stream.active) {
-          try {
-            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-              ? "audio/webm;codecs=opus"
-              : "audio/webm";
-            const newRecorder = new MediaRecorder(stream, { mimeType });
-            audioChunksRef.current = [];
-            newRecorder.ondataavailable = (event) => {
-              if (event.data.size > 0) audioChunksRef.current.push(event.data);
-            };
-            newRecorder.start(250);
-            mediaRecorderRef.current = newRecorder;
-          } catch {}
-        }
-        resolve();
+    // Wait for recorder to stop and collect final chunks
+    const audioBlob = await new Promise<Blob>((resolve) => {
+      recorder.onstop = () => {
+        resolve(new Blob(audioChunksRef.current, { type: "audio/webm" }));
       };
-
       recorder.stop();
     });
-  }, [transcribeAudio]);
 
-  // Auto-transcribe every 5 seconds for live feedback
-  useEffect(() => {
-    if (!isOpen || !isRecording) return;
-    const interval = setInterval(() => {
-      handleIntermediateTranscribe();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [isOpen, isRecording, handleIntermediateTranscribe]);
+    // Stop streams/visualizer
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    animFrameRef.current = null;
+    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
+    if (audioContextRef.current) audioContextRef.current.close();
+    audioContextRef.current = null;
+    analyserRef.current = null;
+    setAnalyserData(new Array(40).fill(2));
+    setIsRecording(false);
+
+    if (audioBlob.size < 1000) {
+      onClose();
+      return;
+    }
+
+    setIsTranscribing(true);
+    try {
+      const text = await transcribeAudio(audioBlob);
+      setIsTranscribing(false);
+      onClose();
+      if (text && text.trim()) {
+        requestAnimationFrame(() => onSendMessage(text.trim()));
+      }
+    } catch (err) {
+      console.error("Transcription error:", err);
+      setIsTranscribing(false);
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -286,7 +216,7 @@ export const VoiceOverlay = ({
           {isTranscribing && (
             <div className="flex items-center gap-1.5 ml-3">
               <Loader2 className="w-3.5 h-3.5 text-white/40 animate-spin" />
-              <span className="text-sm text-white/40">Transcribing...</span>
+              <span className="text-sm text-white/40">Processing...</span>
             </div>
           )}
         </div>
@@ -298,38 +228,27 @@ export const VoiceOverlay = ({
         </button>
       </div>
 
-      {/* Center content - transcription */}
+      {/* Center content */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 overflow-y-auto">
-        {!transcript && !isTranscribing && (
+        {!isTranscribing && (
           <div className="text-center space-y-3">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
               <Mic className="w-8 h-8 text-white/30" />
             </div>
             <h2 className="text-2xl font-semibold text-white/90">Listening...</h2>
-            <p className="text-sm text-white/40">Speak now — Groq Whisper will transcribe your voice</p>
+            <p className="text-sm text-white/40">Speak now — tap the arrow when you're done</p>
           </div>
         )}
 
-        {!transcript && isTranscribing && (
+        {isTranscribing && (
           <div className="text-center space-y-3">
             <Loader2 className="w-10 h-10 text-white/30 animate-spin mx-auto" />
-            <p className="text-sm text-white/40">Transcribing with Groq Whisper...</p>
-          </div>
-        )}
-
-        {transcript && (
-          <div className="w-full max-w-lg">
-            <p className="text-xl text-white/90 text-center leading-relaxed font-light">
-              {transcript}
-              {isTranscribing && (
-                <span className="inline-block w-0.5 h-5 bg-white/50 ml-1 animate-pulse align-middle" />
-              )}
-            </p>
+            <p className="text-sm text-white/40">Weatherza AI is processing your voice...</p>
           </div>
         )}
       </div>
 
-      {/* Bottom section - centered with more padding from bottom */}
+      {/* Bottom section */}
       <div className="px-6 pb-16 space-y-6">
         {/* Waveform visualizer */}
         <div className="flex items-center justify-center gap-[2px] h-10 mx-auto max-w-sm w-full">
@@ -345,7 +264,7 @@ export const VoiceOverlay = ({
           ))}
         </div>
 
-        {/* Action buttons - centered with more vertical space */}
+        {/* Action buttons */}
         <div className="flex items-center justify-center gap-6">
           <button
             onClick={handleClose}
@@ -356,15 +275,12 @@ export const VoiceOverlay = ({
           </button>
 
           <button
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
+            onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
             onClick={handleSend}
             disabled={isTranscribing}
             style={{ pointerEvents: "all", touchAction: "manipulation" }}
             className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-              transcript || isRecording
+              isRecording
                 ? "bg-white hover:bg-white/90 shadow-lg shadow-white/20 scale-100 cursor-pointer"
                 : "bg-white/20 scale-95 cursor-not-allowed"
             }`}
@@ -373,7 +289,7 @@ export const VoiceOverlay = ({
             {isTranscribing ? (
               <Loader2 className="w-7 h-7 text-black animate-spin" />
             ) : (
-              <ChevronUp className={`w-7 h-7 ${transcript || isRecording ? "text-black" : "text-white/40"}`} />
+              <ChevronUp className={`w-7 h-7 ${isRecording ? "text-black" : "text-white/40"}`} />
             )}
           </button>
         </div>
