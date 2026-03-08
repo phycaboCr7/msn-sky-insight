@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { WeatherData, getForecastWeather, getLocationFromCoords } from "@/lib/weather";
 import { CurrentWeather } from "@/components/CurrentWeather";
 import { SearchLocation } from "@/components/SearchLocation";
