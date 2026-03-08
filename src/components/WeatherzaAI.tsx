@@ -738,9 +738,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Voice refs removed — now using Groq Whisper via MediaRecorder in VoiceOverlay
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom — debounced to prevent shaking during streaming
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 150);
+    return () => { if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current); };
   }, [messages]);
 
   // Extract text from PDF using pdfjs-dist
