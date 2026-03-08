@@ -40,6 +40,48 @@ interface Message {
 let msgIdCounter = 0;
 const genMsgId = () => `msg-${Date.now()}-${++msgIdCounter}`;
 
+// Separate background component for WeatherzaAI
+const AIBackground = ({ weather }: { weather: WeatherData }) => {
+  const [bgImage, setBgImage] = useState<string>('');
+
+  useEffect(() => {
+    const fetchBg = async () => {
+      try {
+        const queries = ['abstract technology dark', 'futuristic space nebula', 'dark galaxy stars cosmos', 'aurora borealis night sky'];
+        const query = queries[Math.floor(Math.random() * queries.length)];
+        const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
+          body: { query, category: 'science', min_width: 1280, per_page: 20, image_type: 'photo', editors_choice: true },
+        });
+        if (!error && data?.hits?.length > 0) {
+          const idx = Math.floor(Math.random() * Math.min(data.hits.length, 10));
+          const url = data.hits[idx].largeImageURL || data.hits[idx].webformatURL;
+          const img = new Image();
+          img.onload = () => setBgImage(url);
+          img.src = url;
+        }
+      } catch (e) {
+        console.error('AIBackground fetch error:', e);
+      }
+    };
+    fetchBg();
+  }, [weather.location.name]);
+
+  if (!bgImage) return null;
+
+  return (
+    <div
+      className="absolute inset-0 z-0 transition-opacity duration-1000"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        opacity: 0.25,
+        filter: 'brightness(0.6)',
+      }}
+    />
+  );
+};
+
 // Calculate actual AQI from PM2.5
 const calculateAQI = (pm25: number): number => {
   const breakpoints = [
