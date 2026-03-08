@@ -75,7 +75,7 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
     }, 1500);
 
     return () => clearTimeout(timeoutId);
-  }, [weather?.current.condition.text]);
+  }, [weather?.current.condition.text, weather?.current.is_day]);
 
   if (!backgroundImage) return null;
 
