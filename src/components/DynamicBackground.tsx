@@ -6,7 +6,23 @@ interface DynamicBackgroundProps {
   weather: WeatherData | null;
 }
 
-const getWeatherKeywords = (condition: string) => {
+const getWeatherKeywords = (condition: string, isDay: boolean) => {
+  if (!isDay) {
+    const lowerCondition = condition.toLowerCase();
+    if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) {
+      return 'rainy night city lights dark sky';
+    } else if (lowerCondition.includes('storm') || lowerCondition.includes('thunder')) {
+      return 'thunderstorm night lightning dark dramatic sky';
+    } else if (lowerCondition.includes('snow')) {
+      return 'snowy night winter dark sky stars';
+    } else if (lowerCondition.includes('cloud')) {
+      return 'cloudy night sky dark moody';
+    } else if (lowerCondition.includes('fog') || lowerCondition.includes('mist')) {
+      return 'foggy night dark mysterious';
+    }
+    return 'night sky stars dark blue cosmos starry';
+  }
+
   const lowerCondition = condition.toLowerCase();
   
   if (lowerCondition.includes('sunny') || lowerCondition.includes('clear')) {
@@ -38,7 +54,8 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
     const timeoutId = setTimeout(async () => {
       setLoading(true);
       try {
-        const keywords = getWeatherKeywords(weather.current.condition.text);
+        const isDay = weather.current.is_day === 1;
+        const keywords = getWeatherKeywords(weather.current.condition.text, isDay);
         const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
           body: { query: keywords, category: 'nature', min_width: 1920, per_page: 20, image_type: 'photo', editors_choice: true },
         });
@@ -58,7 +75,7 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
     }, 1500);
 
     return () => clearTimeout(timeoutId);
-  }, [weather?.current.condition.text]);
+  }, [weather?.current.condition.text, weather?.current.is_day]);
 
   if (!backgroundImage) return null;
 
