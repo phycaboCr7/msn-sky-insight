@@ -158,67 +158,43 @@ const CodeBlock = ({
   };
 
   const handleRun = () => {
-    // Create a popup window for code execution
     const popupWidth = 1000;
     const popupHeight = 700;
     const left = (window.screen.width - popupWidth) / 2;
     const top = (window.screen.height - popupHeight) / 2;
 
     if (lang === "html") {
-      // For HTML, open directly in new window
       const htmlContent = children;
       const blob = new Blob([htmlContent], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`);
     } else {
-      // For other languages, open interpreter in new tab
-      const codeData = encodeURIComponent(JSON.stringify({ code: editableCode, language: lang }));
-      const interpreterHtml = `
-<!DOCTYPE html>
+      // Use Pyodide (in-browser Python) for Python, or show code for other langs
+      const isPython = lang === 'python' || lang === 'py';
+      const interpreterHtml = `<!DOCTYPE html>
 <html>
 <head>
   <title>${lang.toUpperCase()} Interpreter</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: 'Monaco', 'Menlo', monospace; 
-      background: #1a1a2e; 
-      color: #eee; 
-      height: 100vh; 
-      display: flex; 
-      flex-direction: column;
-    }
-    .header {
-      background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2));
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    body { font-family: 'Monaco', 'Menlo', 'Consolas', monospace; background: #1a1a2e; color: #eee; height: 100vh; display: flex; flex-direction: column; }
+    .header { background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.2)); padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; }
     .header h1 { font-size: 16px; font-weight: 600; }
-    .output {
-      flex: 1;
-      overflow: auto;
-      padding: 16px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
+    .output { flex: 1; overflow: auto; padding: 16px; font-size: 14px; line-height: 1.6; }
     .input-line { color: #00d4ff; }
     .output-line { color: #86efac; }
     .error-line { color: #f87171; }
     .info-line { color: #888; font-style: italic; }
     .prompt { color: #facc15; }
-    .footer {
-      background: rgba(0,0,0,0.3);
-      padding: 8px 16px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      font-size: 12px;
-      color: #888;
-    }
-    pre { white-space: pre-wrap; word-wrap: break-word; }
+    .footer { background: rgba(0,0,0,0.3); padding: 8px 16px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: #888; display: flex; justify-content: space-between; }
+    pre { white-space: pre-wrap; word-wrap: break-word; margin: 0; }
     .loading { color: #facc15; animation: pulse 1s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .image-container { margin: 16px 0; text-align: center; }
+    .image-container img { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .input-form { display: flex; padding: 8px 16px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); }
+    .input-form input { flex: 1; background: transparent; border: none; color: #00d4ff; font-family: inherit; font-size: 14px; outline: none; }
+    .input-form .prompt-label { color: #facc15; margin-right: 4px; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -228,38 +204,138 @@ const CodeBlock = ({
     <span id="status"></span>
   </div>
   <div class="output" id="output">
-    <div class="info-line">🐍 ${lang.toUpperCase()} Interactive Shell</div>
-    <div class="info-line">Running code...</div>
-    <div class="input-line"><span class="prompt">&gt;&gt;&gt; </span><pre style="display:inline">${editableCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
-    <div class="loading" id="loading">⏳ Executing...</div>
+    <div class="info-line">🐍 PYTHON Interactive Shell</div>
+    <div class="loading" id="loading">⏳ Loading Python engine (Pyodide)...</div>
   </div>
-  <div class="footer">Press Ctrl+W to close • Powered by Piston API</div>
+  ${isPython ? '<div class="input-form" id="inputForm" style="display:none"><span class="prompt-label">&gt;&gt;&gt; </span><input type="text" id="cmdInput" placeholder="Type code here..." autocomplete="off" /></div>' : ''}
+  <div class="footer">
+    <span>Press Enter to execute · ↑↓ for history · 📊 Matplotlib generates inline plots</span>
+    <span style="color: rgba(34,197,94,0.7)">⚡ Powered by Pyodide (In-Browser Python)</span>
+  </div>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"><\/script>
   <script>
+    const output = document.getElementById('output');
+    const loading = document.getElementById('loading');
+    const cmdHistory = [];
+    let histIdx = -1;
+
+    function addLine(text, cls) {
+      const d = document.createElement('div');
+      d.className = cls;
+      if (cls === 'input-line') {
+        d.innerHTML = '<span class="prompt">&gt;&gt;&gt; </span><pre style="display:inline">' + escHtml(text) + '</pre>';
+      } else {
+        const pre = document.createElement('pre');
+        pre.textContent = text;
+        d.appendChild(pre);
+      }
+      output.appendChild(d);
+      output.scrollTop = output.scrollHeight;
+    }
+    function addImage(base64) {
+      const d = document.createElement('div');
+      d.className = 'image-container';
+      d.innerHTML = '<img src="data:image/png;base64,' + base64 + '" />';
+      output.appendChild(d);
+      output.scrollTop = output.scrollHeight;
+    }
+    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
     (async function() {
-      const output = document.getElementById('output');
-      const loading = document.getElementById('loading');
       try {
-        const response = await fetch('https://znkvwgwijwmeapcyjpgu.supabase.co/functions/v1/execute-code', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpua3Z3Z3dpandtZWFwY3lqcGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2MDc1NjIsImV4cCI6MjA4MTE4MzU2Mn0.wvFfzKNl5EQzCbzX8_xQdS6cinh7gGNEcaFfPzB8ags'
-          },
-          body: JSON.stringify({ code: ${JSON.stringify(editableCode)}, language: '${lang}' })
-        });
-        const data = await response.json();
+        const pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
+        loading.textContent = '📦 Loading packages (numpy, matplotlib)...';
+        await pyodide.loadPackage(['numpy', 'matplotlib', 'scipy', 'sympy']);
+        await pyodide.runPythonAsync(\`
+import matplotlib
+matplotlib.use('AGG')
+import matplotlib.pyplot as plt
+import io, base64
+
+def get_plot_as_base64():
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', facecolor='#1a1a2e', edgecolor='none', pad_inches=0.1)
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode()
+    plt.close('all')
+    return img_str
+\`);
         loading.remove();
-        if (data.error) {
-          output.innerHTML += '<div class="error-line">❌ ' + data.error + '</div>';
-        } else {
-          output.innerHTML += '<div class="' + (data.hasError ? 'error-line' : 'output-line') + '">' + (data.output || '(no output)').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+        addLine('✅ Python engine ready! NumPy, Matplotlib, SciPy, SymPy loaded.', 'info-line');
+
+        window._pyodide = pyodide;
+
+        // Run initial code
+        const initialCode = ${JSON.stringify(editableCode)};
+        if (initialCode) {
+          addLine(initialCode, 'input-line');
+          await runCode(pyodide, initialCode);
+        }
+
+        // Show input form
+        const form = document.getElementById('inputForm');
+        const inp = document.getElementById('cmdInput');
+        if (form && inp) {
+          form.style.display = 'flex';
+          inp.focus();
+          inp.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' && inp.value.trim()) {
+              const code = inp.value.trim();
+              cmdHistory.push(code);
+              histIdx = -1;
+              inp.value = '';
+              addLine(code, 'input-line');
+              await runCode(pyodide, code);
+              inp.focus();
+            } else if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              if (cmdHistory.length > 0) {
+                histIdx = Math.min(histIdx + 1, cmdHistory.length - 1);
+                inp.value = cmdHistory[cmdHistory.length - 1 - histIdx] || '';
+              }
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              if (histIdx > 0) { histIdx--; inp.value = cmdHistory[cmdHistory.length - 1 - histIdx] || ''; }
+              else { histIdx = -1; inp.value = ''; }
+            }
+          });
         }
       } catch (e) {
         loading.remove();
-        output.innerHTML += '<div class="error-line">❌ ' + e.message + '</div>';
+        addLine('❌ Failed to load Python: ' + e.message, 'error-line');
       }
     })();
-  </script>
+
+    async function runCode(pyodide, code) {
+      try {
+        // Clean markdown artifacts
+        code = code.replace(/\\*\\*(\\d+(?:\\.\\d+)?)\\*\\*/g, '$1');
+        const hasPlot = /plt\\.(show|savefig|plot|bar|scatter|hist|pie|contour|imshow|figure)|\\. plot\\(|\\. bar\\(/.test(code);
+        
+        await pyodide.runPythonAsync('import sys; from io import StringIO; _sc = StringIO(); sys.stdout = _sc');
+        
+        let execCode = code;
+        if (hasPlot) {
+          execCode = execCode.replace(/plt\\.show\\(\\)/g, '');
+          execCode += '\\n_plot_img = get_plot_as_base64()';
+        }
+        
+        await pyodide.runPythonAsync(execCode);
+        const stdout = await pyodide.runPythonAsync('sys.stdout = sys.__stdout__; _sc.getvalue()');
+        
+        if (stdout && stdout.trim()) addLine(stdout.trim(), 'output-line');
+        
+        if (hasPlot) {
+          const img = await pyodide.runPythonAsync("_plot_img if '_plot_img' in dir() else None");
+          if (img) addImage(img);
+        }
+        
+        if (!stdout?.trim() && !hasPlot) addLine('(executed)', 'info-line');
+      } catch (e) {
+        addLine('❌ ' + (e.message || String(e)).replace(/PythonError: /g, ''), 'error-line');
+      }
+    }
+  <\/script>
 </body>
 </html>`;
       const blob = new Blob([interpreterHtml], { type: 'text/html' });
