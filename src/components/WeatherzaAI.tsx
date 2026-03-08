@@ -1696,7 +1696,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               <Send className="w-4 h-4" />
             </button>
           )}
-        </div>
+        </div>{/* close inner input bar */}
+        </div>{/* close glow wrapper */}
 
         {/* Voice Overlay */}
         <VoiceOverlay
