@@ -38,7 +38,7 @@ export const AnimatedWeatherIcon = ({
   const weatherType = getWeatherType();
 
   return (
-    <div className={cn("forecast-icon", sizeClasses[size], className)}>
+    <div className={cn("forecast-icon overflow-visible flex items-center justify-center", sizeClasses[size], className)}>
       {weatherType === "sunny" && <SunnyIcon size={size} />}
       {weatherType === "night" && <NightIcon size={size} />}
       {weatherType === "cloudy" && <CloudyIcon size={size} />}

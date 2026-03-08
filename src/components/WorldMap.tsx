@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, Thermometer, Wind, Cloud, Droplets, Loader2, MapPin } from "lucide-react";
+import { Globe, Thermometer, Wind, Cloud, Droplets, Loader2, MapPin, Sun, Moon } from "lucide-react";
 import { WeatherData } from "@/lib/weather";
 
 interface WorldMapProps {
@@ -69,6 +69,7 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
   const [activeLayer, setActiveLayer] = useState<MapLayer>('temperature');
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMap, setIsDarkMap] = useState(true);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -111,20 +112,29 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
     return () => { map.current?.remove(); };
   }, [weather.location.lat, weather.location.lon, weather.location.name, weather.current.temp_c, weather.current.condition.text]);
 
+  const addMarkerToMap = (color: string) => {
+    if (!map.current) return;
+    const { lat, lon } = weather.location;
+    const marker = new maplibregl.Marker({ element: createMarkerElement(color), anchor: 'center' })
+      .setLngLat([lon, lat])
+      .setPopup(createPopup(weather))
+      .addTo(map.current);
+    marker.togglePopup();
+  };
+
   const handleLayerChange = (layer: MapLayer) => {
     setActiveLayer(layer);
     if (!map.current || !isMapLoaded) return;
+    map.current.once('style.load', () => addMarkerToMap(LAYER_CONFIG[layer].color));
+    map.current.setStyle(isDarkMap ? MAP_STYLES.dark : MAP_STYLES.liberty);
+  };
 
-    map.current.once('style.load', () => {
-      const { lat, lon } = weather.location;
-      const marker = new maplibregl.Marker({ element: createMarkerElement(LAYER_CONFIG[layer].color), anchor: 'center' })
-        .setLngLat([lon, lat])
-        .setPopup(createPopup(weather))
-        .addTo(map.current!);
-      marker.togglePopup();
-    });
-
-    map.current.setStyle(MAP_STYLES.dark);
+  const toggleMapTheme = () => {
+    const newDark = !isDarkMap;
+    setIsDarkMap(newDark);
+    if (!map.current || !isMapLoaded) return;
+    map.current.once('style.load', () => addMarkerToMap(LAYER_CONFIG[activeLayer].color));
+    map.current.setStyle(newDark ? MAP_STYLES.dark : MAP_STYLES.liberty);
   };
 
   return (
@@ -167,6 +177,15 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
             </div>
           )}
           <div ref={mapContainer} className="w-full h-full" />
+          
+          {/* Dark/Light toggle */}
+          <button
+            onClick={toggleMapTheme}
+            className="absolute top-3 left-3 z-10 bg-black/70 backdrop-blur-md p-2 rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300"
+            title={isDarkMap ? 'Switch to light map' : 'Switch to dark map'}
+          >
+            {isDarkMap ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-blue-400" />}
+          </button>
           
           {/* Active layer badge */}
           <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md px-3 py-2 rounded-xl text-xs border border-white/10 flex items-center gap-2">

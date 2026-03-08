@@ -59,7 +59,7 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
               </div>
 
               {/* Weather icon - constrained with overflow-hidden */}
-              <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center overflow-hidden">
+              <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center overflow-visible">
                 <AnimatedWeatherIcon
                   condition={day.day.condition.text}
                   isDay={true}
@@ -80,22 +80,22 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
               </div>
 
               {/* Temperature bar */}
-              <div className="hidden sm:flex items-center gap-2 w-32">
-                <span className="text-[10px] text-blue-400 w-7 text-right font-semibold" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+              <div className="hidden sm:flex items-center gap-2 w-36">
+                <span className="text-[11px] text-blue-400 w-8 text-right font-semibold" style={{ fontFamily: "'Bodoni Moda', serif" }}>
                   {Math.round(day.day.mintemp_c)}°
                 </span>
-                <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden relative">
+                <div className="flex-1 h-[6px] bg-white/10 rounded-full overflow-hidden relative">
                   <div
-                    className="absolute h-full rounded-full transition-all duration-500"
+                    className="absolute h-full rounded-full transition-all duration-700"
                     style={{
                       left: `${lowPct}%`,
-                      width: `${Math.max(highPct - lowPct, 10)}%`,
-                      background: `linear-gradient(90deg, hsl(215 80% 60%), hsl(30 90% 55%), hsl(15 90% 55%))`,
-                      minWidth: '12px',
+                      right: `${100 - highPct}%`,
+                      background: `linear-gradient(90deg, hsl(215 80% 60%), hsl(35 95% 55%), hsl(15 90% 55%))`,
+                      minWidth: '20%',
                     }}
                   />
                 </div>
-                <span className="text-[10px] text-orange-400 w-7 font-semibold" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+                <span className="text-[11px] text-orange-400 w-8 font-semibold" style={{ fontFamily: "'Bodoni Moda', serif" }}>
                   {Math.round(day.day.maxtemp_c)}°
                 </span>
               </div>
