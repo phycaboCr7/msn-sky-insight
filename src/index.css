@@ -815,6 +815,14 @@ All colors MUST be HSL.
   100% { transform: translateY(180px) rotate(360deg); opacity: 0; }
 }
 
+@keyframes cwSnowFallSpin {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.9; }
+  25% { transform: translateY(50px) rotate(120deg) translateX(8px) scale(0.9); opacity: 0.8; }
+  50% { transform: translateY(100px) rotate(240deg) translateX(-6px) scale(1.1); opacity: 0.7; }
+  75% { transform: translateY(150px) rotate(300deg) translateX(4px) scale(0.95); opacity: 0.4; }
+  100% { transform: translateY(220px) rotate(420deg) scale(0.8); opacity: 0; }
+}
+
 @keyframes cwThunderFlash {
   0%, 90%, 100% { opacity: 0; }
   92% { opacity: 0.8; }
@@ -863,4 +871,18 @@ All colors MUST be HSL.
 @keyframes glow-rotate {
   from { --glow-angle: 0deg; }
   to { --glow-angle: 360deg; }
+}
+
+/* MapLibre popup — remove default white box and arrow */
+.maplibregl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: rgba(0,0,0,0.85) !important;
+  border-bottom-color: rgba(0,0,0,0.85) !important;
 }

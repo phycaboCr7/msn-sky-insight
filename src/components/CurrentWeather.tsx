@@ -27,12 +27,12 @@ const WeatherParticles = ({ condition, isDay, temp }: { condition: string; isDay
       }));
     }
     if (isSnow) {
-      return Array.from({ length: 15 }, (_, i) => ({
+      return Array.from({ length: 20 }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
-        delay: `${Math.random() * 3}s`,
-        duration: `${2 + Math.random() * 2}s`,
-        size: `${3 + Math.random() * 5}px`,
+        delay: `${Math.random() * 4}s`,
+        duration: `${3 + Math.random() * 3}s`,
+        size: `${14 + Math.random() * 14}px`,
       }));
     }
     return [];
@@ -90,15 +90,14 @@ const WeatherParticles = ({ condition, isDay, temp }: { condition: string; isDay
         />
       )}
       {isSnow && particles.map((p) => (
-        <div key={p.id} className="absolute" style={{ left: p.left, top: '-10px' }}>
-          {/* Snowflake shape */}
+        <div key={p.id} className="absolute" style={{ left: p.left, top: '-20px' }}>
           <div
-            className="text-white/70"
+            className="text-white/80"
             style={{
-              fontSize: p.size || '8px',
-              animation: `cwSnowFall ${p.duration} linear infinite`,
+              fontSize: p.size || '18px',
+              animation: `cwSnowFallSpin ${p.duration} linear infinite`,
               animationDelay: p.delay,
-              filter: 'drop-shadow(0 0 4px hsl(210 80% 90% / 0.6))',
+              filter: 'drop-shadow(0 0 6px hsl(210 80% 95% / 0.8))',
             }}
           >
             ❄
