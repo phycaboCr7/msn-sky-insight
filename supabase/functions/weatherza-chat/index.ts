@@ -297,7 +297,23 @@ You have access to the full conversation history. Reference previous messages na
       });
     }
 
-    // For text queries: use Groq Qwen model with STREAMING
+    // Detect if the query is coding-related
+    const lastUserMsg = messages.filter((m: any) => m.role === "user").pop()?.content?.toLowerCase() || "";
+    const codingKeywords = [
+      "code", "coding", "program", "function", "algorithm", "debug", "error", "bug",
+      "javascript", "python", "java", "c++", "typescript", "rust", "golang", "swift",
+      "html", "css", "react", "node", "api", "database", "sql", "compile", "runtime",
+      "class", "object", "array", "loop", "variable", "syntax", "import", "export",
+      "async", "await", "promise", "callback", "recursion", "sorting", "binary",
+      "stack", "queue", "linked list", "tree", "graph", "hash", "regex",
+      "write a", "build a", "create a", "implement", "develop", "fix this",
+      "refactor", "optimize", "script", "snippet", "library", "framework",
+      "frontend", "backend", "fullstack", "deploy", "docker", "git",
+      "leetcode", "dsa", "data structure", "competitive programming",
+    ];
+    const isCodingTask = codingKeywords.some(kw => lastUserMsg.includes(kw));
+
+    // For text queries: build messages
     const aiMessages = [
       { role: "system", content: systemPrompt },
       ...messages.slice(-8).map((msg: any) => ({
@@ -306,6 +322,49 @@ You have access to the full conversation history. Reference previous messages na
       })),
     ];
 
+    // Route coding tasks to Lovable AI (Gemini 2.5 Pro) for superior code generation
+    if (isCodingTask) {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (LOVABLE_API_KEY) {
+        console.log("Coding task detected — routing to Gemini 2.5 Pro via Lovable AI");
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-pro",
+            messages: aiMessages,
+            stream: true,
+          }),
+        });
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+              status: 429,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          if (response.status === 402) {
+            return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
+              status: 402,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          const t = await response.text();
+          console.error("Lovable AI error:", response.status, t);
+          // Fall through to Groq as fallback
+        } else {
+          return new Response(response.body, {
+            headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+          });
+        }
+      }
+    }
+
+    // Default: use Groq Llama for general queries (ultra-low latency)
     // Retry logic for rate limits
     const maxRetries = 3;
     let response: Response | null = null;
@@ -329,7 +388,7 @@ You have access to the full conversation history. Reference previous messages na
         const retryAfter = response.headers.get("retry-after");
         const delay = retryAfter ? Math.min(parseInt(retryAfter) * 1000, 10000) : (attempt + 1) * 2000;
         console.log(`Rate limited, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`);
-        await response.text(); // consume body
+        await response.text();
         await new Promise(r => setTimeout(r, delay));
         continue;
       }
