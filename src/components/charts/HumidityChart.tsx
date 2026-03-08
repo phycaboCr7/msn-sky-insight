@@ -75,15 +75,15 @@ export const HumidityChart = ({ weather }: HumidityChartProps) => {
 
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={humidityData} barCategoryGap="20%">
+          <ComposedChart data={humidityData} barCategoryGap="25%" barGap={2}>
             <defs>
               <linearGradient id="humGrad2" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="hsl(215 80% 55%)" stopOpacity={0.85}/>
                 <stop offset="100%" stopColor="hsl(215 80% 55%)" stopOpacity={0.2}/>
               </linearGradient>
-              <linearGradient id="rainAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(185 80% 55%)" stopOpacity={0.3}/>
-                <stop offset="100%" stopColor="hsl(185 80% 55%)" stopOpacity={0}/>
+              <linearGradient id="rainBarGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(185 80% 55%)" stopOpacity={0.9}/>
+                <stop offset="100%" stopColor="hsl(185 80% 55%)" stopOpacity={0.25}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 20% 18%)" vertical={false} />
@@ -106,16 +106,14 @@ export const HumidityChart = ({ weather }: HumidityChartProps) => {
               fill="url(#humGrad2)"
               radius={[6, 6, 0, 0]}
               name="Humidity"
-              maxBarSize={32}
+              maxBarSize={28}
             />
-            <Area
-              type="monotone"
-              dataKey="rain"
-              stroke="hsl(185 80% 55%)"
-              strokeWidth={2}
-              fill="url(#rainAreaGrad)"
+            <Bar 
+              dataKey="rain" 
+              fill="url(#rainBarGrad)"
+              radius={[6, 6, 0, 0]}
               name="Rain Chance"
-              dot={{ fill: 'hsl(185 80% 55%)', r: 3, strokeWidth: 0 }}
+              maxBarSize={28}
             />
           </ComposedChart>
         </ResponsiveContainer>
