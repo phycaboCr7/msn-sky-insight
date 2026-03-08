@@ -1247,6 +1247,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   const clearChat = () => {
     setMessages([]);
+    localStorage.removeItem('weatherza-chat-history');
     toast({
       title: "Chat Cleared",
       description: "Started a fresh conversation.",
