@@ -11,9 +11,6 @@ const getLocationKeywords = (location: string, region: string, country: string) 
   return `${location} ${region} ${country} landmark cityscape`;
 };
 
-const getLocCacheKey = (name: string, region: string, country: string) =>
-  `weatherza_loc_${name}_${region}_${country}`.replace(/\s+/g, '_').toLowerCase();
-
 export const LocationBackground = ({ weather, className = "" }: LocationBackgroundProps) => {
   const [locationImage, setLocationImage] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -21,19 +18,14 @@ export const LocationBackground = ({ weather, className = "" }: LocationBackgrou
   useEffect(() => {
     if (!weather) return;
 
-    const { name, region, country } = weather.location;
-    const cacheKey = getLocCacheKey(name, region, country);
-    
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      setLocationImage(cached);
-      return;
-    }
-
     const fetchLocationImage = async () => {
       setLoading(true);
       try {
-        const keywords = getLocationKeywords(name, region, country);
+        const keywords = getLocationKeywords(
+          weather.location.name, 
+          weather.location.region, 
+          weather.location.country
+        );
         
         const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
           body: { query: keywords, category: 'places', min_width: 800, per_page: 20 },
@@ -43,7 +35,6 @@ export const LocationBackground = ({ weather, className = "" }: LocationBackgrou
           const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 10));
           const imageUrl = data.hits[randomIndex].largeImageURL || data.hits[randomIndex].webformatURL;
           setLocationImage(imageUrl);
-          try { sessionStorage.setItem(cacheKey, imageUrl); } catch {}
         }
       } catch (error) {
         console.error('Error fetching location image:', error);

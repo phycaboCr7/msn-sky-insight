@@ -8,34 +8,6 @@ interface WeatherCardProps {
   variant?: "default" | "glass" | "highlighted";
 }
 
-// Shared parallax manager — single RAF loop for all cards
-const parallaxCards = new Set<{ el: HTMLElement; setY: (y: number) => void }>();
-let rafId: number | null = null;
-
-const runParallax = () => {
-  const wh = window.innerHeight;
-  parallaxCards.forEach(({ el, setY }) => {
-    const rect = el.getBoundingClientRect();
-    const center = rect.top + rect.height / 2;
-    const dist = (wh / 2 - center) / wh;
-    setY(dist * 15);
-  });
-  rafId = requestAnimationFrame(runParallax);
-};
-
-const startParallax = () => {
-  if (rafId === null && parallaxCards.size > 0) {
-    rafId = requestAnimationFrame(runParallax);
-  }
-};
-
-const stopParallax = () => {
-  if (rafId !== null && parallaxCards.size === 0) {
-    cancelAnimationFrame(rafId);
-    rafId = null;
-  }
-};
-
 export const WeatherCard = ({ children, className, variant = "default" }: WeatherCardProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [parallaxY, setParallaxY] = useState(0);
@@ -43,25 +15,37 @@ export const WeatherCard = ({ children, className, variant = "default" }: Weathe
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        // Only set visible when entering viewport
+        setIsVisible(entry.isIntersecting);
+      },
       { threshold: 0.3 }
     );
-    if (cardRef.current) observer.observe(cardRef.current);
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
     return () => observer.disconnect();
   }, []);
 
-  // Register with shared parallax manager
+  // Subtle parallax effect on scroll
   useEffect(() => {
-    if (!cardRef.current) return;
-    const entry = { el: cardRef.current, setY: setParallaxY };
-    parallaxCards.add(entry);
-    startParallax();
-    return () => {
-      parallaxCards.delete(entry);
-      stopParallax();
+    const handleScroll = () => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const cardCenter = rect.top + rect.height / 2;
+      const distanceFromCenter = (windowHeight / 2 - cardCenter) / windowHeight;
+      setParallaxY(distanceFromCenter * 15);
     };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Solid when visible, glass when not
   const visibleStyles = "bg-black/45 backdrop-blur-xl border-white/20 shadow-xl";
   const glassStyles = "bg-white/5 backdrop-blur-lg border-white/10 shadow-md";
 

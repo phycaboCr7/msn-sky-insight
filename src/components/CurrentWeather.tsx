@@ -4,7 +4,6 @@ import { AnimatedWeatherIcon } from "./AnimatedWeatherIcon";
 import { WeatherData, AirQuality } from "@/lib/weather";
 import { getFlagUrl } from "@/lib/utils";
 import { Wind } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 
 interface CurrentWeatherProps {
   weather: WeatherData;
@@ -54,50 +53,18 @@ const MiniAQIBox = ({ airQuality }: { airQuality: AirQuality }) => {
   );
 };
 
-// Animated counter hook
-const useAnimatedNumber = (target: number, duration = 600) => {
-  const [display, setDisplay] = useState(target);
-  const prevRef = useRef(target);
-  const rafRef = useRef<number>();
-
-  useEffect(() => {
-    const from = prevRef.current;
-    const to = target;
-    prevRef.current = target;
-    
-    if (from === to) return;
-    
-    const start = performance.now();
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(from + (to - from) * eased));
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(animate);
-      }
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [target, duration]);
-
-  return display;
-};
-
 // Format temperature to always show minus sign properly
 const formatTemp = (temp: number): string => {
-  if (temp < 0) {
-    return `−${Math.abs(temp)}`;  // Use proper minus sign (−) not hyphen (-)
+  const rounded = Math.round(temp);
+  if (rounded < 0) {
+    return `−${Math.abs(rounded)}`;  // Use proper minus sign (−) not hyphen (-)
   }
-  return `${temp}`;
+  return `${rounded}`;
 };
 
 export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
   const { current, location } = weather;
   const isDay = current.is_day === 1;
-  const animatedTemp = useAnimatedNumber(Math.round(current.temp_c));
-  const animatedFeels = useAnimatedNumber(Math.round(current.feelslike_c));
   
   return (
     <WeatherCard className="p-4 sm:p-6 lg:p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
@@ -122,8 +89,8 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
             />
           </div>
           <div className="space-y-1 sm:space-y-2">
-            <div className="text-5xl sm:text-7xl lg:text-9xl text-foreground animate-count whitespace-nowrap" style={{ fontFamily: "'Bodoni Moda', 'Playfair Display', Georgia, serif", fontWeight: 600, letterSpacing: '-0.02em' }} key={Math.round(current.temp_c)}>
-              {formatTemp(animatedTemp)}°
+            <div className="text-5xl sm:text-7xl lg:text-9xl text-foreground animate-scale-in whitespace-nowrap" style={{ fontFamily: "'Bodoni Moda', 'Playfair Display', Georgia, serif", fontWeight: 600, letterSpacing: '-0.02em' }}>
+              {formatTemp(current.temp_c)}°
             </div>
             <div className="text-base sm:text-xl text-muted-foreground animate-slide-up">
               {current.condition.text}
@@ -148,7 +115,7 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
             <div className="bg-white/5 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-2 border border-white/10">
               <div className="text-xs sm:text-sm text-muted-foreground">Feels like</div>
               <div className="text-lg sm:text-xl font-semibold text-primary whitespace-nowrap" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
-                {formatTemp(animatedFeels)}°
+                {formatTemp(current.feelslike_c)}°
               </div>
             </div>
             {current.air_quality && (

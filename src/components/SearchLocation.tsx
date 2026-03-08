@@ -24,7 +24,6 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
   const [suggestions, setSuggestions] = useState<Place[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -101,29 +100,29 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
 
   return (
     <div className="col-span-full relative" ref={containerRef}>
-      <WeatherCard className="p-4 sm:p-6 relative overflow-visible">
+      <WeatherCard className="p-6 relative overflow-visible">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer pointer-events-none rounded-lg" 
              style={{ backgroundSize: '200% 100%' }} />
         
-        <div className="relative z-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <div className="relative z-10 flex flex-col sm:flex-row gap-4">
           <form onSubmit={handleSubmit} className="flex-1 flex gap-2">
-            <div className={`relative flex-1 group rounded-full transition-all duration-300 search-inner-glow ${isFocused ? 'ring-1 ring-primary/30' : ''}`}>
-              <Search className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors duration-300 z-10 ${!isFocused && !searchQuery ? 'animate-search-bounce' : ''}`} size={18} />
+            <div className="relative flex-1 group">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors duration-300 z-10" size={18} />
               <Input
                 type="text"
                 placeholder="Search for a city or location..."
                 value={searchQuery}
                 onChange={handleInputChange}
-                onFocus={() => { setIsFocused(true); suggestions.length > 0 && setShowSuggestions(true); }}
-                onBlur={() => setIsFocused(false)}
-                className="pl-11 pr-4 bg-white/5 backdrop-blur-sm border-white/15 focus:border-primary/40 focus:bg-white/10 transition-all duration-300 text-foreground placeholder:text-muted-foreground rounded-full h-11"
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                className="pl-10 bg-white/5 backdrop-blur-sm border-white/20 focus:border-primary/50 focus:bg-white/10 transition-all duration-300 text-foreground placeholder:text-muted-foreground"
                 disabled={isLoading}
               />
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/10 via-transparent to-primary/10 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
             <Button 
               type="submit" 
               disabled={!searchQuery.trim() || isLoading}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-glow transition-all duration-300 rounded-full h-11 px-5"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg hover:shadow-glow transition-all duration-300"
             >
               {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
             </Button>
@@ -133,7 +132,7 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
             onClick={onCurrentLocation}
             variant="outline"
             disabled={isLoading}
-            className="border-white/15 bg-white/5 hover:bg-white/10 text-foreground hover:text-primary backdrop-blur-sm transition-all duration-300 hover:shadow-lg rounded-full h-11"
+            className="border-white/20 bg-white/5 hover:bg-white/10 text-foreground hover:text-primary backdrop-blur-sm transition-all duration-300 hover:shadow-lg"
           >
             <MapPin size={18} className="mr-2" />
             Current Location
@@ -142,13 +141,13 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
       </WeatherCard>
       
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute left-6 right-6 sm:right-auto sm:w-[calc(100%-250px)] top-full mt-1 bg-gray-900/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl z-[9999] overflow-hidden max-h-80 overflow-y-auto">
+        <div className="absolute left-6 right-6 sm:right-auto sm:w-[calc(100%-250px)] top-full mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-[9999] overflow-hidden max-h-80 overflow-y-auto">
           {suggestions.map((place, index) => (
             <button
               key={`${place.lat}-${place.lon}-${index}`}
               type="button"
               onClick={() => handleSelectPlace(place)}
-              className="w-full px-4 py-3 text-left hover:bg-primary/20 transition-colors duration-200 border-b border-white/5 last:border-b-0"
+              className="w-full px-4 py-3 text-left hover:bg-primary/20 transition-colors duration-200 border-b border-gray-700/50 last:border-b-0"
             >
               <div className="flex flex-col">
                 <span className="font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', serif" }}>

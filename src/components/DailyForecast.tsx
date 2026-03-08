@@ -32,25 +32,11 @@ const getDayName = (dateString: string, index: number) => {
   return date.toLocaleDateString('en-US', { weekday: 'long' });
 };
 
-// Get temperature bar color based on position in global range
-const getTempBarGradient = (min: number, max: number, globalMin: number, globalMax: number) => {
-  const range = globalMax - globalMin || 1;
-  const startPct = ((min - globalMin) / range) * 100;
-  const endPct = ((max - globalMin) / range) * 100;
-  return { startPct, endPct };
-};
-
 export const DailyForecast = ({ weather }: DailyForecastProps) => {
   if (!weather.forecast?.forecastday) return null;
 
   const dailyData = weather.forecast.forecastday;
   const daysCount = dailyData.length;
-  
-  // Calculate global min/max for relative bar sizing
-  const allMins = dailyData.map(d => d.day.mintemp_c);
-  const allMaxs = dailyData.map(d => d.day.maxtemp_c);
-  const globalMin = Math.min(...allMins);
-  const globalMax = Math.max(...allMaxs);
 
   return (
     <WeatherCard className="p-6 col-span-full lg:col-span-1">
@@ -61,9 +47,6 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
         {dailyData.map((day, index) => {
           const dayName = getDayName(day.date, index);
           const isToday = index === 0;
-          const { startPct, endPct } = getTempBarGradient(
-            day.day.mintemp_c, day.day.maxtemp_c, globalMin, globalMax
-          );
           
           return (
             <div
@@ -79,33 +62,23 @@ export const DailyForecast = ({ weather }: DailyForecastProps) => {
                 <div className="flex-shrink-0">
                   {getWeatherIcon(day.day.condition.text, day.day.avgtemp_c)}
                 </div>
-                <div className="flex-1 text-sm text-muted-foreground hidden sm:block" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+                <div className="flex-1 text-sm text-muted-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                   {day.day.condition.text}
                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {day.day.daily_chance_of_rain > 0 && (
                   <div className="text-xs text-blue-400 font-medium">
                     {day.day.daily_chance_of_rain}%
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-right">
-                  <span className="text-sm text-muted-foreground w-8 text-right" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
-                    {Math.round(day.day.mintemp_c)}°
-                  </span>
-                  {/* iOS-style temperature range bar */}
-                  <div className="w-16 sm:w-24 h-[4px] rounded-full bg-white/10 relative overflow-hidden">
-                    <div 
-                      className="absolute top-0 bottom-0 rounded-full temp-range-bar"
-                      style={{
-                        left: `${startPct}%`,
-                        right: `${100 - endPct}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-sm font-semibold text-foreground w-8" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+                  <span className="text-lg font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
                     {Math.round(day.day.maxtemp_c)}°
+                  </span>
+                  <span className="text-muted-foreground" style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+                    {Math.round(day.day.mintemp_c)}°
                   </span>
                 </div>
               </div>
