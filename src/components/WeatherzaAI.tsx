@@ -1477,6 +1477,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={(e) => {
+                e.preventDefault();
+                // Prevent browser from scrolling the page when textarea is focused
+                const scrollY = window.scrollY;
+                requestAnimationFrame(() => {
+                  window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior });
+                });
+              }}
               className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors w-full"
               rows={2}
             />
