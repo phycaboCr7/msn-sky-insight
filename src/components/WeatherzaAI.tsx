@@ -153,7 +153,7 @@ const CodeBlock = ({
 
   const handleOpenPyodide = () => {
     if (onOpenPyodide) {
-      onOpenPyodide(children);
+      onOpenPyodide(editableCode);
     }
   };
 
