@@ -1971,6 +1971,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           selectedFont={chatFont}
           onSelectFont={(font) => { setChatFont(font); setFontPickerOpen(false); }}
         />
+
+        {/* Background Picker Overlay */}
+        <BackgroundPicker
+          isOpen={bgPickerOpen}
+          onClose={() => setBgPickerOpen(false)}
+          currentBg={customBg}
+          onSelectBg={(bg) => { setCustomBg(bg); setBgPickerOpen(false); }}
+        />
       </CardContent>
     </Card>
   );
