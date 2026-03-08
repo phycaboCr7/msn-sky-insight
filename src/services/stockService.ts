@@ -1,4 +1,4 @@
-const API_KEY = "JVRYUE6VGYO01KPO";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface StockQuote {
   symbol: string;
@@ -28,6 +28,14 @@ export interface ChartPoint {
   volume: number;
 }
 
+async function callStockProxy(body: Record<string, unknown>) {
+  const { data, error } = await supabase.functions.invoke("stock-proxy", {
+    body,
+  });
+  if (error) throw new Error(error.message || "Stock proxy error");
+  return data;
+}
+
 // Normalize string for fuzzy matching
 function normalize(str: string): string {
   return str
@@ -38,7 +46,7 @@ function normalize(str: string): string {
     .trim();
 }
 
-// Simple Levenshtein distance for typo tolerance
+// Levenshtein distance for typo tolerance
 function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length;
   const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
@@ -54,36 +62,6 @@ function levenshtein(a: string, b: string): number {
   return dp[m][n];
 }
 
-// Search stocks by keyword with typo tolerance
-export async function searchStocks(keyword: string): Promise<StockSearchResult[]> {
-  const url = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(keyword)}&apikey=${API_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  const matches = data["bestMatches"];
-  if (!matches || !Array.isArray(matches)) return [];
-
-  const results: StockSearchResult[] = matches.slice(0, 10).map((m: any) => ({
-    symbol: m["1. symbol"],
-    name: m["2. name"],
-    type: m["3. type"],
-    region: m["4. region"],
-    currency: m["8. currency"],
-  }));
-
-  // If no results from API, return empty (API handles most fuzzy cases)
-  if (results.length === 0) return [];
-
-  // Sort by relevance: exact > starts-with > contains > fuzzy distance
-  const norm = normalize(keyword);
-  results.sort((a, b) => {
-    const scoreA = matchScore(a, norm);
-    const scoreB = matchScore(b, norm);
-    return scoreA - scoreB;
-  });
-
-  return results;
-}
-
 function matchScore(s: StockSearchResult, norm: string): number {
   const ns = normalize(s.symbol);
   const nn = normalize(s.name);
@@ -93,83 +71,162 @@ function matchScore(s: StockSearchResult, norm: string): number {
   return 3 + Math.min(levenshtein(ns, norm), levenshtein(nn, norm));
 }
 
-export async function getStockQuote(symbol: string): Promise<StockQuote> {
-  const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  const q = data["Global Quote"];
-  if (!q || !q["01. symbol"]) throw new Error("No data found");
+// Search stocks using Eulerpool API
+export async function searchStocks(keyword: string): Promise<StockSearchResult[]> {
+  try {
+    const data = await callStockProxy({ action: "search", symbol: keyword });
 
-  return {
-    symbol: q["01. symbol"],
-    price: parseFloat(q["05. price"]),
-    open: parseFloat(q["02. open"]),
-    high: parseFloat(q["03. high"]),
-    low: parseFloat(q["04. low"]),
-    volume: q["06. volume"],
-    change: parseFloat(q["09. change"]),
-    changePercent: parseFloat(q["10. change percent"]?.replace("%", "") || "0"),
-    previousClose: parseFloat(q["08. previous close"]),
-    latestDay: q["07. latest trading day"],
-    currency: "USD", // Will be overridden by search result currency
-  };
+    // Handle different response formats
+    let results: StockSearchResult[] = [];
+
+    if (Array.isArray(data)) {
+      results = data.slice(0, 10).map((item: any) => ({
+        symbol: item.ticker || item.symbol || "",
+        name: item.name || item.companyName || "",
+        type: item.type || "Equity",
+        region: item.exchange || item.region || "",
+        currency: item.currency || "USD",
+      }));
+    } else if (data?.results && Array.isArray(data.results)) {
+      results = data.results.slice(0, 10).map((item: any) => ({
+        symbol: item.ticker || item.symbol || "",
+        name: item.name || item.companyName || "",
+        type: item.type || "Equity",
+        region: item.exchange || item.region || "",
+        currency: item.currency || "USD",
+      }));
+    }
+
+    if (results.length === 0) return [];
+
+    // Sort by relevance
+    const norm = normalize(keyword);
+    results.sort((a, b) => matchScore(a, norm) - matchScore(b, norm));
+
+    return results;
+  } catch (err) {
+    console.error("Search stocks error:", err);
+    return [];
+  }
+}
+
+// Get stock quote using Eulerpool API
+export async function getStockQuote(symbol: string): Promise<StockQuote> {
+  try {
+    // Try the v1 price endpoint first
+    const data = await callStockProxy({ action: "price", symbol });
+
+    if (data && (data.price !== undefined || data.ticker)) {
+      return {
+        symbol: data.ticker || symbol,
+        price: parseFloat(data.price) || 0,
+        open: parseFloat(data.open) || 0,
+        high: parseFloat(data.high) || 0,
+        low: parseFloat(data.low) || 0,
+        volume: String(data.volume || "0"),
+        change: parseFloat(data.change) || 0,
+        changePercent: parseFloat(data.changePct || data.changePercent) || 0,
+        previousClose: parseFloat(data.previousClose || data.prevClose) || 0,
+        latestDay: data.date || data.latestDay || new Date().toISOString().split("T")[0],
+        currency: data.currency || "USD",
+      };
+    }
+
+    // Fallback: try the api/1 quote endpoint
+    const quoteData = await callStockProxy({ action: "quote", identifier: symbol });
+
+    if (quoteData && Array.isArray(quoteData) && quoteData.length > 0) {
+      const latest = quoteData[quoteData.length - 1];
+      const prev = quoteData.length > 1 ? quoteData[quoteData.length - 2] : latest;
+      const change = (latest.price || latest.close || 0) - (prev.price || prev.close || 0);
+      const prevPrice = prev.price || prev.close || 1;
+
+      return {
+        symbol,
+        price: latest.price || latest.close || 0,
+        open: latest.open || 0,
+        high: latest.high || 0,
+        low: latest.low || 0,
+        volume: String(latest.volume || "0"),
+        change,
+        changePercent: (change / prevPrice) * 100,
+        previousClose: prevPrice,
+        latestDay: latest.date || new Date().toISOString().split("T")[0],
+        currency: "USD",
+      };
+    }
+
+    throw new Error("No data found");
+  } catch (err) {
+    console.error("Get stock quote error:", err);
+    throw new Error("Failed to fetch stock data");
+  }
 }
 
 // Fetch chart data based on timeframe
 export async function getChartData(symbol: string, timeframe: string): Promise<ChartPoint[]> {
-  let url: string;
-  let seriesKey: string;
+  try {
+    const now = new Date();
+    let from: string;
+    let interval: string;
 
-  switch (timeframe) {
-    case "1D":
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${encodeURIComponent(symbol)}&interval=15min&apikey=${API_KEY}`;
-      seriesKey = "Time Series (15min)";
-      break;
-    case "5D":
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${encodeURIComponent(symbol)}&interval=60min&outputsize=full&apikey=${API_KEY}`;
-      seriesKey = "Time Series (60min)";
-      break;
-    case "1M":
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`;
-      seriesKey = "Time Series (Daily)";
-      break;
-    case "1Y":
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(symbol)}&outputsize=full&apikey=${API_KEY}`;
-      seriesKey = "Time Series (Daily)";
-      break;
-    case "5Y":
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`;
-      seriesKey = "Weekly Time Series";
-      break;
-    case "Max":
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${encodeURIComponent(symbol)}&apikey=${API_KEY}`;
-      seriesKey = "Monthly Time Series";
-      break;
-    default:
-      url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${encodeURIComponent(symbol)}&interval=15min&apikey=${API_KEY}`;
-      seriesKey = "Time Series (15min)";
-  }
+    switch (timeframe) {
+      case "1D": {
+        from = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        interval = "15m";
+        break;
+      }
+      case "5D": {
+        from = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        interval = "1h";
+        break;
+      }
+      case "1M": {
+        from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        interval = "1d";
+        break;
+      }
+      case "1Y": {
+        from = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        interval = "1d";
+        break;
+      }
+      case "5Y": {
+        from = new Date(now.getTime() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        interval = "1w";
+        break;
+      }
+      case "Max": {
+        from = "1990-01-01";
+        interval = "1mo";
+        break;
+      }
+      default: {
+        from = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        interval = "15m";
+      }
+    }
 
-  const res = await fetch(url);
-  const data = await res.json();
-  const series = data[seriesKey];
-  if (!series) return [];
+    const to = now.toISOString().split("T")[0];
+    const data = await callStockProxy({ action: "history", symbol, timeframe: interval, from, to });
 
-  let entries = Object.entries(series).map(([time, val]: [string, any]) => ({
-    time,
-    close: parseFloat(val["4. close"]),
-    volume: parseInt(val["5. volume"] || val["6. volume"] || "0"),
-  })).reverse();
+    let entries: ChartPoint[] = [];
 
-  // Limit data points based on timeframe
-  switch (timeframe) {
-    case "1D": return entries.slice(-30);
-    case "5D": return entries.slice(-40);
-    case "1M": return entries.slice(-22);
-    case "1Y": return entries.slice(-252);
-    case "5Y": return entries.slice(-260);
-    case "Max": return entries;
-    default: return entries.slice(-30);
+    // Handle response - could be { data: [...] } or direct array
+    const items = data?.data || data?.history || (Array.isArray(data) ? data : []);
+
+    if (Array.isArray(items)) {
+      entries = items.map((item: any) => ({
+        time: item.date || item.time || item.datetime || "",
+        close: parseFloat(item.close) || parseFloat(item.price) || 0,
+        volume: parseInt(item.volume || "0"),
+      }));
+    }
+
+    return entries;
+  } catch (err) {
+    console.error("Get chart data error:", err);
+    return [];
   }
 }
 
