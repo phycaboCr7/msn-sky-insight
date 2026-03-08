@@ -825,6 +825,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   // Extract text from PDF using pdfjs-dist
   const extractPdfText = async (file: File): Promise<string> => {
     try {
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       
