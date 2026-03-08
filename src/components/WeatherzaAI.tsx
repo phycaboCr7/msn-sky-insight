@@ -50,10 +50,15 @@ let msgIdCounter = 0;
 const genMsgId = () => `msg-${Date.now()}-${++msgIdCounter}`;
 
 // Separate background component for WeatherzaAI
-const AIBackground = ({ weather }: { weather: WeatherData }) => {
+const AIBackground = ({ weather, customBg }: { weather: WeatherData; customBg?: CustomBg | null }) => {
   const [bgImage, setBgImage] = useState<string>('');
 
   useEffect(() => {
+    // If user has a custom bg, use it
+    if (customBg?.url) {
+      setBgImage(customBg.url);
+      return;
+    }
     const fetchBg = async () => {
       try {
         const queries = ['dramatic waterfall tropical rainforest', 'volcanic eruption lava ocean', 'northern lights mountain lake reflection', 'deep ocean bioluminescent underwater', 'lightning storm dramatic landscape', 'milky way mountain silhouette night'];
@@ -73,7 +78,7 @@ const AIBackground = ({ weather }: { weather: WeatherData }) => {
       }
     };
     fetchBg();
-  }, [weather.location.name]);
+  }, [weather.location.name, customBg?.url]);
 
   if (!bgImage) return null;
 
