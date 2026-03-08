@@ -232,6 +232,7 @@ _stdout_capture.getvalue()
       if (stdout) setOutput(stdout);
       
       // Get animation frames if available
+      let hasAnimFrames = false;
       if (executionType === "ANIMATION") {
         const framesResult = await window.pyodide.runPythonAsync(`get_animation_frames()`);
         if (framesResult && framesResult.length > 0) {
@@ -239,14 +240,19 @@ _stdout_capture.getvalue()
           const dataUrls = frames.map((f: string) => `data:image/png;base64,${f}`);
           setAnimationFrames(dataUrls);
           setImageData(dataUrls[0]);
+          hasAnimFrames = true;
+          // Auto-start animation playback
+          setIsAnimating(true);
           toast({ title: "Animation Ready! 🎞️", description: `Generated ${frames.length} frames (${(frames.length / 24).toFixed(1)}s at 24fps)` });
         }
       }
       
-      // Get single image
-      const imgResult = await window.pyodide.runPythonAsync(`_result_img if '_result_img' in dir() else None`);
-      if (imgResult && animationFrames.length === 0) {
-        setImageData(`data:image/png;base64,${imgResult}`);
+      // Get single image (only if no animation frames)
+      if (!hasAnimFrames) {
+        const imgResult = await window.pyodide.runPythonAsync(`_result_img if '_result_img' in dir() else None`);
+        if (imgResult) {
+          setImageData(`data:image/png;base64,${imgResult}`);
+        }
       }
       
       toast({ title: "Executed! ✅", description: "Python code ran successfully" });
