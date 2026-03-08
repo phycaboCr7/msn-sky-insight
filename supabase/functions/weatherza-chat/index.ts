@@ -286,27 +286,27 @@ You have access to the full conversation history. Reference previous messages na
       });
     }
 
-    // For text queries: use Lovable AI Gateway with STREAMING
+    // For text queries: use Groq Qwen model with STREAMING
     const aiMessages = [
       { role: "system", content: systemPrompt },
-      ...messages.slice(-6).map((msg: any) => ({
+      ...messages.slice(-8).map((msg: any) => ({
         role: msg.role,
         content: msg.content,
       })),
     ];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "qwen-qwq-32b",
         messages: aiMessages,
         stream: true,
-        temperature: 0.55,
-        max_tokens: 4096,
+        temperature: 0.6,
+        max_tokens: 8192,
       }),
     });
 
@@ -317,15 +317,9 @@ You have access to the full conversation history. Reference previous messages na
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error("Groq API error:", response.status, t);
+      throw new Error(`Groq API error: ${response.status}`);
     }
 
     // Stream the response directly back to client
