@@ -1357,12 +1357,35 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="relative z-10">
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
-          {/* Messages Scroll Area */}
-          <div 
-            ref={messagesContainerRef}
-            className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
-            style={{ minHeight: 0 }}
-          >
+        {/* Mode Selector */}
+        <div className="flex flex-wrap gap-1.5 px-2 pb-2">
+          {([
+            { key: 'weather', label: 'Weather', icon: CloudSun, color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/40 text-blue-400' },
+            { key: 'code', label: 'Code', icon: Code, color: 'from-green-500/20 to-emerald-500/20 border-green-500/40 text-green-400' },
+            { key: 'math', label: 'Math', icon: Calculator, color: 'from-purple-500/20 to-violet-500/20 border-purple-500/40 text-purple-400' },
+            { key: 'conversation', label: 'Chat', icon: MessageCircle, color: 'from-orange-500/20 to-amber-500/20 border-orange-500/40 text-orange-400' },
+          ] as const).map(({ key, label, icon: Icon, color }) => (
+            <button
+              key={key}
+              onClick={() => setAiMode(key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
+                aiMode === key
+                  ? `bg-gradient-to-r ${color} shadow-lg scale-105`
+                  : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:border-white/20'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Messages Scroll Area */}
+        <div 
+          ref={messagesContainerRef}
+          className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
+          style={{ minHeight: 0 }}
+        >
             {messages.map((msg) => (
               <div
                 key={msg.id}
