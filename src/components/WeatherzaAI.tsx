@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, lazy, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -889,7 +889,24 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const glowOuterRef = useRef<HTMLDivElement>(null);
+  const glowInnerRef = useRef<HTMLDivElement>(null);
   // Voice refs removed — now using Groq Whisper via MediaRecorder in VoiceOverlay
+
+  // JS-driven rotating glow animation
+  useEffect(() => {
+    let angle = 0;
+    let rafId: number;
+    const animate = () => {
+      angle = (angle + 0.8) % 360;
+      const val = `${angle}deg`;
+      glowOuterRef.current?.style.setProperty('background', `conic-gradient(from ${val}, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)`);
+      glowInnerRef.current?.style.setProperty('background', `conic-gradient(from ${val}, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)`);
+      rafId = requestAnimationFrame(animate);
+    };
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   // Auto-scroll chat container only — debounced to prevent shaking during streaming
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -1615,20 +1632,20 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
         {/* Input Area - unified bar */}
         <div className="relative group/bar">
-          {/* Animated multi-color glow ring - Lovable style */}
+          {/* Animated multi-color glow ring - Lovable style (JS-driven rotation) */}
           <div
-            className="absolute -inset-[2px] rounded-[18px] opacity-75 group-hover/bar:opacity-100 transition-opacity duration-500 pointer-events-none"
+            ref={glowOuterRef}
+            className="absolute -inset-[3px] rounded-[18px] opacity-60 group-hover/bar:opacity-100 transition-opacity duration-500 pointer-events-none"
             style={{
-              background: 'conic-gradient(from var(--glow-angle, 0deg), #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)',
-              animation: 'glow-rotate 4s linear infinite',
-              filter: 'blur(8px)',
+              background: 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)',
+              filter: 'blur(12px)',
             }}
           />
           <div
+            ref={glowInnerRef}
             className="absolute -inset-[1.5px] rounded-[17px] pointer-events-none"
             style={{
-              background: 'conic-gradient(from var(--glow-angle, 0deg), #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)',
-              animation: 'glow-rotate 4s linear infinite',
+              background: 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)',
             }}
           />
         <div className="relative bg-black/60 backdrop-blur-2xl rounded-2xl border-0 p-2 flex items-end gap-2 z-10">
