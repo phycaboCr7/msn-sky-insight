@@ -218,15 +218,9 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
 
   useEffect(() => {
     if (!weather) return;
-    if (apiKey?.trim()) {
-      // Try AI immediately when key is available
-      generateRecommendations();
-    } else {
-      // Show basic boxes automatically
-      setRecommendations(createBasicRecommendations(weather));
-    }
+    generateRecommendations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [weather?.location?.name, apiKey]);
+  }, [weather?.location?.name]);
 
   return (
     <WeatherCard className="p-6 col-span-full">
@@ -256,24 +250,8 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
         </Button>
       </div>
 
-      <div className="mb-4">
-        <div className="flex items-center gap-2">
-          <Input
-            type="password"
-            placeholder="Enter your Gemini API key..."
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="bg-white/5 border-white/20"
-          />
-          <Button type="button" variant="secondary" onClick={saveApiKey}>Save Key</Button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Get your API key from Google AI Studio
-        </p>
-      </div>
-
       <div className="mb-6">
-        <AIAskBar weather={weather} apiKey={apiKey} />
+        <AIAskBar weather={weather} />
       </div>
 
       {recommendations.length > 0 && (
