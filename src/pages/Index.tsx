@@ -216,7 +216,7 @@ const Index = () => {
               </Suspense>
               
               <Suspense fallback={<CardSkeleton />}>
-                <StockWidget />
+                <StockWidget country={weather?.location?.country} />
               </Suspense>
               
               <Suspense fallback={<CardSkeleton className="col-span-full" />}>

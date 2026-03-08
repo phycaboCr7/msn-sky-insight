@@ -181,6 +181,45 @@ export function getCurrencySymbol(currency: string): string {
 
 const TOP_STOCKS = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META"];
 
+// Country-specific default stocks with proper exchange suffixes for Yahoo Finance
+const COUNTRY_STOCKS: Record<string, { stocks: string[]; currency: string }> = {
+  "India": { stocks: ["RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS", "WIPRO.NS", "SBIN.NS", "BHARTIARTL.NS", "ITC.NS", "LT.NS"], currency: "INR" },
+  "United Kingdom": { stocks: ["SHEL.L", "AZN.L", "HSBA.L", "BP.L", "GSK.L", "ULVR.L", "RIO.L", "LSEG.L"], currency: "GBP" },
+  "Japan": { stocks: ["7203.T", "6758.T", "9984.T", "6861.T", "8306.T", "9432.T", "6902.T"], currency: "JPY" },
+  "Germany": { stocks: ["SAP.DE", "SIE.DE", "ALV.DE", "DTE.DE", "BAS.DE", "BMW.DE", "MBG.DE"], currency: "EUR" },
+  "France": { stocks: ["MC.PA", "OR.PA", "TTE.PA", "SAN.PA", "AIR.PA", "BN.PA"], currency: "EUR" },
+  "Canada": { stocks: ["RY.TO", "TD.TO", "ENB.TO", "CNR.TO", "BN.TO", "CP.TO", "SHOP.TO"], currency: "CAD" },
+  "Australia": { stocks: ["BHP.AX", "CBA.AX", "CSL.AX", "NAB.AX", "WBC.AX", "ANZ.AX"], currency: "AUD" },
+  "South Korea": { stocks: ["005930.KS", "000660.KS", "035420.KS", "051910.KS"], currency: "KRW" },
+  "China": { stocks: ["0700.HK", "9988.HK", "9618.HK", "1810.HK", "3690.HK"], currency: "HKD" },
+  "Hong Kong": { stocks: ["0700.HK", "9988.HK", "0005.HK", "1299.HK", "0388.HK"], currency: "HKD" },
+  "Brazil": { stocks: ["PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBDC4.SA", "ABEV3.SA"], currency: "BRL" },
+  "Singapore": { stocks: ["D05.SI", "O39.SI", "U11.SI", "Z74.SI"], currency: "SGD" },
+  "Switzerland": { stocks: ["NESN.SW", "ROG.SW", "NOVN.SW", "UBSG.SW"], currency: "CHF" },
+  "Saudi Arabia": { stocks: ["2222.SR", "1120.SR", "2010.SR"], currency: "SAR" },
+  "Mexico": { stocks: ["FEMSAUBD.MX", "GFNORTEO.MX", "AMXL.MX", "WALMEX.MX"], currency: "MXN" },
+  "South Africa": { stocks: ["NPN.JO", "SOL.JO", "BTI.JO", "AGL.JO"], currency: "ZAR" },
+  "Pakistan": { stocks: ["OGDC.KA", "PPL.KA", "HBL.KA", "UBL.KA"], currency: "PKR" },
+  "Turkey": { stocks: ["THYAO.IS", "GARAN.IS", "ASELS.IS", "BIMAS.IS"], currency: "TRY" },
+  "Sweden": { stocks: ["ERIC-B.ST", "VOLV-B.ST", "ATCO-A.ST"], currency: "SEK" },
+  "Norway": { stocks: ["EQNR.OL", "DNB.OL", "MOWI.OL"], currency: "NOK" },
+  "Indonesia": { stocks: ["BBCA.JK", "BBRI.JK", "TLKM.JK"], currency: "IDR" },
+  "Thailand": { stocks: ["PTT.BK", "AOT.BK", "SCB.BK"], currency: "THB" },
+  "Malaysia": { stocks: ["1155.KL", "1295.KL", "4863.KL"], currency: "MYR" },
+  "Israel": { stocks: ["TEVA.TA", "NICE.TA", "LUMI.TA"], currency: "ILS" },
+};
+
+export function getDefaultStockForCountry(country?: string): { symbol: string; currency: string } {
+  if (country && COUNTRY_STOCKS[country]) {
+    const entry = COUNTRY_STOCKS[country];
+    const symbol = entry.stocks[Math.floor(Math.random() * entry.stocks.length)];
+    return { symbol, currency: entry.currency };
+  }
+  // Default to US stocks
+  const symbol = TOP_STOCKS[Math.floor(Math.random() * TOP_STOCKS.length)];
+  return { symbol, currency: "USD" };
+}
+
 export function getRandomTopStock(): string {
   return TOP_STOCKS[Math.floor(Math.random() * TOP_STOCKS.length)];
 }
