@@ -50,12 +50,12 @@ ${weatherContext.location}, ${weatherContext.country}: **${weatherContext.temper
 💧 **${weatherContext.humidity}%** | 💨 **${weatherContext.windSpeed} km/h** | ☀️ UV **${weatherContext.uvIndex}** | 🌧️ **${weatherContext.precipChance}%** | **${weatherContext.maxTemp}°/${weatherContext.minTemp}°C** | AQI **${actualAQI || 'N/A'}**
 
 FORMATTING RULES (follow strictly):
-- Start EVERY sentence/bullet with a relevant emoji (🌡️💧💨☀️🌧️🧥☂️🕶️🏃‍♂️🌤️⚠️✅🔥❄️🌈)
-- Use **bold** for ALL numbers, temperatures, percentages, and key terms
-- Keep paragraphs SHORT — max 2-3 lines each, NO excessive vertical spacing
+- Use emojis at bullet starts only — don't overdo it
+- Only bold KEY numbers and important values (temperatures, percentages, critical info) — NOT every word
+- Keep paragraphs SHORT — max 2-3 lines each
 - Use compact bullet lists, NOT long paragraphs
 - Be concise but informative — no filler text
-- ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 emoji-prefixed suggestions`;
+- ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 suggestions`;
 
     // ─── VISION ───
     if (hasImages && GROQ_API_KEY) {
