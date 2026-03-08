@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3 } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -783,6 +783,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
+  const [aiMode, setAiMode] = useState<'weather' | 'code' | 'math' | 'conversation'>(() => {
+    return (localStorage.getItem('weatherza-ai-mode') as any) || 'weather';
+  });
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [pyodideCode, setPyodideCode] = useState<string | null>(null);
   const lastMessageRef = useRef<HTMLDivElement>(null);
@@ -822,6 +825,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       }
     }
   }, [messages]);
+
+  // Persist AI mode
+  useEffect(() => {
+    localStorage.setItem('weatherza-ai-mode', aiMode);
+  }, [aiMode]);
 
   // Extract text from PDF using pdfjs-dist
   const extractPdfText = async (file: File): Promise<string> => {
@@ -995,7 +1003,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const streamFromAI = async (
     messagesForAI: any[],
     weatherCtx: any,
-    updatedMessages: Message[]
+    updatedMessages: Message[],
+    mode: string = 'weather'
   ) => {
     // Check if the latest user message needs internet search
     const latestUserMsg = messagesForAI[messagesForAI.length - 1];
@@ -1019,7 +1028,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx }),
+      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode }),
     });
 
     if (!resp.ok) {
@@ -1180,7 +1189,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     const weatherCtx = buildWeatherContext();
     const messagesForAI = updatedMessages.map(m => ({ role: m.role, content: m.content }));
 
-    streamFromAI(messagesForAI, weatherCtx, updatedMessages)
+    streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode)
       .catch((err) => {
         console.error("Voice send error:", err);
         setMessages(prev => [...prev, { id: genMsgId(), role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
@@ -1224,7 +1233,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         return { role: m.role, content, image: m.image };
       });
 
-      await streamFromAI(messagesForAI, weatherCtx, updatedMessages);
+      await streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode);
     } catch (error) {
       console.error("AI Error:", error);
       toast({
@@ -1348,12 +1357,35 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       <CardContent className="relative z-10">
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
-          {/* Messages Scroll Area */}
-          <div 
-            ref={messagesContainerRef}
-            className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
-            style={{ minHeight: 0 }}
-          >
+        {/* Mode Selector */}
+        <div className="flex flex-wrap gap-1.5 px-2 pb-2">
+          {([
+            { key: 'weather', label: 'Weather', icon: CloudSun, color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/40 text-blue-400' },
+            { key: 'code', label: 'Code', icon: Code, color: 'from-green-500/20 to-emerald-500/20 border-green-500/40 text-green-400' },
+            { key: 'math', label: 'Math', icon: Calculator, color: 'from-purple-500/20 to-violet-500/20 border-purple-500/40 text-purple-400' },
+            { key: 'conversation', label: 'Chat', icon: MessageCircle, color: 'from-orange-500/20 to-amber-500/20 border-orange-500/40 text-orange-400' },
+          ] as const).map(({ key, label, icon: Icon, color }) => (
+            <button
+              key={key}
+              onClick={() => setAiMode(key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 border ${
+                aiMode === key
+                  ? `bg-gradient-to-r ${color} shadow-lg scale-105`
+                  : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10 hover:border-white/20'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Messages Scroll Area */}
+        <div 
+          ref={messagesContainerRef}
+          className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
+          style={{ minHeight: 0 }}
+        >
             {messages.map((msg) => (
               <div
                 key={msg.id}

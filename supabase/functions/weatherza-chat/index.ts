@@ -29,13 +29,14 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, weatherContext } = await req.json();
+    const { messages, weatherContext, mode = 'weather' } = await req.json();
     const hasImages = messages.some((msg: any) => msg.image);
 
     console.log("Received weather chat request:", {
       messageCount: messages?.length || 0,
       location: weatherContext?.location,
       hasImages,
+      mode,
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
@@ -306,33 +307,18 @@ You have access to the full conversation history. Reference previous messages na
       })),
     ];
 
-    // Detect coding tasks
-    const lastUserMsg = (messages[messages.length - 1]?.content || "").toLowerCase();
-    const codingKeywords = [
-      "code", "function", "program", "script", "algorithm", "debug", "fix this",
-      "write a", "implement", "refactor", "compile", "syntax", "error in",
-      "javascript", "python", "typescript", "java", "c++", "rust", "html", "css",
-      "react", "node", "api", "endpoint", "database", "query", "sql",
-      "class", "object", "array", "loop", "recursive", "sort", "search",
-      "regex", "parse", "convert", "generate code", "build a", "create a program",
-      "data structure", "binary", "stack", "queue", "linked list", "tree",
-      "explain this code", "how to code", "coding", "programming", "developer",
-      "git", "deploy", "server", "frontend", "backend", "fullstack",
-      "matplotlib", "plot", "graph", "turtle", "visualization",
-    ];
-    const isCodingTask = codingKeywords.some(kw => lastUserMsg.includes(kw));
-
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
-    // Route coding tasks to Gemini for superior code generation
-    if (isCodingTask && GEMINI_API_KEY) {
-      console.log("Coding task detected, routing to Gemini");
+    // Route based on mode: code/math/conversation → Gemini, weather → Groq
+    const useGemini = mode !== 'weather' && GEMINI_API_KEY;
+
+    if (useGemini) {
+      console.log(`Mode "${mode}" → routing to Gemini`);
 
       // Convert messages to Gemini format
       const geminiContents = [];
-      // Add system instruction as first user message for Gemini
       for (const msg of aiMessages) {
-        if (msg.role === "system") continue; // handled via systemInstruction
+        if (msg.role === "system") continue;
         geminiContents.push({
           role: msg.role === "assistant" ? "model" : "user",
           parts: [{ text: msg.content }],
@@ -354,7 +340,7 @@ You have access to the full conversation history. Reference previous messages na
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 contents: geminiContents,
                 generationConfig: {
-                  temperature: 0.4,
+                  temperature: mode === 'code' ? 0.3 : mode === 'math' ? 0.2 : 0.6,
                   maxOutputTokens: 8192,
                 },
               }),
@@ -365,13 +351,12 @@ You have access to the full conversation history. Reference previous messages na
             const geminiData = await geminiResponse.json();
             geminiAnswer = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
             if (geminiAnswer) {
-              console.log(`Gemini ${model} responded successfully`);
+              console.log(`Gemini ${model} responded successfully for mode "${mode}"`);
               break;
             }
           } else {
             const errText = await geminiResponse.text();
             console.error(`Gemini ${model} error ${geminiResponse.status}:`, errText);
-            // Wait briefly before trying next model
             await new Promise(r => setTimeout(r, 1000));
           }
         } catch (e) {
