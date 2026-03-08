@@ -152,7 +152,7 @@ FORMATTING RULES (follow strictly):
     if (effectiveMode !== 'weather') {
       const aiMessages = [
         { role: "system", content: systemPrompt },
-        ...messages.slice(-4).map((m: any) => ({ role: m.role, content: m.content })),
+        ...messages.slice(-5).map((m: any) => ({ role: m.role, content: m.content })),
       ];
 
       // Try Lovable AI Gateway first
@@ -245,7 +245,7 @@ FORMATTING RULES (follow strictly):
     // ─── GROQ WEATHER (fast streaming) ───
     const groqMessages = [
       { role: "system", content: groqSystemPrompt },
-      ...messages.slice(-4).map((m: any) => ({ role: m.role, content: m.content })),
+      ...messages.slice(-5).map((m: any) => ({ role: m.role, content: m.content })),
     ];
 
     let response: Response | null = null;
