@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AIAskBar } from "./AIAskBar";
+import { supabase } from "@/integrations/supabase/client";
 import { Brain, Loader2, Shirt, Umbrella, Sun, AlertTriangle, Utensils, Bed } from "lucide-react";
 
 interface AIRecommendationsProps {
@@ -18,32 +18,12 @@ interface Recommendation {
   priority: 'low' | 'medium' | 'high';
 }
 
-const GEMINI_API_KEY = "AIzaSyCDEnvMp3qTNwN7ta-gctt8e-KMR4oXuW0";
-
 export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('gemini_api_key') || GEMINI_API_KEY);
   const { toast } = useToast();
 
-  const saveApiKey = () => {
-    if (apiKey.trim()) {
-      try {
-        localStorage.setItem('gemini_api_key', apiKey.trim());
-        toast({ title: "API key saved", description: "Your Gemini API key is stored locally." });
-      } catch {}
-    } else {
-      localStorage.removeItem('gemini_api_key');
-    }
-  };
-
   const generateRecommendations = async () => {
-    if (!apiKey.trim()) {
-      setRecommendations(createBasicRecommendations(weather));
-      toast({ title: "Using basic advice", description: "Add your Gemini API key for smarter tips." });
-      return;
-    }
-
     setLoading(true);
     try {
       const weatherInfo = {
@@ -60,32 +40,12 @@ export const AIRecommendations = ({ weather }: AIRecommendationsProps) => {
 
       const prompt = `Using this weather data: ${JSON.stringify(weatherInfo)}, return actionable recommendations for these exact categories: ["Clothing","Diet","Sleep","Umbrella"]. For each, provide: category, advice, priority (low|medium|high). Keep advice concise and specific to the location \"${weatherInfo.location}\". Return ONLY a valid JSON array.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          }
-        }),
+      const { data, error } = await supabase.functions.invoke('gemini-proxy', {
+        body: { prompt, type: "json" },
       });
 
-      if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const aiResponse = data.candidates[0].content.parts[0].text;
+      if (error) throw error;
+      const aiResponse = data?.text || "";
 
       // Parse AI response and create recommendations
       try {
