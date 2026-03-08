@@ -1943,6 +1943,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             <PyodideRunner code={pyodideCode} onClose={() => setPyodideCode(null)} />
           </Suspense>
         )}
+
+        {/* Font Picker Overlay */}
+        <FontPicker
+          isOpen={fontPickerOpen}
+          onClose={() => setFontPickerOpen(false)}
+          selectedFont={chatFont}
+          onSelectFont={(font) => { setChatFont(font); setFontPickerOpen(false); }}
+        />
       </CardContent>
     </Card>
   );
