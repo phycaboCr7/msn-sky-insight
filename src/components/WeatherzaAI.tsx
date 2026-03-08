@@ -1078,9 +1078,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     const assistantId = genMsgId();
     setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
 
-    // Watchdog: if no chunk for 8 seconds, abort gracefully
+    // Watchdog: if no chunk for 30 seconds, abort gracefully (tables need more time)
     const watchdog = setInterval(() => {
-      if (Date.now() - lastChunkTime > 8000 && !streamDone) {
+      if (Date.now() - lastChunkTime > 30000 && !streamDone) {
         console.warn("Stream watchdog: no data for 8s, finalizing");
         streamDone = true;
         reader.cancel().catch(() => {});
