@@ -99,9 +99,16 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
           />
         </>
       )}
-      {!isDay && isSunny && [15, 35, 55, 75, 90].map((left, i) => (
-        <div key={i} className="absolute rounded-full bg-white"
-          style={{ width: `${2 + (i % 2)}px`, height: `${2 + (i % 2)}px`, left: `${left}%`, top: `${10 + i * 12}%`, opacity: 0.4, animation: `cwStarTwinkle ${1.5 + i * 0.3}s ease-in-out infinite`, animationDelay: `${i * 0.4}s` }}
+      {!isDay && starParticles.map((s) => (
+        <div key={s.id} className="absolute rounded-full"
+          style={{
+            width: s.size, height: s.size, left: s.left, top: s.top,
+            opacity: s.opacity,
+            background: s.id % 7 === 0 ? 'hsl(210 60% 90%)' : s.id % 5 === 0 ? 'hsl(45 80% 90%)' : 'white',
+            boxShadow: `0 0 ${parseInt(s.size) > 2 ? '4px' : '2px'} hsl(0 0% 100% / 0.4)`,
+            animation: `cwStarTwinkle ${s.duration} ease-in-out infinite`,
+            animationDelay: s.delay,
+          }}
         />
       ))}
     </div>
