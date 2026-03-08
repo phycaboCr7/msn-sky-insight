@@ -1189,7 +1189,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     const weatherCtx = buildWeatherContext();
     const messagesForAI = updatedMessages.map(m => ({ role: m.role, content: m.content }));
 
-    streamFromAI(messagesForAI, weatherCtx, updatedMessages)
+    streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode)
       .catch((err) => {
         console.error("Voice send error:", err);
         setMessages(prev => [...prev, { id: genMsgId(), role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
