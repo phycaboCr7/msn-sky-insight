@@ -1466,14 +1466,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             {/* Pro Mode Toggle — sliding switch */}
             <button
               onClick={toggleProMode}
-              className="flex items-center gap-2 px-2 py-1 rounded-full text-[11px] font-bold transition-all duration-300 hover:bg-white/5"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:bg-white/5"
               title={proMode ? "Disable Pro Mode" : "Enable Pro Mode"}
             >
-              <Zap className={`w-3.5 h-3.5 transition-colors duration-300 ${proMode ? 'text-primary fill-current' : 'text-muted-foreground'}`} />
-              <span className={`transition-colors duration-300 ${proMode ? 'text-primary' : 'text-muted-foreground'}`}>Pro</span>
+              <Zap className={`w-4 h-4 transition-colors duration-300 ${proMode ? 'text-primary fill-current' : 'text-muted-foreground'}`} />
+              <span className={`transition-colors duration-300 text-[13px] ${proMode ? 'text-primary' : 'text-muted-foreground'}`}>Pro</span>
               {/* Sliding switch track */}
               <div
-                className={`relative w-9 h-5 rounded-full transition-all duration-400 ${
+                className={`relative w-12 h-6 rounded-full transition-all duration-400 ${
                   proMode ? 'shadow-lg' : 'bg-white/10'
                 }`}
                 style={proMode ? {
@@ -1483,8 +1483,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               >
                 {/* Sliding knob */}
                 <div
-                  className={`absolute top-[2px] w-4 h-4 rounded-full shadow-md transition-all duration-300 ${
-                    proMode ? 'left-[18px] bg-white' : 'left-[2px] bg-white/60'
+                  className={`absolute top-[3px] w-[18px] h-[18px] rounded-full shadow-md transition-all duration-300 ${
+                    proMode ? 'left-[27px] bg-white' : 'left-[3px] bg-white/60'
                   }`}
                   style={proMode ? { boxShadow: '0 0 6px hsl(28 100% 60% / 0.5)' } : undefined}
                 />
