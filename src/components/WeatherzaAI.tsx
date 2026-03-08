@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
