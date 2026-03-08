@@ -889,7 +889,24 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const glowOuterRef = useRef<HTMLDivElement>(null);
+  const glowInnerRef = useRef<HTMLDivElement>(null);
   // Voice refs removed — now using Groq Whisper via MediaRecorder in VoiceOverlay
+
+  // JS-driven rotating glow animation
+  useEffect(() => {
+    let angle = 0;
+    let rafId: number;
+    const animate = () => {
+      angle = (angle + 0.8) % 360;
+      const val = `${angle}deg`;
+      glowOuterRef.current?.style.setProperty('background', `conic-gradient(from ${val}, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)`);
+      glowInnerRef.current?.style.setProperty('background', `conic-gradient(from ${val}, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)`);
+      rafId = requestAnimationFrame(animate);
+    };
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   // Auto-scroll chat container only — debounced to prevent shaking during streaming
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
