@@ -853,3 +853,14 @@ All colors MUST be HSL.
   0%, 100% { background-position: 200% 0; }
   50% { background-position: -200% 0; }
 }
+
+@property --glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes glow-rotate {
+  from { --glow-angle: 0deg; }
+  to { --glow-angle: 360deg; }
+}
