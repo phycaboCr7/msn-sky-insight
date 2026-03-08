@@ -783,6 +783,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [aiMode, setAiMode] = useState<'weather' | 'code' | 'math' | 'conversation'>(() => {
     return (localStorage.getItem('weatherza-ai-mode') as any) || 'weather';
   });
