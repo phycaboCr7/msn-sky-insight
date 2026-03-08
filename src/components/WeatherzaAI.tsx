@@ -1666,7 +1666,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar rounded-full mb-3 p-[2px]">
+        <div className={`relative group/bar rounded-full mb-3 p-[2px] transition-all duration-500 ${!proMode ? 'border border-white/15' : ''}`}>
           {/* Blurred glow layer — sits behind everything */}
           <div
             ref={glowInnerRef}
