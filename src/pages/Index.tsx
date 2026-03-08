@@ -173,12 +173,12 @@ const Index = () => {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-20 max-w-7xl">
         <div className="mb-6 sm:mb-8 text-center animate-fade-in">
-          <h1 className="font-playfair text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary via-[hsl(30,60%,75%)] to-primary/80 bg-clip-text text-transparent">
+          <h1 className="font-playfair text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground/90 to-primary/80 bg-clip-text text-transparent">
             Weatherza
           </h1>
           {currentTime && (
             <div 
-              className="text-2xl sm:text-3xl mb-2 bg-gradient-to-r from-primary/90 via-[hsl(30,50%,70%)] to-primary/70 bg-clip-text text-transparent"
+              className="text-2xl sm:text-3xl mb-2 bg-gradient-to-r from-foreground/80 via-primary/70 to-foreground/80 bg-clip-text text-transparent"
               style={{ fontFamily: "'Bodoni Moda', Georgia, serif" }}
             >
               {currentTime}
