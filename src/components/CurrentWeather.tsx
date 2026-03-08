@@ -61,7 +61,7 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
         left: `${Math.random() * 60}%`,
         delay: `${i * 4 + Math.random() * 3}s`,
         duration: `${0.8 + Math.random() * 0.4}s`,
-        angle: 15 + Math.random() * 30,
+        angle: 30 + Math.random() * 20,
         length: 60 + Math.random() * 40,
       }));
     }
@@ -147,8 +147,8 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
             className="h-[1.5px] rounded-full"
             style={{
               '--shoot-length': `${s.length}px`,
+              '--shoot-angle': `${s.angle}deg`,
               background: 'linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.8), hsl(0 0% 100% / 0.3))',
-              transform: `rotate(${s.angle}deg)`,
               animation: `cwShootingStar ${s.duration} ease-out infinite`,
               animationDelay: s.delay,
               transformOrigin: 'left center',
