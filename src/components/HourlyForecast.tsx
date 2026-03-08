@@ -9,12 +9,12 @@ interface HourlyForecastProps {
 }
 
 export const HourlyForecast = ({ weather }: HourlyForecastProps) => {
-  if (!weather.forecast?.forecastday[0]?.hour) return null;
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+
+  if (!weather.forecast?.forecastday[0]?.hour) return null;
 
   const currentHour = new Date().getHours();
   const hourlyData = weather.forecast.forecastday[0].hour
