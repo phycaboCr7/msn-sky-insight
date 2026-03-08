@@ -12,16 +12,19 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
-import * as pdfjsLib from "pdfjs-dist";
-import mammoth from "mammoth";
-import html2canvas from "html2canvas";
 
 // Lazy load PyodideRunner for graph visualization
 const PyodideRunner = lazy(() => import("@/components/python-visualizer"));
 
-// Set PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+// Heavy libs loaded dynamically on demand (not at startup)
+const loadDocx = () => import("docx");
+const loadPdfjs = async () => {
+  const lib = await import("pdfjs-dist");
+  lib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  return lib;
+};
+const loadMammoth = () => import("mammoth").then(m => m.default);
+const loadHtml2canvas = () => import("html2canvas").then(m => m.default);
 
 interface WeatherzaAIProps {
   weather: WeatherData;
@@ -524,13 +527,14 @@ const generatePDF = async (content: string, _elementRef?: HTMLElement | null, fi
   // 7. Wait for KaTeX and images to render
   await new Promise(r => setTimeout(r, 500));
 
-  // 8. Capture with html2canvas
-  const canvas = await html2canvas(container, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-  });
+   // 8. Capture with html2canvas (dynamically loaded)
+   const html2canvas = await loadHtml2canvas();
+   const canvas = await html2canvas(container, {
+     scale: 2,
+     useCORS: true,
+     backgroundColor: '#ffffff',
+     logging: false,
+   });
 
   // 9. Cleanup DOM
   root.unmount();
