@@ -893,8 +893,22 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const glowOuterRef = useRef<HTMLDivElement>(null);
   const glowInnerRef = useRef<HTMLDivElement>(null);
 
-  // JS-driven rotating glow animation — dual layer (sharp border + blurred glow)
+  // Pro Mode toggle handler
+  const toggleProMode = () => {
+    const next = !proMode;
+    setProMode(next);
+    localStorage.setItem('weatherza-pro-mode', String(next));
+    toast({ title: next ? "⚡ Pro Mode Activated" : "Pro Mode Off", description: next ? "Enhanced glow & premium experience enabled." : "Standard mode restored." });
+  };
+
+  // JS-driven rotating glow animation — only active in Pro Mode
   useEffect(() => {
+    if (!proMode) {
+      // Clear glow when pro mode is off
+      if (glowOuterRef.current) glowOuterRef.current.style.background = 'transparent';
+      if (glowInnerRef.current) glowInnerRef.current.style.background = 'transparent';
+      return;
+    }
     let angle = 0;
     let rafId: number;
     const animate = () => {
@@ -907,7 +921,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     };
     rafId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafId);
-  }, []);
+  }, [proMode]);
 
   // Auto-scroll chat container only — debounced to prevent shaking during streaming
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
