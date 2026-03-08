@@ -28,7 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, weatherContext, mode = 'weather' } = await req.json();
+    const { messages, weatherContext, mode = 'weather', isPro = false } = await req.json();
     const hasImages = messages.some((msg: any) => msg.image);
 
     console.log("Chat request:", { count: messages?.length || 0, location: weatherContext?.location, hasImages, mode });
@@ -41,7 +41,9 @@ serve(async (req) => {
     const userName = weatherContext.userName;
     const userGreeting = userName ? `The user's name is ${userName}. Address them by name naturally.` : '';
 
-    const systemPrompt = `You are Weatherza AI by Rakshit Jain (Weatherza Labs). Contact: phycabo33@gmail.com
+    const proPrefix = isPro ? `PREMIUM MODE ACTIVE — You are in PRO mode. Deliver elite-quality, comprehensive, beautifully structured responses. Use rich formatting: headers, subheaders, tables where appropriate, detailed bullet points, and thorough analysis. Provide expert-level depth with actionable insights. Your responses should feel like a premium consulting report — polished, data-rich, and insightful. Include specific numbers, percentages, comparisons, and professional recommendations. Format with clear visual hierarchy using markdown headers (##, ###), bold for key metrics, and organized sections. Go above and beyond in detail and presentation quality.\n\n` : '';
+
+    const systemPrompt = `${proPrefix}You are Weatherza AI by Rakshit Jain (Weatherza Labs). Contact: phycabo33@gmail.com
 ${userGreeting}
 WEATHER: ${weatherContext.location}, ${weatherContext.country} | ${weatherContext.temperature}°C (feels ${weatherContext.feelsLike}°C) | ${weatherContext.condition} | 💧${weatherContext.humidity}% | 💨${weatherContext.windSpeed}km/h | UV ${weatherContext.uvIndex} | Rain ${weatherContext.precipChance}% | Hi/Lo ${weatherContext.maxTemp}°/${weatherContext.minTemp}°C | AQI ${actualAQI || 'N/A'}
 
@@ -106,7 +108,9 @@ NEVER use plain text alignment or spaces to simulate tables. ALWAYS include the 
 
 RULES: Only bold KEY information like temperatures, percentages, important values — NOT every single word. Use emojis sparingly at bullet starts. MATH/EQUATIONS: ALWAYS use LaTeX delimiters — $...$ for inline equations and $$...$$ for display/block equations. NEVER write equations as plain text. Examples: write $E = mc^2$ not E = mc², write $$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$$ not iℏ(∂ψ/∂t) = Hψ. For matrices use $$\\sigma_x = \\begin{bmatrix} 0 & 1 \\\\ 1 & 0 \\end{bmatrix}$$ not σx = [[0, 1], [1, 0]]. Code must be non-interactive (no input()). Python: matplotlib AGG only, end with print(get_plot_as_base64()). Turtle: t=SimpleTurtle(), print(t.draw()). HTML/CSS/JS: ALWAYS write as a SINGLE combined HTML file — embed ALL CSS inside <style> tags and ALL JavaScript inside <script> tags within the same HTML file. NEVER output separate CSS or JS files. NEVER split code into multiple files. The entire web page must be self-contained in one \`\`\`html code block. Use inline styles or <style> blocks, never external stylesheets. Structure with headings/bullets/tables. Be thorough. Never fabricate data. End with --- then 💡 **Want me to help with more?** + 2-3 suggestions.`;
 
-    const groqSystemPrompt = `You are Weatherza AI by Rakshit Jain. Warm, precise, emoji-rich weather assistant.
+    const groqProPrefix = isPro ? `PREMIUM MODE — Deliver elite, comprehensive weather analysis with detailed breakdowns, hourly insights, health advisories, outfit suggestions, and activity recommendations. Format beautifully with sections and bold key data.\n\n` : '';
+
+    const groqSystemPrompt = `${groqProPrefix}You are Weatherza AI by Rakshit Jain. Warm, precise, emoji-rich weather assistant.
 
 ${weatherContext.location}, ${weatherContext.country}: **${weatherContext.temperature}°C** (feels **${weatherContext.feelsLike}°C**) | **${weatherContext.condition}**
 💧 **${weatherContext.humidity}%** | 💨 **${weatherContext.windSpeed} km/h** | ☀️ UV **${weatherContext.uvIndex}** | 🌧️ **${weatherContext.precipChance}%** | **${weatherContext.maxTemp}°/${weatherContext.minTemp}°C** | AQI **${actualAQI || 'N/A'}**

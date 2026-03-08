@@ -4,8 +4,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown, Type } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
+import { FontPicker, FontOption, getStoredFont, loadGoogleFont } from "@/components/FontPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
 import ReactMarkdown from "react-markdown";
@@ -441,12 +442,12 @@ const useTypingEffect = (text: string, isTyping: boolean, chunkSize: number = 5,
 };
 
 // Message content component with typing effect
-const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void }) => {
+const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void; chatFont?: string }) => {
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
   return (
     <div className="w-full overflow-visible">
-      <div className="weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+      <div className="weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit" style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
@@ -890,6 +891,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   const [proMode, setProMode] = useState(() => localStorage.getItem('weatherza-pro-mode') === 'true');
+  const [chatFont, setChatFont] = useState<FontOption>(() => getStoredFont());
+  const [fontPickerOpen, setFontPickerOpen] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -923,6 +926,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Load initial chat font
+  useEffect(() => {
+    loadGoogleFont(chatFont);
   }, []);
 
   // Persist prompt count
@@ -1219,7 +1227,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode }),
+      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode, isPro: proMode }),
       signal: controller.signal,
     });
 
@@ -1666,7 +1674,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh' }}>
         {/* Mode Selector */}
-        <div className="flex gap-1 px-1 pb-3">
+        <div className="flex items-center gap-1 px-1 pb-3">
+          <div className="flex gap-1 flex-1">
           {([
             { key: 'weather', label: 'Weather', icon: CloudSun },
             { key: 'code', label: 'Code', icon: Code },
@@ -1687,6 +1696,28 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               {label}
             </button>
           ))}
+          </div>
+          {/* Font picker button — signed-in users only */}
+          {isSignedIn && (
+            <div className="relative">
+              <button
+                onClick={() => setFontPickerOpen(!fontPickerOpen)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  fontPickerOpen ? 'bg-primary text-primary-foreground' : 'bg-white/5 text-muted-foreground hover:bg-white/10'
+                }`}
+                title="Choose chat font"
+              >
+                <Type className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline" style={{ fontFamily: chatFont.family }}>{chatFont.name}</span>
+              </button>
+              <FontPicker
+                isOpen={fontPickerOpen}
+                onClose={() => setFontPickerOpen(false)}
+                selectedFont={chatFont}
+                onSelectFont={(font) => { setChatFont(font); setFontPickerOpen(false); }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Messages Scroll Area */}
@@ -1717,7 +1748,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 >
                   {msg.role === "assistant" ? (
                     <div ref={msg === messages[messages.length - 1] ? lastMessageRef : undefined}>
-                      <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} />
+                      <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} chatFont={chatFont.family} />
                     </div>
                   ) : (
                     <div>
