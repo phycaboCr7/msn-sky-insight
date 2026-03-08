@@ -87,13 +87,8 @@ const Index = () => {
         }
       );
     } else {
-      toast({
-        title: "Not Supported",
-        description: "Geolocation is not supported by this browser.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      setInitialLoading(false);
+      // Fallback to default location
+      fetchWeather("New Delhi");
     }
   };
 
