@@ -153,8 +153,8 @@ export const MoonPhaseCard = ({ weather }: MoonPhaseCardProps) => {
       
       <div className="flex flex-col items-center gap-4">
         {/* Large Moon Icon */}
-        <div className="text-6xl animate-pulse-slow">
-          {getMoonPhaseIcon(moon_phase)}
+        <div>
+          <MoonPhaseSVG phase={moon_phase} size={80} />
         </div>
         
         {/* Phase Name */}
