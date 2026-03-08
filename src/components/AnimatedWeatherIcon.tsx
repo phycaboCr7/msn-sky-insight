@@ -74,14 +74,30 @@ const SunnyIcon = ({ size }: { size: string }) => {
   );
 };
 
-const NightIcon = ({ size }: { size: string }) => (
-  <div className={cn(
-    "forecast__night",
-    size === "sm" && "scale-[0.4]",
-    size === "md" && "scale-[0.6]",
-    size === "lg" && "scale-100"
-  )} />
-);
+const NightIcon = ({ size }: { size: string }) => {
+  if (size === "sm") {
+    return (
+      <div
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, hsl(210 30% 85%) 0%, hsl(220 20% 70%) 100%)',
+          boxShadow: '0 0 12px 4px hsl(210 40% 70% / 0.5), inset -6px -3px 0 hsl(220 25% 50%)',
+          animation: 'moon-glow 4s ease-in-out infinite',
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className={cn(
+      "forecast__night",
+      size === "md" && "scale-[0.6]",
+      size === "lg" && "scale-100"
+    )} />
+  );
+};
 
 const CloudyIcon = ({ size }: { size: string }) => (
   <div className={cn(
