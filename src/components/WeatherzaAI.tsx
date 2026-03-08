@@ -1631,7 +1631,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar overflow-hidden rounded-3xl">
+        <div className="relative group/bar overflow-hidden rounded-3xl" style={{ boxShadow: '0 0 20px hsl(28 100% 60% / 0.3), 0 0 40px hsl(220 80% 60% / 0.15)' }}>
           {/* Animated border glow - thin border only */}
           <div
             ref={glowOuterRef}
