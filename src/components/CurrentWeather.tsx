@@ -7,10 +7,10 @@ import { Wind } from "lucide-react";
 import { useMemo } from "react";
 
 // Animated weather particles overlay
-const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: boolean }) => {
+const WeatherParticles = ({ condition, isDay, temp }: { condition: string; isDay: boolean; temp?: number }) => {
   const lc = condition.toLowerCase();
   const isRain = lc.includes('rain') || lc.includes('drizzle') || lc.includes('shower');
-  const isSnow = lc.includes('snow') || lc.includes('blizzard') || lc.includes('sleet') || lc.includes('ice');
+  const isSnow = lc.includes('snow') || lc.includes('blizzard') || lc.includes('sleet') || lc.includes('ice') || (temp !== undefined && temp < 0);
   const isThunder = lc.includes('thunder');
   const isCloudy = lc.includes('cloud') || lc.includes('overcast');
   const isFog = lc.includes('fog') || lc.includes('mist') || lc.includes('haze');
