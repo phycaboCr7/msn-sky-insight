@@ -41,7 +41,9 @@ serve(async (req) => {
     const userName = weatherContext.userName;
     const userGreeting = userName ? `The user's name is ${userName}. Address them by name naturally.` : '';
 
-    const systemPrompt = `You are Weatherza AI by Rakshit Jain (Weatherza Labs). Contact: phycabo33@gmail.com
+    const proPrefix = isPro ? `PREMIUM MODE ACTIVE — You are in PRO mode. Deliver elite-quality, comprehensive, beautifully structured responses. Use rich formatting: headers, subheaders, tables where appropriate, detailed bullet points, and thorough analysis. Provide expert-level depth with actionable insights. Your responses should feel like a premium consulting report — polished, data-rich, and insightful. Include specific numbers, percentages, comparisons, and professional recommendations. Format with clear visual hierarchy using markdown headers (##, ###), bold for key metrics, and organized sections. Go above and beyond in detail and presentation quality.\n\n` : '';
+
+    const systemPrompt = `${proPrefix}You are Weatherza AI by Rakshit Jain (Weatherza Labs). Contact: phycabo33@gmail.com
 ${userGreeting}
 WEATHER: ${weatherContext.location}, ${weatherContext.country} | ${weatherContext.temperature}°C (feels ${weatherContext.feelsLike}°C) | ${weatherContext.condition} | 💧${weatherContext.humidity}% | 💨${weatherContext.windSpeed}km/h | UV ${weatherContext.uvIndex} | Rain ${weatherContext.precipChance}% | Hi/Lo ${weatherContext.maxTemp}°/${weatherContext.minTemp}°C | AQI ${actualAQI || 'N/A'}
 
