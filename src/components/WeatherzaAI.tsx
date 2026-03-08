@@ -928,6 +928,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     return () => unsubscribe();
   }, []);
 
+  // Load initial chat font
+  useEffect(() => {
+    loadGoogleFont(chatFont);
+  }, []);
+
   // Persist prompt count
   useEffect(() => {
     localStorage.setItem(PROMPT_COUNT_KEY, String(promptCount));
