@@ -38,6 +38,21 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
     return [];
   }, [isRain, isThunder, isSnow]);
 
+  const starParticles = useMemo(() => {
+    if (!isDay) {
+      return Array.from({ length: 35 }, (_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 80}%`,
+        size: `${1 + Math.random() * 2.5}px`,
+        opacity: 0.2 + Math.random() * 0.6,
+        delay: `${Math.random() * 4}s`,
+        duration: `${1.5 + Math.random() * 2.5}s`,
+      }));
+    }
+    return [];
+  }, [isDay]);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-[6]">
       {(isRain || isThunder) && particles.map((p) => (
@@ -99,9 +114,16 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
           />
         </>
       )}
-      {!isDay && isSunny && [15, 35, 55, 75, 90].map((left, i) => (
-        <div key={i} className="absolute rounded-full bg-white"
-          style={{ width: `${2 + (i % 2)}px`, height: `${2 + (i % 2)}px`, left: `${left}%`, top: `${10 + i * 12}%`, opacity: 0.4, animation: `cwStarTwinkle ${1.5 + i * 0.3}s ease-in-out infinite`, animationDelay: `${i * 0.4}s` }}
+      {!isDay && starParticles.map((s) => (
+        <div key={s.id} className="absolute rounded-full"
+          style={{
+            width: s.size, height: s.size, left: s.left, top: s.top,
+            opacity: s.opacity,
+            background: s.id % 7 === 0 ? 'hsl(210 60% 90%)' : s.id % 5 === 0 ? 'hsl(45 80% 90%)' : 'white',
+            boxShadow: `0 0 ${parseInt(s.size) > 2 ? '4px' : '2px'} hsl(0 0% 100% / 0.4)`,
+            animation: `cwStarTwinkle ${s.duration} ease-in-out infinite`,
+            animationDelay: s.delay,
+          }}
         />
       ))}
     </div>
