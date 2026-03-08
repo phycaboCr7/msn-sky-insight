@@ -54,7 +54,8 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
     const timeoutId = setTimeout(async () => {
       setLoading(true);
       try {
-        const keywords = getWeatherKeywords(weather.current.condition.text);
+        const isDay = weather.current.is_day === 1;
+        const keywords = getWeatherKeywords(weather.current.condition.text, isDay);
         const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
           body: { query: keywords, category: 'nature', min_width: 1920, per_page: 20, image_type: 'photo', editors_choice: true },
         });
