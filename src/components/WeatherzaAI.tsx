@@ -47,10 +47,10 @@ const AIBackground = ({ weather }: { weather: WeatherData }) => {
   useEffect(() => {
     const fetchBg = async () => {
       try {
-        const queries = ['abstract technology dark', 'futuristic space nebula', 'dark galaxy stars cosmos', 'aurora borealis night sky'];
+        const queries = ['dramatic waterfall tropical rainforest', 'volcanic eruption lava ocean', 'northern lights mountain lake reflection', 'deep ocean bioluminescent underwater', 'lightning storm dramatic landscape', 'milky way mountain silhouette night'];
         const query = queries[Math.floor(Math.random() * queries.length)];
         const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
-          body: { query, category: 'science', min_width: 1280, per_page: 20, image_type: 'photo', editors_choice: true },
+          body: { query, category: 'nature', min_width: 1280, per_page: 20, image_type: 'photo', editors_choice: true },
         });
         if (!error && data?.hits?.length > 0) {
           const idx = Math.floor(Math.random() * Math.min(data.hits.length, 10));
@@ -75,8 +75,8 @@ const AIBackground = ({ weather }: { weather: WeatherData }) => {
         backgroundImage: `url(${bgImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.25,
-        filter: 'brightness(0.6)',
+        opacity: 0.35,
+        filter: 'brightness(0.5) contrast(1.4) saturate(1.6) blur(3px)',
       }}
     />
   );
