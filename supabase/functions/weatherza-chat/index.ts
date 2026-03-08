@@ -172,7 +172,7 @@ FORMATTING RULES (follow strictly):
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "google/gemini-2.5-pro",
+              model: "google/gemini-2.5-flash",
               messages: aiMessages,
               stream: true,
             }),
@@ -207,7 +207,7 @@ FORMATTING RULES (follow strictly):
           .filter(m => m.role !== "system")
           .map(m => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
 
-        const geminiModels = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"];
+        const geminiModels = ["gemini-2.5-flash", "gemini-2.0-flash"];
         for (const model of geminiModels) {
           try {
             const resp = await fetch(

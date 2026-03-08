@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -783,6 +783,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [aiMode, setAiMode] = useState<'weather' | 'code' | 'math' | 'conversation'>(() => {
     return (localStorage.getItem('weatherza-ai-mode') as any) || 'weather';
   });
@@ -1022,6 +1023,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
     const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
@@ -1029,6 +1033,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode }),
+      signal: controller.signal,
     });
 
     if (!resp.ok) {
@@ -1147,6 +1152,15 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         } catch { /* ignore */ }
       }
     }
+    abortControllerRef.current = null;
+  };
+
+  const stopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
   };
 
   const buildWeatherContext = () => {
@@ -1556,18 +1570,25 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               rows={2}
             />
           </div>
-          <Button 
-            data-send-btn
-            onClick={askAI} 
-            disabled={loading || isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
-            className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-          >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
+          {loading ? (
+            <Button
+              data-stop-btn
+              onClick={stopGeneration}
+              className="px-4 self-end bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 border-0"
+              title="Stop generating"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+            </Button>
+          ) : (
+            <Button 
+              data-send-btn
+              onClick={askAI} 
+              disabled={isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
+              className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+            >
               <Send className="w-4 h-4" />
-            )}
-          </Button>
+            </Button>
+          )}
         </div>
 
         {/* Voice Overlay */}
