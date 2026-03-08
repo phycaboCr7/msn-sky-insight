@@ -339,32 +339,52 @@ You have access to the full conversation history. Reference previous messages na
         });
       }
 
-      const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-            contents: geminiContents,
-            generationConfig: {
-              temperature: 0.4,
-              maxOutputTokens: 8192,
-            },
-          }),
-        }
-      );
+      // Try multiple Gemini models for reliability
+      const geminiModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
+      let geminiAnswer = "";
 
-      if (geminiResponse.ok) {
-        const geminiData = await geminiResponse.json();
-        const answer = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        if (answer) {
-          return new Response(JSON.stringify({ answer }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+      for (const model of geminiModels) {
+        try {
+          const geminiResponse = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: geminiContents,
+                generationConfig: {
+                  temperature: 0.4,
+                  maxOutputTokens: 8192,
+                },
+              }),
+            }
+          );
+
+          if (geminiResponse.ok) {
+            const geminiData = await geminiResponse.json();
+            geminiAnswer = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            if (geminiAnswer) {
+              console.log(`Gemini ${model} responded successfully`);
+              break;
+            }
+          } else {
+            const errText = await geminiResponse.text();
+            console.error(`Gemini ${model} error ${geminiResponse.status}:`, errText);
+            // Wait briefly before trying next model
+            await new Promise(r => setTimeout(r, 1000));
+          }
+        } catch (e) {
+          console.error(`Gemini ${model} fetch error:`, e);
         }
+      }
+
+      if (geminiAnswer) {
+        return new Response(JSON.stringify({ answer: geminiAnswer }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       } else {
-        console.error("Gemini error, falling back to Groq:", geminiResponse.status);
+        console.error("All Gemini models failed, falling back to Groq");
       }
     }
 
