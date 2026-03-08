@@ -61,7 +61,7 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
         left: `${Math.random() * 60}%`,
         delay: `${i * 4 + Math.random() * 3}s`,
         duration: `${0.8 + Math.random() * 0.4}s`,
-        angle: 15 + Math.random() * 30,
+        angle: 30 + Math.random() * 20,
         length: 60 + Math.random() * 40,
       }));
     }
