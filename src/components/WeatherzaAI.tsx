@@ -893,15 +893,16 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const glowInnerRef = useRef<HTMLDivElement>(null);
   // Voice refs removed — now using Groq Whisper via MediaRecorder in VoiceOverlay
 
-  // JS-driven rotating glow animation
+  // JS-driven rotating glow animation — dual layer (sharp border + blurred glow)
   useEffect(() => {
     let angle = 0;
     let rafId: number;
     const animate = () => {
-      angle = (angle + 0.8) % 360;
+      angle = (angle + 0.6) % 360;
       const val = `${angle}deg`;
-      const gradient = `conic-gradient(from ${val}, hsl(28 100% 60%), hsl(280 80% 55%), hsl(260 70% 50%), hsl(220 80% 60%), hsl(28 100% 60%))`;
-      glowOuterRef.current?.style.setProperty('background', gradient);
+      const gradient = `conic-gradient(from ${val}, #ff4da6, #c026d3, #7c3aed, #4338ca, #7c3aed, #c026d3, #d97706, #f59e0b, #d97706, #c026d3, #7c3aed, #ff4da6)`;
+      if (glowOuterRef.current) glowOuterRef.current.style.background = gradient;
+      if (glowInnerRef.current) glowInnerRef.current.style.background = gradient;
       rafId = requestAnimationFrame(animate);
     };
     rafId = requestAnimationFrame(animate);
