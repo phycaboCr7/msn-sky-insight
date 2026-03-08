@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.pixabay-proxy]
 verify_jwt = false
+
+[functions.stock-proxy]
+verify_jwt = false
