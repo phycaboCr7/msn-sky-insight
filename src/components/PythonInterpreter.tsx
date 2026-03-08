@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, X, ExternalLink, Terminal, Trash2, Copy, Check, Image, Code } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Loader2, X, ExternalLink, Terminal, Trash2, Copy, Check, Image } from "lucide-react";
 
 interface PythonInterpreterProps {
   initialCode?: string;
@@ -14,40 +13,11 @@ interface HistoryEntry {
   imageUrl?: string;
 }
 
-// Visualization libraries that produce graphical output
-const VISUAL_LIBRARIES = [
-  'matplotlib', 'plt', 'pyplot',
-  'turtle',
-  'plotly',
-  'seaborn', 'sns',
-  'bokeh',
-  'altair',
-  'pygal',
-  'pillow', 'PIL', 'Image',
-  'cv2', 'opencv',
-  'skimage',
-  'pygame',
-  'tkinter',
-  'manim',
-  'mayavi',
-  'vispy',
-  'vpython',
-  'networkx',
-  'wordcloud',
-  'folium',
-  'geopandas',
-  'cartopy'
-];
-
-// Check if code contains visualization libraries
-function containsVisualization(code: string): boolean {
-  const lowerCode = code.toLowerCase();
-  return VISUAL_LIBRARIES.some(lib => 
-    lowerCode.includes(`import ${lib}`) || 
-    lowerCode.includes(`from ${lib}`) ||
-    lowerCode.includes(`${lib}.`) ||
-    lowerCode.includes(`as ${lib}`)
-  );
+declare global {
+  interface Window {
+    loadPyodide: any;
+    pyodide: any;
+  }
 }
 
 export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInterpreterProps) => {
@@ -57,9 +27,11 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [copied, setCopied] = useState(false);
-  const [generatingImage, setGeneratingImage] = useState(false);
+  const [pyodideReady, setPyodideReady] = useState(false);
+  const [loadingPyodide, setLoadingPyodide] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
+  const pyodideRef = useRef<any>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -73,107 +45,165 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
     inputRef.current?.focus();
   }, []);
 
-  // Run initial code if provided
+  // Load Pyodide
   useEffect(() => {
-    if (initialCode) {
-      const isVisual = containsVisualization(initialCode);
+    const loadPyodideEngine = async () => {
+      setLoadingPyodide(true);
       setHistory([
-        { type: 'info', content: `🐍 ${language.toUpperCase()} Interactive Shell` },
-        { type: 'info', content: isVisual ? `Detected visualization code. Generating image...` : `Running initial code from AI...` },
-        { type: 'input', content: initialCode }
+        { type: 'info', content: '🐍 PYTHON Interactive Shell' },
+        { type: 'info', content: 'Loading Python engine...' },
       ]);
-      executeCode(initialCode);
-    } else {
-      setHistory([
-        { type: 'info', content: `🐍 ${language.toUpperCase()} Interactive Shell` },
-        { type: 'info', content: `Type your code and press Enter to execute.` },
-        { type: 'info', content: `📊 Matplotlib, Turtle, Seaborn, etc. will generate AI visualizations!` }
-      ]);
+
+      try {
+        // Load Pyodide script if not already loaded
+        if (!window.loadPyodide) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load Pyodide'));
+            document.head.appendChild(script);
+          });
+        }
+
+        const pyodide = await window.loadPyodide({
+          indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/',
+        });
+
+        // Pre-load common packages
+        await pyodide.loadPackage(['numpy', 'matplotlib', 'scipy', 'sympy']);
+        
+        // Setup matplotlib AGG backend
+        await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use('AGG')
+import matplotlib.pyplot as plt
+import io, base64
+
+def get_plot_as_base64():
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', 
+                facecolor='#1a1a2e', edgecolor='none', pad_inches=0.1)
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode()
+    plt.close('all')
+    return img_str
+`);
+        
+        pyodideRef.current = pyodide;
+        setPyodideReady(true);
+        setHistory(prev => [
+          ...prev,
+          { type: 'info', content: '✅ Python engine ready! NumPy, Matplotlib, SciPy, SymPy loaded.' },
+          { type: 'info', content: 'Type your code and press Enter to execute. Use Shift+Enter for multiline.' },
+        ]);
+
+        // Run initial code if provided
+        if (initialCode) {
+          setHistory(prev => [
+            ...prev,
+            { type: 'info', content: 'Running initial code...' },
+            { type: 'input', content: initialCode },
+          ]);
+          await executeCodeInternal(pyodide, initialCode);
+        }
+      } catch (e: any) {
+        setHistory(prev => [
+          ...prev,
+          { type: 'error', content: `❌ Failed to load Python engine: ${e.message}` },
+        ]);
+      } finally {
+        setLoadingPyodide(false);
+      }
+    };
+
+    loadPyodideEngine();
+  }, []);
+
+  const executeCodeInternal = useCallback(async (pyodide: any, code: string) => {
+    try {
+      // Sanitize markdown artifacts
+      let cleanCode = code.replace(/\*\*(\d+(?:\.\d+)?)\*\*/g, '$1');
+      
+      // Capture stdout
+      await pyodide.runPythonAsync(`
+import sys
+from io import StringIO
+_stdout_capture = StringIO()
+sys.stdout = _stdout_capture
+`);
+
+      // Check if code has matplotlib plots
+      const hasPlot = /plt\.(show|savefig|plot|bar|scatter|hist|pie|contour|imshow|figure)|\.plot\(|\.bar\(/.test(cleanCode);
+      
+      if (hasPlot) {
+        // Add plot capture at the end
+        cleanCode = cleanCode.replace(/plt\.show\(\)/g, '');
+        cleanCode += '\n_plot_img = get_plot_as_base64()';
+      }
+
+      await pyodide.runPythonAsync(cleanCode);
+
+      // Get stdout
+      const stdout = await pyodide.runPythonAsync(`
+sys.stdout = sys.__stdout__
+_stdout_capture.getvalue()
+`);
+
+      if (stdout && stdout.trim()) {
+        setHistory(prev => [...prev, { type: 'output', content: stdout.trim() }]);
+      }
+
+      // Check for plot image
+      if (hasPlot) {
+        const imgData = await pyodide.runPythonAsync(`_plot_img if '_plot_img' in dir() else None`);
+        if (imgData) {
+          setHistory(prev => [
+            ...prev,
+            { type: 'image', content: 'Generated plot:', imageUrl: `data:image/png;base64,${imgData}` },
+          ]);
+        }
+      }
+
+      if (!stdout?.trim() && !hasPlot) {
+        // Check if last expression has a value
+        try {
+          const result = await pyodide.runPythonAsync(`
+_last = None
+try:
+    _last = repr(${cleanCode.split('\n').pop()?.trim() || 'None'})
+except:
+    pass
+_last
+`);
+          if (result && result !== 'None') {
+            setHistory(prev => [...prev, { type: 'output', content: result }]);
+          }
+        } catch {
+          // No displayable result, that's fine
+        }
+      }
+    } catch (e: any) {
+      const errorMsg = e.message || String(e);
+      // Clean up the Pyodide traceback for readability
+      const cleanError = errorMsg
+        .replace(/PythonError: /g, '')
+        .replace(/File "<exec>", /g, 'Line ');
+      setHistory(prev => [...prev, { type: 'error', content: `❌ ${cleanError}` }]);
     }
   }, []);
 
-  const executeVisualCode = async (code: string) => {
-    setGeneratingImage(true);
-    setHistory(prev => [...prev, { type: 'info', content: '🎨 Generating visualization with AI...' }]);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('execute-visual-python', {
-        body: { code }
-      });
-
-      if (error) {
-        setHistory(prev => [...prev, { type: 'error', content: `❌ Error: ${error.message}` }]);
-        return false;
-      } else if (data?.error) {
-        // If not a visualization, return false to try regular execution
-        if (data.isVisual === false) {
-          return false;
-        }
-        setHistory(prev => [...prev, { type: 'error', content: `❌ ${data.error}` }]);
-        return true;
-      } else if (data?.imageUrl) {
-        setHistory(prev => [...prev, 
-          { type: 'info', content: `✅ Visualization generated: ${data.description || 'Python plot'}` },
-          { type: 'image', content: 'Generated visualization:', imageUrl: data.imageUrl }
-        ]);
-        if (data.message) {
-          setHistory(prev => [...prev, { type: 'output', content: data.message }]);
-        }
-        return true;
-      }
-      return false;
-    } catch (e: any) {
-      setHistory(prev => [...prev, { type: 'error', content: `❌ ${e.message}` }]);
-      return true;
-    } finally {
-      setGeneratingImage(false);
-    }
-  };
-
-  const executeCode = async (code: string) => {
+  const executeCode = useCallback(async (code: string) => {
+    if (!pyodideRef.current) return;
     setIsExecuting(true);
-    
-    // Check if this is visualization code
-    if (language === 'python' || language === 'py') {
-      if (containsVisualization(code)) {
-        const handled = await executeVisualCode(code);
-        if (handled) {
-          setIsExecuting(false);
-          inputRef.current?.focus();
-          return;
-        }
-        // If not handled, fall through to regular execution
-        setHistory(prev => [...prev, { type: 'info', content: '📝 Falling back to text execution...' }]);
-      }
-    }
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('execute-code', {
-        body: { code, language }
-      });
-
-      if (error) {
-        setHistory(prev => [...prev, { type: 'error', content: `❌ Error: ${error.message}` }]);
-      } else if (data?.error) {
-        setHistory(prev => [...prev, { type: 'error', content: `❌ ${data.error}` }]);
-      } else {
-        const output = data.output || '(no output)';
-        setHistory(prev => [...prev, { 
-          type: data.hasError ? 'error' : 'output', 
-          content: output 
-        }]);
-      }
-    } catch (e: any) {
-      setHistory(prev => [...prev, { type: 'error', content: `❌ ${e.message}` }]);
-    } finally {
-      setIsExecuting(false);
-      inputRef.current?.focus();
-    }
-  };
+    await executeCodeInternal(pyodideRef.current, code);
+    setIsExecuting(false);
+    inputRef.current?.focus();
+  }, [executeCodeInternal]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isExecuting) return;
+    if (!input.trim() || isExecuting || !pyodideReady) return;
 
     const code = input.trim();
     setHistory(prev => [...prev, { type: 'input', content: code }]);
@@ -206,8 +236,8 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
 
   const clearHistory = () => {
     setHistory([
-      { type: 'info', content: `🐍 ${language.toUpperCase()} Interactive Shell` },
-      { type: 'info', content: `Console cleared. Type your code and press Enter.` }
+      { type: 'info', content: '🐍 PYTHON Interactive Shell' },
+      { type: 'info', content: 'Console cleared. Type your code and press Enter.' },
     ]);
   };
 
@@ -222,9 +252,7 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
   };
 
   const openInNewTab = () => {
-    // Find any images in history
     const images = history.filter(h => h.type === 'image' && h.imageUrl);
-    
     const fullContent = history.map(h => {
       if (h.type === 'input') return `>>> ${h.content}`;
       if (h.type === 'info') return `# ${h.content}`;
@@ -232,48 +260,19 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
       return h.content;
     }).join('\n');
 
-    const imageHtml = images.map(img => 
+    const imageHtml = images.map(img =>
       `<div style="margin: 20px 0; text-align: center;">
         <p style="color: #888; margin-bottom: 10px;">${img.content}</p>
         <img src="${img.imageUrl}" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);" />
       </div>`
     ).join('');
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${language.toUpperCase()} Interpreter Output</title>
-        <style>
-          body { 
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; 
-            background: #1a1a2e; 
-            color: #eee; 
-            padding: 20px; 
-            line-height: 1.6;
-          }
-          pre {
-            white-space: pre-wrap;
-            margin: 0;
-          }
-          .prompt { color: #00d4ff; }
-          .error { color: #ff6b6b; }
-          .info { color: #888; font-style: italic; }
-        </style>
-      </head>
-      <body>
-        <pre>${fullContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-        ${imageHtml}
-      </body>
-      </html>
-    `;
+    const htmlContent = `<!DOCTYPE html><html><head><title>Python Shell Output</title>
+      <style>body{font-family:'Monaco','Menlo',monospace;background:#1a1a2e;color:#eee;padding:20px;line-height:1.6}
+      pre{white-space:pre-wrap;margin:0}.prompt{color:#00d4ff}.error{color:#ff6b6b}.info{color:#888;font-style:italic}</style>
+      </head><body><pre>${fullContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>${imageHtml}</body></html>`;
     const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-  };
-
-  const openImageInNewTab = (imageUrl: string) => {
-    window.open(imageUrl, '_blank');
+    window.open(URL.createObjectURL(blob), '_blank');
   };
 
   return (
@@ -283,47 +282,35 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
         <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-b border-white/10">
           <div className="flex items-center gap-3">
             <Terminal className="w-5 h-5 text-green-400" />
-            <span className="font-semibold text-white">{language.toUpperCase()} Interactive Shell</span>
-            {(isExecuting || generatingImage) && (
+            <span className="font-semibold text-white">🐍 PYTHON Interactive Shell</span>
+            {(isExecuting || loadingPyodide) && (
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-green-400" />
-                {generatingImage && <span className="text-xs text-green-400">Generating visualization...</span>}
+                <span className="text-xs text-green-400">
+                  {loadingPyodide ? 'Loading Python...' : 'Executing...'}
+                </span>
               </div>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={clearHistory}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white/10 hover:bg-white/20 text-white/70 rounded-lg transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              Clear
+            <button onClick={clearHistory} className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white/10 hover:bg-white/20 text-white/70 rounded-lg transition-colors">
+              <Trash2 className="w-4 h-4" /> Clear
             </button>
-            <button
-              onClick={copyOutput}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white/10 hover:bg-white/20 text-white/70 rounded-lg transition-colors"
-            >
+            <button onClick={copyOutput} className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white/10 hover:bg-white/20 text-white/70 rounded-lg transition-colors">
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copied ? 'Copied' : 'Copy'}
             </button>
-            <button
-              onClick={openInNewTab}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-              New Tab
+            <button onClick={openInNewTab} className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-colors">
+              <ExternalLink className="w-4 h-4" /> New Tab
             </button>
-            <button
-              onClick={onClose}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-            >
+            <button onClick={onClose} className="p-1.5 hover:bg-white/10 rounded-lg transition-colors">
               <X className="w-5 h-5 text-white/70" />
             </button>
           </div>
         </div>
-        
+
         {/* Terminal Output */}
-        <div 
+        <div
           ref={outputRef}
           className="flex-1 overflow-auto p-4 font-mono text-sm space-y-2"
           onClick={() => inputRef.current?.focus()}
@@ -338,23 +325,22 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
                       <span className="text-sm">{entry.content}</span>
                     </div>
                     <button
-                      onClick={() => openImageInNewTab(entry.imageUrl!)}
+                      onClick={() => window.open(entry.imageUrl!, '_blank')}
                       className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded transition-colors"
                     >
-                      <ExternalLink className="w-3 h-3" />
-                      Open Full Size
+                      <ExternalLink className="w-3 h-3" /> Open Full Size
                     </button>
                   </div>
-                  <img 
-                    src={entry.imageUrl} 
+                  <img
+                    src={entry.imageUrl}
                     alt="Generated visualization"
                     className="w-full max-w-2xl mx-auto rounded-lg shadow-lg border border-white/10"
                   />
                 </div>
               ) : (
                 <div className={`${
-                  entry.type === 'input' ? 'text-cyan-400' : 
-                  entry.type === 'error' ? 'text-red-400' : 
+                  entry.type === 'input' ? 'text-cyan-400' :
+                  entry.type === 'error' ? 'text-red-400' :
                   entry.type === 'info' ? 'text-gray-500 italic' :
                   'text-green-300'
                 }`}>
@@ -366,7 +352,7 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
               )}
             </div>
           ))}
-          
+
           {/* Input Line */}
           <form onSubmit={handleSubmit} className="flex items-start gap-0">
             <span className="text-yellow-400">{'>>> '}</span>
@@ -376,19 +362,19 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={isExecuting || generatingImage}
+              disabled={isExecuting || loadingPyodide}
               className="flex-1 bg-transparent text-cyan-400 outline-none font-mono"
-              placeholder={isExecuting ? "Executing..." : generatingImage ? "Generating image..." : "Type code here..."}
+              placeholder={loadingPyodide ? "Loading Python engine..." : isExecuting ? "Executing..." : "Type code here..."}
               autoFocus
             />
-            {(isExecuting || generatingImage) && <Loader2 className="w-4 h-4 animate-spin text-green-400 ml-2" />}
+            {isExecuting && <Loader2 className="w-4 h-4 animate-spin text-green-400 ml-2" />}
           </form>
         </div>
 
-        {/* Footer with tips */}
+        {/* Footer */}
         <div className="px-4 py-2 bg-black/30 border-t border-white/10 text-xs text-gray-500 flex items-center justify-between">
-          <span>Press Enter to execute • ↑↓ for command history • 📊 Matplotlib/Turtle generates AI images</span>
-          <span className="text-green-400/70">Powered by Piston API + AI Vision</span>
+          <span>Press Enter to execute · ↑↓ for command history · 📊 Matplotlib generates inline plots</span>
+          <span className="text-green-400/70">⚡ Powered by Pyodide (In-Browser Python)</span>
         </div>
       </div>
     </div>
