@@ -94,11 +94,14 @@ export const AirQualityCard = ({ weather }: AirQualityCardProps) => {
   const markerPercent = Math.min((actualAQI / 500) * 100, 100);
 
   return (
-    <div className={`rounded-3xl overflow-visible animate-fade-in shadow-xl border border-white/10 bg-gradient-to-br ${aqiLevel.gradient} relative`}>
+    <div
+      className="rounded-3xl overflow-visible animate-fade-in shadow-xl border border-white/10 relative"
+      style={{ background: `linear-gradient(to bottom, ${aqiLevel.bgFrom} 0%, ${aqiLevel.bgTo} 100%)` }}
+    >
       {/* Monument silhouette background */}
       <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
         <MonumentsSilhouette />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/[0.04] via-transparent to-black/20" />
       </div>
 
       {/* Main content */}
