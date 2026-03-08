@@ -332,7 +332,7 @@ def get_plot_as_base64():
         
         if (!stdout?.trim() && !hasPlot) addLine('(executed)', 'info-line');
       } catch (e) {
-        addLine('❌ ' + (e.message || String(e)).replace(/PythonError: /g, ''), 'error-line');
+        addLine('Error: ' + (e.message || String(e)).replace(/PythonError: /g, ''), 'error-line');
       }
     }
   <\/script>
