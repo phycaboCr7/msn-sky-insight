@@ -34,7 +34,7 @@ export const MoonPhaseCard = ({ weather }: MoonPhaseCardProps) => {
   if (!astro) return null;
 
   const { moon_phase, moon_illumination, moonrise, moonset } = astro;
-  const illum = parseInt(moon_illumination) || 0;
+  const illum = parseInt(String(moon_illumination)) || 0;
   const nextPhase = getNextPhase(moon_phase);
 
   // SVG ring for illumination
