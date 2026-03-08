@@ -777,15 +777,19 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Voice refs removed — now using Groq Whisper via MediaRecorder in VoiceOverlay
 
-  // Auto-scroll to bottom — debounced to prevent shaking during streaming
+  // Auto-scroll chat container only — debounced to prevent shaking during streaming
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     scrollTimeoutRef.current = setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      const container = messagesContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
     }, 150);
     return () => { if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current); };
   }, [messages]);
@@ -1316,6 +1320,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
           {/* Messages Scroll Area */}
           <div 
+            ref={messagesContainerRef}
             className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
             style={{ minHeight: 0 }}
           >
