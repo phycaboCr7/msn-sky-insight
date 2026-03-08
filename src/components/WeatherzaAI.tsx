@@ -1631,24 +1631,18 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar">
-          {/* Animated multi-color glow ring - Lovable style (JS-driven rotation) */}
+        <div className="relative group/bar overflow-hidden rounded-2xl">
+          {/* Animated border glow - thin border only, no blur spread */}
           <div
             ref={glowOuterRef}
-            className="absolute -inset-[3px] rounded-[18px] opacity-60 group-hover/bar:opacity-100 transition-opacity duration-500 pointer-events-none"
-            style={{
-              background: 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)',
-              filter: 'blur(12px)',
-            }}
-          />
-          <div
-            ref={glowInnerRef}
-            className="absolute -inset-[1.5px] rounded-[17px] pointer-events-none"
+            className="absolute inset-0 rounded-2xl pointer-events-none"
             style={{
               background: 'conic-gradient(from 0deg, #ff4500, #ff8c00, #ffd700, #32cd32, #00bfff, #8b5cf6, #d946ef, #ff4500)',
             }}
           />
-        <div className="relative bg-black/60 backdrop-blur-2xl rounded-2xl border-0 p-2 flex items-end gap-2 z-10">
+          {/* This ref is kept for JS animation compatibility */}
+          <div ref={glowInnerRef} className="hidden" />
+        <div className="relative m-[2px] bg-black/80 backdrop-blur-2xl rounded-[14px] border-0 p-2 flex items-end gap-2 z-10">
           <input
             type="file"
             ref={fileInputRef}
