@@ -230,7 +230,7 @@ const CodeBlock = ({
   <div class="output" id="output">
     <div class="info-line">🐍 ${lang.toUpperCase()} Interactive Shell</div>
     <div class="info-line">Running code...</div>
-    <div class="input-line"><span class="prompt">&gt;&gt;&gt; </span><pre style="display:inline">${children.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
+    <div class="input-line"><span class="prompt">&gt;&gt;&gt; </span><pre style="display:inline">${editableCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></div>
     <div class="loading" id="loading">⏳ Executing...</div>
   </div>
   <div class="footer">Press Ctrl+W to close • Powered by Piston API</div>
