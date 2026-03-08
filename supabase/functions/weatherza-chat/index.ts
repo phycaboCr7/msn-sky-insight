@@ -306,10 +306,69 @@ You have access to the full conversation history. Reference previous messages na
       })),
     ];
 
-    // Use Groq for all queries
+    // Detect coding tasks
+    const lastUserMsg = (messages[messages.length - 1]?.content || "").toLowerCase();
+    const codingKeywords = [
+      "code", "function", "program", "script", "algorithm", "debug", "fix this",
+      "write a", "implement", "refactor", "compile", "syntax", "error in",
+      "javascript", "python", "typescript", "java", "c++", "rust", "html", "css",
+      "react", "node", "api", "endpoint", "database", "query", "sql",
+      "class", "object", "array", "loop", "recursive", "sort", "search",
+      "regex", "parse", "convert", "generate code", "build a", "create a program",
+      "data structure", "binary", "stack", "queue", "linked list", "tree",
+      "explain this code", "how to code", "coding", "programming", "developer",
+      "git", "deploy", "server", "frontend", "backend", "fullstack",
+      "matplotlib", "plot", "graph", "turtle", "visualization",
+    ];
+    const isCodingTask = codingKeywords.some(kw => lastUserMsg.includes(kw));
+
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+
+    // Route coding tasks to Gemini for superior code generation
+    if (isCodingTask && GEMINI_API_KEY) {
+      console.log("Coding task detected, routing to Gemini");
+
+      // Convert messages to Gemini format
+      const geminiContents = [];
+      // Add system instruction as first user message for Gemini
+      for (const msg of aiMessages) {
+        if (msg.role === "system") continue; // handled via systemInstruction
+        geminiContents.push({
+          role: msg.role === "assistant" ? "model" : "user",
+          parts: [{ text: msg.content }],
+        });
+      }
+
+      const geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: geminiContents,
+            generationConfig: {
+              temperature: 0.4,
+              maxOutputTokens: 8192,
+            },
+          }),
+        }
+      );
+
+      if (geminiResponse.ok) {
+        const geminiData = await geminiResponse.json();
+        const answer = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (answer) {
+          return new Response(JSON.stringify({ answer }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else {
+        console.error("Gemini error, falling back to Groq:", geminiResponse.status);
+      }
+    }
 
     // Default: use Groq Llama for general queries (ultra-low latency)
-    // Retry logic for rate limits
     const maxRetries = 3;
     let response: Response | null = null;
     for (let attempt = 0; attempt < maxRetries; attempt++) {
