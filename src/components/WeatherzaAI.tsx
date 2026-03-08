@@ -4,14 +4,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
+
+const FREE_PROMPT_LIMIT = 4;
+const PROMPT_COUNT_KEY = 'weatherza-prompt-count';
 
 // Lazy load PyodideRunner for graph visualization
 const PyodideRunner = lazy(() => import("@/components/python-visualizer"));
@@ -893,8 +897,78 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const glowOuterRef = useRef<HTMLDivElement>(null);
   const glowInnerRef = useRef<HTMLDivElement>(null);
 
-  // Pro Mode toggle handler
+  // Auth state
+  const [authUser, setAuthUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [promptCount, setPromptCount] = useState<number>(() => {
+    return parseInt(localStorage.getItem(PROMPT_COUNT_KEY) || '0', 10);
+  });
+  const [showSignInGate, setShowSignInGate] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+
+  const isSignedIn = !!authUser;
+  const remainingFreePrompts = Math.max(0, FREE_PROMPT_LIMIT - promptCount);
+
+  // Listen to auth state
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setAuthUser({ id: session.user.id, name, email: session.user.email || '' });
+        setShowSignInGate(false);
+      } else {
+        setAuthUser(null);
+        // If not signed in, also disable pro mode
+        setProMode(false);
+        localStorage.setItem('weatherza-pro-mode', 'false');
+      }
+    });
+
+    // Check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setAuthUser({ id: session.user.id, name, email: session.user.email || '' });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Persist prompt count
+  useEffect(() => {
+    localStorage.setItem(PROMPT_COUNT_KEY, String(promptCount));
+  }, [promptCount]);
+
+  // Google sign in handler
+  const handleGoogleSignIn = async () => {
+    setSigningIn(true);
+    try {
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error("Sign in error:", err);
+      toast({ title: "Sign-in failed", description: "Could not sign in with Google. Try again.", variant: "destructive" });
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  // Sign out handler
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setAuthUser(null);
+    toast({ title: "Signed out", description: "You've been signed out." });
+  };
+
+  // Pro Mode toggle handler — only for signed-in users
   const toggleProMode = () => {
+    if (!isSignedIn) {
+      setShowSignInGate(true);
+      toast({ title: "Sign in required", description: "Pro Mode is available for signed-in users only.", variant: "destructive" });
+      return;
+    }
     const next = !proMode;
     setProMode(next);
     localStorage.setItem('weatherza-pro-mode', String(next));
@@ -1315,7 +1389,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       maxTemp: weather.forecast?.forecastday[0]?.day.maxtemp_c,
       minTemp: weather.forecast?.forecastday[0]?.day.mintemp_c,
       aqi: actualAQI,
-      pm25: pm25
+      pm25: pm25,
+      userName: authUser?.name || undefined,
     };
   };
 
@@ -1324,8 +1399,21 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     setQuestion(text);
   };
 
+  // Check if user can send a prompt
+  const canSendPrompt = (): boolean => {
+    if (isSignedIn) return true;
+    if (promptCount >= FREE_PROMPT_LIMIT) {
+      setShowSignInGate(true);
+      return false;
+    }
+    return true;
+  };
+
   const handleVoiceSend = (text: string) => {
     if (!text.trim()) return;
+    if (!canSendPrompt()) return;
+
+    if (!isSignedIn) setPromptCount(prev => prev + 1);
 
     const userMessage: Message = { id: genMsgId(), role: "user", content: text.trim() };
     const updatedMessages = [...messages, userMessage];
@@ -1346,6 +1434,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   const askAI = async () => {
     if (!question.trim() && !uploadedImage && !extractedDocText) return;
+    if (!canSendPrompt()) return;
+
+    if (!isSignedIn) setPromptCount(prev => prev + 1);
 
     let messageContent = question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document");
 
@@ -1519,10 +1610,71 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 Clear
               </button>
             )}
+            {/* Auth: Sign in / User info */}
+            {isSignedIn ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-primary font-semibold truncate max-w-[80px]">{authUser.name}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
+                  title="Sign out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleGoogleSignIn}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                Sign in
+              </button>
+            )}
+            {/* Free prompt counter for non-signed-in users */}
+            {!isSignedIn && (
+              <span className="text-[10px] text-muted-foreground/70 px-1">
+                {remainingFreePrompts}/{FREE_PROMPT_LIMIT} free
+              </span>
+            )}
           </div>
         </div>
       </CardHeader>
       <CardContent className="relative z-10 px-4 pb-8 pt-2 overflow-visible">
+        {/* Sign-in gate overlay */}
+        {showSignInGate && !isSignedIn && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md rounded-3xl">
+            <div className="text-center p-8 max-w-sm">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/30 to-purple-500/20 flex items-center justify-center">
+                <Crown className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                Free Limit Reached
+              </h3>
+              <p className="text-muted-foreground text-sm mb-6">
+                You've used all {FREE_PROMPT_LIMIT} free prompts. Sign in with Google to unlock unlimited AI access, Pro Mode, and memory.
+              </p>
+              <button
+                onClick={handleGoogleSignIn}
+                disabled={signingIn}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all active:scale-95 disabled:opacity-50 text-white"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(280 70% 50%))',
+                  boxShadow: '0 0 20px hsl(28 100% 55% / 0.3)',
+                }}
+              >
+                {signingIn ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                {signingIn ? 'Signing in...' : 'Sign in with Google'}
+              </button>
+              <button
+                onClick={() => setShowSignInGate(false)}
+                className="mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh' }}>
         {/* Mode Selector */}
