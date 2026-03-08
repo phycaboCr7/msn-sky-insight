@@ -527,13 +527,14 @@ const generatePDF = async (content: string, _elementRef?: HTMLElement | null, fi
   // 7. Wait for KaTeX and images to render
   await new Promise(r => setTimeout(r, 500));
 
-  // 8. Capture with html2canvas
-  const canvas = await html2canvas(container, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-  });
+   // 8. Capture with html2canvas (dynamically loaded)
+   const html2canvas = await loadHtml2canvas();
+   const canvas = await html2canvas(container, {
+     scale: 2,
+     useCORS: true,
+     backgroundColor: '#ffffff',
+     logging: false,
+   });
 
   // 9. Cleanup DOM
   root.unmount();
