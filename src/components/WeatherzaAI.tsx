@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -908,30 +908,21 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const isSignedIn = !!authUser;
   const remainingFreePrompts = Math.max(0, FREE_PROMPT_LIMIT - promptCount);
 
-  // Listen to auth state
+  // Listen to Firebase auth state
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User';
-        setAuthUser({ id: session.user.id, name, email: session.user.email || '' });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const name = user.displayName || user.email?.split('@')[0] || 'User';
+        setAuthUser({ id: user.uid, name, email: user.email || '' });
         setShowSignInGate(false);
       } else {
         setAuthUser(null);
-        // If not signed in, also disable pro mode
         setProMode(false);
         localStorage.setItem('weatherza-pro-mode', 'false');
       }
     });
 
-    // Check existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User';
-        setAuthUser({ id: session.user.id, name, email: session.user.email || '' });
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   // Persist prompt count
@@ -939,14 +930,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     localStorage.setItem(PROMPT_COUNT_KEY, String(promptCount));
   }, [promptCount]);
 
-  // Google sign in handler
+  // Google sign in handler (Firebase)
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (error) throw error;
+      await loginWithGoogle();
     } catch (err) {
       console.error("Sign in error:", err);
       toast({ title: "Sign-in failed", description: "Could not sign in with Google. Try again.", variant: "destructive" });
@@ -955,9 +943,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
   };
 
-  // Sign out handler
+  // Sign out handler (Firebase)
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await logoutUser();
     setAuthUser(null);
     toast({ title: "Signed out", description: "You've been signed out." });
   };
