@@ -7,10 +7,10 @@ import { Wind } from "lucide-react";
 import { useMemo } from "react";
 
 // Animated weather particles overlay
-const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: boolean }) => {
+const WeatherParticles = ({ condition, isDay, temp }: { condition: string; isDay: boolean; temp?: number }) => {
   const lc = condition.toLowerCase();
   const isRain = lc.includes('rain') || lc.includes('drizzle') || lc.includes('shower');
-  const isSnow = lc.includes('snow') || lc.includes('blizzard') || lc.includes('sleet') || lc.includes('ice');
+  const isSnow = lc.includes('snow') || lc.includes('blizzard') || lc.includes('sleet') || lc.includes('ice') || (temp !== undefined && temp < 0);
   const isThunder = lc.includes('thunder');
   const isCloudy = lc.includes('cloud') || lc.includes('overcast');
   const isFog = lc.includes('fog') || lc.includes('mist') || lc.includes('haze');
@@ -90,16 +90,20 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
         />
       )}
       {isSnow && particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full opacity-60"
-          style={{
-            left: p.left, top: '-10px', width: p.size, height: p.size,
-            background: 'white', boxShadow: '0 0 6px hsl(0 0% 100% / 0.6)',
-            animation: `cwSnowFall ${p.duration} linear infinite`,
-            animationDelay: p.delay,
-          }}
-        />
+        <div key={p.id} className="absolute" style={{ left: p.left, top: '-10px' }}>
+          {/* Snowflake shape */}
+          <div
+            className="text-white/70"
+            style={{
+              fontSize: p.size || '8px',
+              animation: `cwSnowFall ${p.duration} linear infinite`,
+              animationDelay: p.delay,
+              filter: 'drop-shadow(0 0 4px hsl(210 80% 90% / 0.6))',
+            }}
+          >
+            ❄
+          </div>
+        </div>
       ))}
       {isSunny && isDay && (
         <div className="absolute -top-20 -right-20 w-64 h-64 opacity-20"
@@ -226,7 +230,7 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
     <WeatherCard className="p-4 sm:p-6 lg:p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
       {/* Location background image */}
       <LocationBackground weather={weather} />
-      <WeatherParticles condition={current.condition.text} isDay={isDay} />
+      <WeatherParticles condition={current.condition.text} isDay={isDay} temp={current.temp_c} />
       
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none z-5" />

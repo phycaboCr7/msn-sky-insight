@@ -24,7 +24,7 @@ export const AnimatedWeatherIcon = ({
   const getWeatherType = () => {
     const lowerCondition = condition.toLowerCase();
     
-    if (temp !== undefined && temp < 5) return "snow";
+    if (temp !== undefined && temp < 0) return "snow";
     if (lowerCondition.includes('snow')) return "snow";
     if (lowerCondition.includes('rain') || lowerCondition.includes('drizzle')) return "rainy";
     if (lowerCondition.includes('cloud') || lowerCondition.includes('overcast')) return "cloudy";
