@@ -21,6 +21,7 @@ const DynamicBackground = lazy(() => import("@/components/DynamicBackground").th
 const MoonPhaseCard = lazy(() => import("@/components/MoonPhaseCard").then(m => ({ default: m.MoonPhaseCard })));
 const SunPhaseCard = lazy(() => import("@/components/SunPhaseCard").then(m => ({ default: m.SunPhaseCard })));
 const WorldMap = lazy(() => import("@/components/WorldMap").then(m => ({ default: m.WorldMap })));
+const StockWidget = lazy(() => import("@/components/StockWidget").then(m => ({ default: m.StockWidget })));
 
 // Simple loading skeleton
 const CardSkeleton = ({ className = "" }: { className?: string }) => (
@@ -212,6 +213,10 @@ const Index = () => {
               
               <Suspense fallback={<CardSkeleton />}>
                 <SunPhaseCard weather={weather} />
+              </Suspense>
+              
+              <Suspense fallback={<CardSkeleton />}>
+                <StockWidget />
               </Suspense>
               
               <Suspense fallback={<CardSkeleton className="col-span-full" />}>
