@@ -112,20 +112,29 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
     return () => { map.current?.remove(); };
   }, [weather.location.lat, weather.location.lon, weather.location.name, weather.current.temp_c, weather.current.condition.text]);
 
+  const addMarkerToMap = (color: string) => {
+    if (!map.current) return;
+    const { lat, lon } = weather.location;
+    const marker = new maplibregl.Marker({ element: createMarkerElement(color), anchor: 'center' })
+      .setLngLat([lon, lat])
+      .setPopup(createPopup(weather))
+      .addTo(map.current);
+    marker.togglePopup();
+  };
+
   const handleLayerChange = (layer: MapLayer) => {
     setActiveLayer(layer);
     if (!map.current || !isMapLoaded) return;
+    map.current.once('style.load', () => addMarkerToMap(LAYER_CONFIG[layer].color));
+    map.current.setStyle(isDarkMap ? MAP_STYLES.dark : MAP_STYLES.liberty);
+  };
 
-    map.current.once('style.load', () => {
-      const { lat, lon } = weather.location;
-      const marker = new maplibregl.Marker({ element: createMarkerElement(LAYER_CONFIG[layer].color), anchor: 'center' })
-        .setLngLat([lon, lat])
-        .setPopup(createPopup(weather))
-        .addTo(map.current!);
-      marker.togglePopup();
-    });
-
-    map.current.setStyle(MAP_STYLES.dark);
+  const toggleMapTheme = () => {
+    const newDark = !isDarkMap;
+    setIsDarkMap(newDark);
+    if (!map.current || !isMapLoaded) return;
+    map.current.once('style.load', () => addMarkerToMap(LAYER_CONFIG[activeLayer].color));
+    map.current.setStyle(newDark ? MAP_STYLES.dark : MAP_STYLES.liberty);
   };
 
   return (
