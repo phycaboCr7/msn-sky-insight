@@ -55,7 +55,7 @@ const AIBackground = ({ weather }: { weather: WeatherData }) => {
         if (!error && data?.hits?.length > 0) {
           const idx = Math.floor(Math.random() * Math.min(data.hits.length, 10));
           const url = data.hits[idx].largeImageURL || data.hits[idx].webformatURL;
-          const img = new Image();
+          const img = new window.Image();
           img.onload = () => setBgImage(url);
           img.src = url;
         }
