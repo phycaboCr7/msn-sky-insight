@@ -1,17 +1,16 @@
 import { WeatherCard } from "../WeatherCard";
 import { WeatherData } from "@/lib/weather";
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 interface UVIndexChartProps {
   weather: WeatherData;
 }
 
 const getUVColor = (uv: number) => {
-  if (uv <= 2) return "#22c55e"; // Green
-  if (uv <= 5) return "#eab308"; // Yellow
-  if (uv <= 7) return "#f97316"; // Orange
-  if (uv <= 10) return "#ef4444"; // Red
-  return "#8b5cf6"; // Purple
+  if (uv <= 2) return "hsl(142 71% 45%)";
+  if (uv <= 5) return "hsl(48 96% 53%)";
+  if (uv <= 7) return "hsl(25 95% 53%)";
+  if (uv <= 10) return "hsl(0 84% 60%)";
+  return "hsl(265 75% 55%)";
 };
 
 const getUVLevel = (uv: number) => {
@@ -22,74 +21,79 @@ const getUVLevel = (uv: number) => {
   return "Extreme";
 };
 
+const getUVMaxInfo = (weather: WeatherData) => {
+  const hours = weather.forecast?.forecastday?.[0]?.hour;
+  if (!hours) return null;
+  let maxUV = 0;
+  let maxHour = '';
+  for (const h of hours) {
+    if (h.uv > maxUV) {
+      maxUV = h.uv;
+      maxHour = new Date(h.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+  }
+  return { maxUV, maxHour, level: getUVLevel(maxUV) };
+};
+
 export const UVIndexChart = ({ weather }: UVIndexChartProps) => {
   const uvValue = weather.current.uv;
   const maxUV = 11;
   const percentage = (uvValue / maxUV) * 100;
-  
-  const data = [
-    { name: 'UV', value: percentage, color: getUVColor(uvValue) },
-    { name: 'Remaining', value: 100 - percentage, color: 'hsl(var(--muted))' }
-  ];
+  const color = getUVColor(uvValue);
+  const uvMaxInfo = getUVMaxInfo(weather);
+
+  // SVG gauge ring
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <WeatherCard className="p-6 col-span-1">
-      <h3 className="text-lg font-semibold text-foreground mb-4" style={{ fontFamily: "'Bodoni Moda', Georgia, serif", fontSize: '1.25rem' }}>UV Index</h3>
-      <div className="flex items-center justify-center">
-        <div className="relative w-40 h-40 group">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <defs>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                  <feMerge> 
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-                <linearGradient id="uvGradient" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor={getUVColor(uvValue)} stopOpacity="1"/>
-                  <stop offset="100%" stopColor={getUVColor(uvValue)} stopOpacity="0.6"/>
-                </linearGradient>
-              </defs>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={45}
-                outerRadius={70}
-                startAngle={90}
-                endAngle={-270}
-                dataKey="value"
-                stroke="none"
-                animationBegin={0}
-                animationDuration={1500}
-              >
-                {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={index === 0 ? "url(#uvGradient)" : entry.color}
-                    style={{ filter: index === 0 ? "url(#glow)" : "none" }}
-                  />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+    <WeatherCard className="p-5 sm:p-6 col-span-1">
+      <h3
+        className="text-lg font-bold text-foreground mb-5"
+        style={{ fontFamily: "'Playfair Display', serif" }}
+      >
+        UV Index
+      </h3>
+
+      <div className="flex items-center justify-center mb-4">
+        <div className="relative w-36 h-36">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+            {/* Background ring */}
+            <circle cx="60" cy="60" r={radius} fill="none" stroke="hsl(220 15% 20%)" strokeWidth="6" />
+            {/* Progress ring */}
+            <circle
+              cx="60" cy="60" r={radius}
+              fill="none"
+              stroke={color}
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={dashOffset}
+              className="transition-all duration-1000"
+              style={{ filter: `drop-shadow(0 0 6px ${color}40)` }}
+            />
+          </svg>
+          {/* Center content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-3xl font-bold text-foreground animate-pulse" style={{ color: getUVColor(uvValue), fontFamily: "'Bodoni Moda', Georgia, serif" }}>
+            <span
+              className="text-4xl font-bold leading-none"
+              style={{ color, fontFamily: "'Bodoni Moda', serif" }}
+            >
               {uvValue}
-            </div>
-            <div className="text-sm text-muted-foreground font-medium">{getUVLevel(uvValue)}</div>
-            <div className="text-xs text-muted-foreground/70 mt-1">UV Index</div>
+            </span>
+            <span className="text-sm font-medium text-muted-foreground mt-1">{getUVLevel(uvValue)}</span>
+            <span className="text-[10px] text-muted-foreground/50 mt-0.5">UV Index</span>
           </div>
-          <div className="absolute inset-0 rounded-full border-2 border-white/10 group-hover:border-white/20 transition-all duration-300" />
         </div>
       </div>
-      <div className="mt-4 text-center">
-        <div className="text-sm text-muted-foreground">
-          Maximum UV exposure for today will be very high, expected at 2:00 pm.
+
+      {uvMaxInfo && (
+        <div className="text-center text-xs text-muted-foreground leading-relaxed" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+          Peak UV will be <span className="text-foreground font-semibold">{getUVLevel(uvMaxInfo.maxUV)}</span>,
+          expected at <span className="text-foreground font-semibold">{uvMaxInfo.maxHour}</span>.
         </div>
-      </div>
+      )}
     </WeatherCard>
   );
 };
