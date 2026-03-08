@@ -236,28 +236,29 @@ All colors MUST be HSL.
 }
 
 .weatherza-markdown p {
-  margin-bottom: 0.35rem;
-  line-height: 1.5;
+  margin-bottom: 0.2rem;
+  margin-top: 0.1rem;
+  line-height: 1.45;
 }
 
 .weatherza-markdown h1, .weatherza-markdown h2, .weatherza-markdown h3,
 .weatherza-markdown h4, .weatherza-markdown h5, .weatherza-markdown h6 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.25rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0.15rem;
 }
 
 .weatherza-markdown ul, .weatherza-markdown ol {
-  margin-top: 0.2rem;
-  margin-bottom: 0.35rem;
+  margin-top: 0.1rem;
+  margin-bottom: 0.2rem;
   padding-left: 1.25rem;
 }
 
 .weatherza-markdown li {
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.08rem;
 }
 
 .weatherza-markdown li p {
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.05rem;
 }
 
 .weatherza-markdown pre {
