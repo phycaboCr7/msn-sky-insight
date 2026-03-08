@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { WeatherCard } from "./WeatherCard";
 import { Search, MapPin, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Place {
   name: string;
@@ -17,8 +18,6 @@ interface SearchLocationProps {
   onCurrentLocation: () => void;
   isLoading?: boolean;
 }
-
-const WEATHER_API_KEY = "424a0fbacc0b4291bdd40124250208";
 
 export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading }: SearchLocationProps) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,14 +39,13 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
     debounceRef.current = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(
-          `https://api.weatherapi.com/v1/search.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(query)}`
-        );
+        const { data, error } = await supabase.functions.invoke('weather-proxy', {
+          body: { endpoint: 'search', query },
+        });
 
-        if (!res.ok) throw new Error("API error");
+        if (error) throw new Error("API error");
 
-        const data = await res.json();
-        const places: Place[] = data.map((p: any) => ({
+        const places: Place[] = (data || []).map((p: any) => ({
           name: p.name,
           region: p.region || "",
           country: p.country,
@@ -90,7 +88,6 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
     }
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -104,7 +101,6 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
   return (
     <div className="col-span-full relative" ref={containerRef}>
       <WeatherCard className="p-6 relative overflow-visible">
-        {/* Shimmer effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer pointer-events-none rounded-lg" 
              style={{ backgroundSize: '200% 100%' }} />
         
@@ -144,7 +140,6 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
         </div>
       </WeatherCard>
       
-      {/* Suggestions Dropdown - positioned outside WeatherCard */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute left-6 right-6 sm:right-auto sm:w-[calc(100%-250px)] top-full mt-1 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl z-[9999] overflow-hidden max-h-80 overflow-y-auto">
           {suggestions.map((place, index) => (

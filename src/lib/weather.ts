@@ -1,5 +1,4 @@
-const WEATHER_API_KEY = "424a0fbacc0b4291bdd40124250208";
-const BASE_URL = "https://api.weatherapi.com/v1";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface AirQuality {
   co: number;
@@ -136,51 +135,35 @@ export interface WeatherData {
 }
 
 export const getCurrentWeather = async (location: string): Promise<WeatherData> => {
-  const response = await fetch(
-    `${BASE_URL}/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(location)}&aqi=yes`
-  );
-  
-  if (!response.ok) {
-    throw new Error(`Weather API error: ${response.status}`);
-  }
-  
-  return response.json();
+  const { data, error } = await supabase.functions.invoke('weather-proxy', {
+    body: { endpoint: 'current', location },
+  });
+  if (error) throw new Error(`Weather API error: ${error.message}`);
+  return data;
 };
 
 export const getForecastWeather = async (location: string, days: number = 7): Promise<WeatherData> => {
-  const response = await fetch(
-    `${BASE_URL}/forecast.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(location)}&days=${days}&aqi=yes&alerts=yes`
-  );
-  
-  if (!response.ok) {
-    throw new Error(`Weather API error: ${response.status}`);
-  }
-  
-  return response.json();
+  const { data, error } = await supabase.functions.invoke('weather-proxy', {
+    body: { endpoint: 'forecast', location, days },
+  });
+  if (error) throw new Error(`Weather API error: ${error.message}`);
+  return data;
 };
 
 export const searchLocations = async (query: string) => {
-  const response = await fetch(
-    `${BASE_URL}/search.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(query)}`
-  );
-  
-  if (!response.ok) {
-    throw new Error(`Weather API error: ${response.status}`);
-  }
-  
-  return response.json();
+  const { data, error } = await supabase.functions.invoke('weather-proxy', {
+    body: { endpoint: 'search', query },
+  });
+  if (error) throw new Error(`Weather API error: ${error.message}`);
+  return data;
 };
 
 export const getLocationFromCoords = async (lat: number, lon: number): Promise<WeatherData> => {
-  const response = await fetch(
-    `${BASE_URL}/current.json?key=${WEATHER_API_KEY}&q=${lat},${lon}&aqi=yes`
-  );
-  
-  if (!response.ok) {
-    throw new Error(`Weather API error: ${response.status}`);
-  }
-  
-  return response.json();
+  const { data, error } = await supabase.functions.invoke('weather-proxy', {
+    body: { endpoint: 'coords', lat, lon },
+  });
+  if (error) throw new Error(`Weather API error: ${error.message}`);
+  return data;
 };
 
 export const getWeatherIcon = (code: number, isDay: boolean = true): string => {

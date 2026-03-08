@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { WeatherData } from "@/lib/weather";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DynamicBackgroundProps {
   weather: WeatherData | null;
 }
-
-const PIXABAY_API_KEY = "43307277-3275141345dbfb358b9de4311";
 
 const getWeatherKeywords = (condition: string) => {
   const lowerCondition = condition.toLowerCase();
@@ -36,33 +35,27 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
   useEffect(() => {
     if (!weather) return;
 
-    // Defer background image fetch to not block initial render
     const timeoutId = setTimeout(async () => {
       setLoading(true);
       try {
         const keywords = getWeatherKeywords(weather.current.condition.text);
-        const response = await fetch(
-          `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(keywords)}&image_type=photo&orientation=horizontal&category=nature&min_width=1920&per_page=10&safesearch=true`
-        );
+        const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
+          body: { query: keywords, category: 'nature', min_width: 1920, per_page: 10 },
+        });
         
-        if (response.ok) {
-          const data = await response.json();
-          if (data.hits && data.hits.length > 0) {
-            const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 5));
-            // Use webformatURL (smaller) instead of largeImageURL for faster load
-            const imageUrl = data.hits[randomIndex].webformatURL;
-            // Preload the image before displaying
-            const img = new Image();
-            img.onload = () => setBackgroundImage(imageUrl);
-            img.src = imageUrl;
-          }
+        if (!error && data?.hits && data.hits.length > 0) {
+          const randomIndex = Math.floor(Math.random() * Math.min(data.hits.length, 5));
+          const imageUrl = data.hits[randomIndex].webformatURL;
+          const img = new Image();
+          img.onload = () => setBackgroundImage(imageUrl);
+          img.src = imageUrl;
         }
       } catch (error) {
         console.error('Error fetching background image:', error);
       } finally {
         setLoading(false);
       }
-    }, 1500); // Delay 1.5s to let main content render first
+    }, 1500);
 
     return () => clearTimeout(timeoutId);
   }, [weather?.current.condition.text]);
@@ -71,7 +64,6 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
 
   return (
     <>
-      {/* Cinematic animated background image */}
       <div 
         className="fixed inset-0 z-0 animate-cinematic-zoom"
         style={{
@@ -82,7 +74,6 @@ export const DynamicBackground = ({ weather }: DynamicBackgroundProps) => {
           filter: 'blur(2px) brightness(0.4)',
         }}
       />
-      {/* Glassmorphism overlay for readability */}
       <div 
         className="fixed inset-0 z-[1]"
         style={{
