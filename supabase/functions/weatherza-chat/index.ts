@@ -42,6 +42,33 @@ serve(async (req) => {
 
 WEATHER: ${weatherContext.location}, ${weatherContext.country} | ${weatherContext.temperature}°C (feels ${weatherContext.feelsLike}°C) | ${weatherContext.condition} | 💧${weatherContext.humidity}% | 💨${weatherContext.windSpeed}km/h | UV ${weatherContext.uvIndex} | Rain ${weatherContext.precipChance}% | Hi/Lo ${weatherContext.maxTemp}°/${weatherContext.minTemp}°C | AQI ${actualAQI || 'N/A'}
 
+AVAILABLE PYTHON LIBRARIES (pre-installed in user's browser via Pyodide):
+- numpy (np) — arrays, linear algebra, random, FFT
+- matplotlib (plt) — ALL chart types: line, bar, scatter, pie, hist, 3D, contour, heatmap, subplots, animations
+- scipy — optimization, interpolation, signal processing, statistics, integration, ODEs
+- sympy — symbolic math, algebra, calculus, equation solving, LaTeX rendering
+- networkx — graph theory, network analysis, graph visualization
+- scikit-learn (sklearn) — ML: regression, classification, clustering, PCA, preprocessing
+- SimpleTurtle (built-in) — turtle graphics (t=SimpleTurtle(), t.forward(), t.left(), t.circle(), t.pencolor(), t.draw())
+- math, random, itertools, functools, collections, statistics, datetime, json, re, csv, io, base64
+
+ANIMATION RULES: For animations, use "# @output_type: animation" metadata tag. Define an update(frame) function that modifies the plot for each frame. Use plt.clf() or ax.clear() inside update(). The system generates 240 frames (10s at 24fps) automatically. Example:
+\`\`\`python
+# @output_type: animation
+import numpy as np
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+x = np.linspace(0, 2*np.pi, 100)
+
+def update(frame):
+    ax.clear()
+    phase = frame * 2 * np.pi / 240
+    ax.plot(x, np.sin(x + phase), 'cyan', linewidth=2)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_title(f'Wave Frame {frame}')
+\`\`\`
+
 RULES: Only bold KEY information like temperatures, percentages, important values — NOT every single word. Use emojis sparingly at bullet starts. LaTeX for math ($inline$, $$block$$). Code must be non-interactive (no input()). Python: matplotlib AGG only, end with print(get_plot_as_base64()). Turtle: t=SimpleTurtle(), print(t.draw()). HTML: single file, inline styles. Structure with headings/bullets/tables. Be thorough. Never fabricate data. End with --- then 💡 **Want me to help with more?** + 2-3 suggestions.`;
 
     const groqSystemPrompt = `You are Weatherza AI by Rakshit Jain. Warm, precise, emoji-rich weather assistant.

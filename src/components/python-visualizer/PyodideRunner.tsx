@@ -65,11 +65,17 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/"
           });
           
-          await window.pyodide.loadPackage(["numpy", "matplotlib"]);
+          // Load core packages first
+          await window.pyodide.loadPackage(["numpy", "matplotlib", "scipy", "sympy"]);
           await window.pyodide.runPythonAsync(PYTHON_SETUP_CODE);
           
+          // Load additional packages in background (non-blocking)
+          window.pyodide.loadPackage(["networkx", "scikit-learn"]).catch(() => {
+            console.log("Optional packages (networkx, scikit-learn) not loaded");
+          });
+          
           setPyodideReady(true);
-          toast({ title: "Python Ready! 🐍", description: "Loaded NumPy, Matplotlib & Turtle" });
+          toast({ title: "Python Ready! 🐍", description: "Loaded NumPy, Matplotlib, SciPy, SymPy & Turtle" });
         } catch (err) {
           console.error("Pyodide load error:", err);
           setError("Failed to load Python environment");
@@ -226,6 +232,7 @@ _stdout_capture.getvalue()
       if (stdout) setOutput(stdout);
       
       // Get animation frames if available
+      let hasAnimFrames = false;
       if (executionType === "ANIMATION") {
         const framesResult = await window.pyodide.runPythonAsync(`get_animation_frames()`);
         if (framesResult && framesResult.length > 0) {
@@ -233,14 +240,19 @@ _stdout_capture.getvalue()
           const dataUrls = frames.map((f: string) => `data:image/png;base64,${f}`);
           setAnimationFrames(dataUrls);
           setImageData(dataUrls[0]);
+          hasAnimFrames = true;
+          // Auto-start animation playback
+          setIsAnimating(true);
           toast({ title: "Animation Ready! 🎞️", description: `Generated ${frames.length} frames (${(frames.length / 24).toFixed(1)}s at 24fps)` });
         }
       }
       
-      // Get single image
-      const imgResult = await window.pyodide.runPythonAsync(`_result_img if '_result_img' in dir() else None`);
-      if (imgResult && animationFrames.length === 0) {
-        setImageData(`data:image/png;base64,${imgResult}`);
+      // Get single image (only if no animation frames)
+      if (!hasAnimFrames) {
+        const imgResult = await window.pyodide.runPythonAsync(`_result_img if '_result_img' in dir() else None`);
+        if (imgResult) {
+          setImageData(`data:image/png;base64,${imgResult}`);
+        }
       }
       
       toast({ title: "Executed! ✅", description: "Python code ran successfully" });
@@ -254,13 +266,11 @@ _stdout_capture.getvalue()
     }
   }, [pyodideReady, code, sliders, executionType, toast, animationFrames.length]);
 
-  // Run animation and generate video
+  // Run animation and generate video (auto-play is now handled inside runCode)
   const runAnimation = useCallback(async () => {
     await runCode();
-    if (animationFrames.length > 1) {
-      setIsAnimating(true);
-    }
-  }, [runCode, animationFrames.length]);
+    // Animation auto-starts inside runCode when frames are detected
+  }, [runCode]);
 
   // Export as video using real canvas-based MediaRecorder
   const exportVideo = useCallback(async () => {
@@ -483,7 +493,7 @@ _stdout_capture.getvalue()
               <LiveCanvas 
                 frames={animationFrames} 
                 fps={24} 
-                autoPlay={false}
+                autoPlay={true}
                 onVideoReady={handleVideoReady}
               />
             </div>
