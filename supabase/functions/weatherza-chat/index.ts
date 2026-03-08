@@ -157,7 +157,7 @@ FORMATTING RULES (follow strictly):
     if (mode !== 'weather') {
       const aiMessages = [
         { role: "system", content: systemPrompt },
-        ...messages.slice(-8).map((m: any) => ({ role: m.role, content: m.content })),
+        ...messages.slice(-4).map((m: any) => ({ role: m.role, content: m.content })),
       ];
 
       // Try Lovable AI Gateway first
@@ -172,7 +172,7 @@ FORMATTING RULES (follow strictly):
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "google/gemini-2.5-flash",
+              model: "google/gemini-3-flash-preview",
               messages: aiMessages,
               stream: true,
             }),
@@ -220,7 +220,7 @@ FORMATTING RULES (follow strictly):
                   contents: geminiContents,
                   generationConfig: {
                     temperature: mode === 'code' ? 0.3 : mode === 'math' ? 0.2 : 0.6,
-                    maxOutputTokens: 8192,
+                    maxOutputTokens: 16384,
                   },
                 }),
               }
