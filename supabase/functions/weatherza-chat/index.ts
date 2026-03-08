@@ -29,13 +29,14 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, weatherContext } = await req.json();
+    const { messages, weatherContext, mode = 'weather' } = await req.json();
     const hasImages = messages.some((msg: any) => msg.image);
 
     console.log("Received weather chat request:", {
       messageCount: messages?.length || 0,
       location: weatherContext?.location,
       hasImages,
+      mode,
     });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
