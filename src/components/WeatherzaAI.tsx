@@ -1860,7 +1860,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               className="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
               title="Upload image or document"
             >
-              {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+              {extractedDocName ? <FileText className="w-4 h-4" /> : <Paperclip className="w-4 h-4" />}
             </button>
             <button
               type="button"
