@@ -1,4 +1,4 @@
-// Python setup code for Pyodide including Matplotlib and Turtle simulation
+// Python setup code for Pyodide including Matplotlib, SciPy, SymPy and Turtle simulation
 export const PYTHON_SETUP_CODE = `
 import matplotlib
 matplotlib.use('AGG')
@@ -7,6 +7,21 @@ import numpy as np
 import io
 import base64
 import math
+import random
+import statistics
+
+# Import scipy and sympy (pre-loaded)
+try:
+    import scipy
+    from scipy import optimize, interpolate, signal, stats, integrate
+except ImportError:
+    pass
+
+try:
+    import sympy
+    from sympy import symbols, solve, diff, integrate as sym_integrate, simplify, expand, factor, latex
+except ImportError:
+    pass
 
 # Global frame storage for animations
 _animation_frames = []
