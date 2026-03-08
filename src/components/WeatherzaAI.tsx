@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Image, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown, Type, ImageIcon } from "lucide-react";
+import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Paperclip, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown, Type, ImageIcon } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { FontPicker, FontOption, getStoredFont, loadGoogleFont } from "@/components/FontPicker";
 import { BackgroundPicker, CustomBg, getStoredBg } from "@/components/BackgroundPicker";
@@ -1860,7 +1860,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               className="w-9 h-9 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
               title="Upload image or document"
             >
-              {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+              {extractedDocName ? <FileText className="w-4 h-4" /> : <Paperclip className="w-4 h-4" />}
             </button>
             <button
               type="button"
