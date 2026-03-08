@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, Thermometer, Wind, Cloud, Droplets, Loader2, MapPin } from "lucide-react";
+import { Globe, Thermometer, Wind, Cloud, Droplets, Loader2, MapPin, Sun, Moon } from "lucide-react";
 import { WeatherData } from "@/lib/weather";
 
 interface WorldMapProps {
