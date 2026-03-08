@@ -102,16 +102,50 @@ const Index = () => {
     }
   };
 
+  const scrollLockRef = useRef(true);
+
   useEffect(() => {
     getCurrentLocation();
     window.scrollTo(0, 0);
   }, []);
 
-  // Always scroll to top when weather data loads
+  // Keep page pinned to top until user interacts
   useEffect(() => {
-    if (weather) {
-      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-    }
+    if (!weather) return;
+    
+    // Immediately scroll to top
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Keep forcing scroll top for a few seconds while lazy components load
+    const intervals = [100, 300, 600, 1000, 1500, 2000];
+    const timers = intervals.map(ms =>
+      setTimeout(() => {
+        if (scrollLockRef.current) {
+          window.scrollTo(0, 0);
+        }
+      }, ms)
+    );
+
+    // Release scroll lock after user scrolls intentionally
+    const handleUserScroll = () => {
+      scrollLockRef.current = false;
+    };
+    window.addEventListener('wheel', handleUserScroll, { once: true });
+    window.addEventListener('touchmove', handleUserScroll, { once: true });
+
+    // Auto-release after 3s
+    const releaseTimer = setTimeout(() => {
+      scrollLockRef.current = false;
+    }, 3000);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      clearTimeout(releaseTimer);
+      window.removeEventListener('wheel', handleUserScroll);
+      window.removeEventListener('touchmove', handleUserScroll);
+    };
   }, [weather]);
 
   if (initialLoading) {
