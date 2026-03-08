@@ -147,8 +147,8 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
             className="h-[1.5px] rounded-full"
             style={{
               '--shoot-length': `${s.length}px`,
+              '--shoot-angle': `${s.angle}deg`,
               background: 'linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.8), hsl(0 0% 100% / 0.3))',
-              transform: `rotate(${s.angle}deg)`,
               animation: `cwShootingStar ${s.duration} ease-out infinite`,
               animationDelay: s.delay,
               transformOrigin: 'left center',
