@@ -848,3 +848,8 @@ All colors MUST be HSL.
   60% { opacity: 1; }
   100% { transform: rotate(var(--shoot-angle)) translateX(var(--shoot-length)); opacity: 0; width: var(--shoot-length); }
 }
+
+@keyframes glow-sweep {
+  0%, 100% { background-position: 200% 0; }
+  50% { background-position: -200% 0; }
+}
