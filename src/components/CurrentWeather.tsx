@@ -4,6 +4,109 @@ import { AnimatedWeatherIcon } from "./AnimatedWeatherIcon";
 import { WeatherData, AirQuality } from "@/lib/weather";
 import { getFlagUrl } from "@/lib/utils";
 import { Wind } from "lucide-react";
+import { useMemo } from "react";
+
+// Animated weather particles overlay
+const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: boolean }) => {
+  const lc = condition.toLowerCase();
+  const isRain = lc.includes('rain') || lc.includes('drizzle') || lc.includes('shower');
+  const isSnow = lc.includes('snow') || lc.includes('blizzard') || lc.includes('sleet') || lc.includes('ice');
+  const isThunder = lc.includes('thunder');
+  const isCloudy = lc.includes('cloud') || lc.includes('overcast');
+  const isFog = lc.includes('fog') || lc.includes('mist') || lc.includes('haze');
+  const isSunny = lc.includes('sunny') || lc.includes('clear');
+
+  const particles = useMemo(() => {
+    if (isRain || isThunder) {
+      return Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        delay: `${Math.random() * 2}s`,
+        duration: `${0.6 + Math.random() * 0.4}s`,
+        height: `${12 + Math.random() * 10}px`,
+      }));
+    }
+    if (isSnow) {
+      return Array.from({ length: 15 }, (_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        delay: `${Math.random() * 3}s`,
+        duration: `${2 + Math.random() * 2}s`,
+        size: `${3 + Math.random() * 5}px`,
+      }));
+    }
+    return [];
+  }, [isRain, isThunder, isSnow]);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[6]">
+      {(isRain || isThunder) && particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute w-[2px] rounded-full opacity-40"
+          style={{
+            left: p.left,
+            top: '-10px',
+            height: p.height,
+            background: 'linear-gradient(180deg, transparent, hsl(210 80% 70%))',
+            animation: `cwRainFall ${p.duration} linear infinite`,
+            animationDelay: p.delay,
+          }}
+        />
+      ))}
+      {isThunder && (
+        <div className="absolute inset-0 opacity-0"
+          style={{ background: 'hsl(45 100% 90% / 0.15)', animation: 'cwThunderFlash 4s ease-in-out infinite' }}
+        />
+      )}
+      {isSnow && particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full opacity-60"
+          style={{
+            left: p.left, top: '-10px', width: p.size, height: p.size,
+            background: 'white', boxShadow: '0 0 6px hsl(0 0% 100% / 0.6)',
+            animation: `cwSnowFall ${p.duration} linear infinite`,
+            animationDelay: p.delay,
+          }}
+        />
+      ))}
+      {isSunny && isDay && (
+        <div className="absolute -top-20 -right-20 w-64 h-64 opacity-20"
+          style={{
+            background: 'radial-gradient(circle, hsl(45 100% 60% / 0.6) 0%, transparent 70%)',
+            animation: 'cwSunPulse 4s ease-in-out infinite',
+          }}
+        />
+      )}
+      {isFog && (
+        <>
+          <div className="absolute bottom-0 left-0 right-0 h-1/2 opacity-20"
+            style={{ background: 'linear-gradient(0deg, hsl(0 0% 80% / 0.4), transparent)', animation: 'cwFogDrift 6s ease-in-out infinite' }}
+          />
+          <div className="absolute bottom-0 left-0 right-0 h-1/3 opacity-15"
+            style={{ background: 'linear-gradient(0deg, hsl(0 0% 90% / 0.3), transparent)', animation: 'cwFogDrift 8s ease-in-out infinite reverse' }}
+          />
+        </>
+      )}
+      {isCloudy && !isRain && !isSnow && (
+        <>
+          <div className="absolute top-2 opacity-10 rounded-full"
+            style={{ width: '120px', height: '40px', background: 'hsl(0 0% 80% / 0.5)', filter: 'blur(15px)', animation: 'cwCloudDrift 8s ease-in-out infinite' }}
+          />
+          <div className="absolute top-8 opacity-[0.07] rounded-full"
+            style={{ width: '90px', height: '30px', background: 'hsl(0 0% 80% / 0.5)', filter: 'blur(12px)', animation: 'cwCloudDrift 10s ease-in-out infinite reverse', animationDelay: '2s' }}
+          />
+        </>
+      )}
+      {!isDay && isSunny && [15, 35, 55, 75, 90].map((left, i) => (
+        <div key={i} className="absolute rounded-full bg-white"
+          style={{ width: `${2 + (i % 2)}px`, height: `${2 + (i % 2)}px`, left: `${left}%`, top: `${10 + i * 12}%`, opacity: 0.4, animation: `cwStarTwinkle ${1.5 + i * 0.3}s ease-in-out infinite`, animationDelay: `${i * 0.4}s` }}
+        />
+      ))}
+    </div>
+  );
+};
 
 interface CurrentWeatherProps {
   weather: WeatherData;
@@ -70,6 +173,7 @@ export const CurrentWeather = ({ weather }: CurrentWeatherProps) => {
     <WeatherCard className="p-4 sm:p-6 lg:p-8 col-span-full lg:col-span-2 relative overflow-hidden animate-slide-up">
       {/* Location background image */}
       <LocationBackground weather={weather} />
+      <WeatherParticles condition={current.condition.text} isDay={isDay} />
       
       {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none z-5" />
