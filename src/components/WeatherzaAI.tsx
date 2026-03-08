@@ -1725,7 +1725,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 >
                   {msg.role === "assistant" ? (
                     <div ref={msg === messages[messages.length - 1] ? lastMessageRef : undefined}>
-                      <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} />
+                      <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} chatFont={chatFont.family} />
                     </div>
                   ) : (
                     <div>
