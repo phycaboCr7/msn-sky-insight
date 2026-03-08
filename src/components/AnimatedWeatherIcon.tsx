@@ -51,10 +51,10 @@ export const AnimatedWeatherIcon = ({
 const SunnyIcon = ({ size }: { size: string }) => (
   <div className={cn(
     "forecast__sunny",
-    size === "sm" && "scale-[0.4] !shadow-none",
+    size === "sm" && "scale-[0.35]",
     size === "md" && "scale-[0.6]",
     size === "lg" && "scale-100"
-  )} style={size === "sm" ? { boxShadow: 'none' } : undefined} />
+  )} />
 );
 
 const NightIcon = ({ size }: { size: string }) => (
