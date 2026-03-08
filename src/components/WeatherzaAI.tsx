@@ -764,9 +764,24 @@ const isPythonGraphCode = (code: string): boolean => {
   return graphIndicators.some(indicator => code.includes(indicator));
 };
 
+// Load messages from localStorage
+const loadStoredMessages = (): Message[] => {
+  try {
+    const stored = localStorage.getItem('weatherza-chat-history');
+    if (stored) {
+      const parsed = JSON.parse(stored) as Message[];
+      // Strip isTyping flag from stored messages
+      return parsed.map(m => ({ ...m, isTyping: false }));
+    }
+  } catch (e) {
+    console.error('Failed to load chat history:', e);
+  }
+  return [];
+};
+
 export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [pyodideCode, setPyodideCode] = useState<string | null>(null);
@@ -792,6 +807,20 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       }
     }, 150);
     return () => { if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current); };
+  }, [messages]);
+
+  // Persist messages to localStorage (skip while typing/streaming)
+  useEffect(() => {
+    const hasTyping = messages.some(m => m.isTyping);
+    if (!hasTyping && messages.length > 0) {
+      try {
+        // Keep last 50 messages to avoid localStorage bloat
+        const toStore = messages.slice(-50).map(({ id, role, content }) => ({ id, role, content }));
+        localStorage.setItem('weatherza-chat-history', JSON.stringify(toStore));
+      } catch (e) {
+        console.error('Failed to save chat history:', e);
+      }
+    }
   }, [messages]);
 
   // Extract text from PDF using pdfjs-dist
@@ -1218,6 +1247,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   const clearChat = () => {
     setMessages([]);
+    localStorage.removeItem('weatherza-chat-history');
     toast({
       title: "Chat Cleared",
       description: "Started a fresh conversation.",
