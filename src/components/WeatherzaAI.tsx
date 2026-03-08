@@ -172,7 +172,7 @@ const CodeBlock = ({
       window.open(url, '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`);
     } else {
       // For other languages, open interpreter in new tab
-      const codeData = encodeURIComponent(JSON.stringify({ code: children, language: lang }));
+      const codeData = encodeURIComponent(JSON.stringify({ code: editableCode, language: lang }));
       const interpreterHtml = `
 <!DOCTYPE html>
 <html>
