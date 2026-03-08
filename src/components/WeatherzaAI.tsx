@@ -1311,7 +1311,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh', overflow: 'hidden' }}>
           {/* Messages Scroll Area */}
