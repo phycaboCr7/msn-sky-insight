@@ -13,6 +13,9 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import "katex/dist/katex.min.css";
 
+// Lazy load PyodideRunner for graph visualization
+const PyodideRunner = lazy(() => import("@/components/python-visualizer"));
+
 // Heavy libs loaded dynamically on demand (not at startup)
 const loadDocx = () => import("docx");
 const loadPdfjs = async () => {
@@ -20,7 +23,7 @@ const loadPdfjs = async () => {
   lib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   return lib;
 };
-const loadMammoth = () => import("mammoth");
+const loadMammoth = () => import("mammoth").then(m => m.default);
 const loadHtml2canvas = () => import("html2canvas").then(m => m.default);
 
 interface WeatherzaAIProps {
