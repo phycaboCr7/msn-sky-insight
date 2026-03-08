@@ -145,7 +145,7 @@ const CodeBlock = ({
   const isPythonGraph = (lang === 'python' || lang === 'py') && isPythonGraphCode(editableCode);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(children);
+    await navigator.clipboard.writeText(editableCode);
     setCopied(true);
     toast({ title: "Copied!", description: "Code copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);
