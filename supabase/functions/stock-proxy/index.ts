@@ -14,39 +14,21 @@ serve(async (req) => {
   }
 
   try {
-    const { action, symbol, identifier, timeframe, from, to } = await req.json();
+    const { action, symbol, identifier, from, to } = await req.json();
 
     let url: string;
-    let headers: Record<string, string> = {};
 
     switch (action) {
-      case "search": {
-        // Use the api/1 search or v1 search
-        url = `${BASE}/v1/equities/search?query=${encodeURIComponent(symbol)}&limit=10`;
-        headers = { "Authorization": `Bearer ${API_KEY}` };
-        break;
-      }
-      case "quote": {
-        url = `${BASE}/api/1/equity/quotes/${encodeURIComponent(identifier || symbol)}?token=${API_KEY}`;
-        break;
-      }
       case "profile": {
         url = `${BASE}/api/1/equity/profile/${encodeURIComponent(identifier || symbol)}?token=${API_KEY}`;
         break;
       }
-      case "history": {
-        // Use v1 history endpoint with from/to/interval
-        const interval = timeframe || "1d";
-        let queryParams = `interval=${interval}`;
-        if (from) queryParams += `&from=${from}`;
-        if (to) queryParams += `&to=${to}`;
-        url = `${BASE}/v1/equities/${encodeURIComponent(symbol)}/history?${queryParams}`;
-        headers = { "Authorization": `Bearer ${API_KEY}` };
-        break;
-      }
-      case "price": {
-        url = `${BASE}/v1/equities/${encodeURIComponent(symbol)}/price`;
-        headers = { "Authorization": `Bearer ${API_KEY}` };
+      case "quote": {
+        // Quotes endpoint with optional from/to as ms timestamps
+        let qp = `token=${API_KEY}`;
+        if (from) qp += `&from=${from}`;
+        if (to) qp += `&to=${to}`;
+        url = `${BASE}/api/1/equity/quotes/${encodeURIComponent(identifier || symbol)}?${qp}`;
         break;
       }
       default:
@@ -59,10 +41,7 @@ serve(async (req) => {
     console.log(`Stock proxy: ${action} -> ${url}`);
 
     const response = await fetch(url, {
-      headers: {
-        ...headers,
-        "Accept": "application/json",
-      },
+      headers: { "Accept": "application/json" },
     });
 
     const data = await response.json();
