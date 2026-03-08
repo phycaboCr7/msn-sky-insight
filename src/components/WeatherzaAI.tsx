@@ -199,7 +199,7 @@ const CodeBlock = ({
 </head>
 <body>
   <div class="header">
-    <span>🐍</span>
+    <span>[Py]</span>
     <h1>${lang.toUpperCase()} Interactive Shell</h1>
     <span id="status"></span>
   </div>
