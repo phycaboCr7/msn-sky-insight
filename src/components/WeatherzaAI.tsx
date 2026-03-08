@@ -1003,7 +1003,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const streamFromAI = async (
     messagesForAI: any[],
     weatherCtx: any,
-    updatedMessages: Message[]
+    updatedMessages: Message[],
+    mode: string = 'weather'
   ) => {
     // Check if the latest user message needs internet search
     const latestUserMsg = messagesForAI[messagesForAI.length - 1];
