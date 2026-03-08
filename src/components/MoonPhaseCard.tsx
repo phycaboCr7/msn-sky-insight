@@ -2,6 +2,10 @@ import { WeatherCard } from "./WeatherCard";
 import { WeatherData } from "@/lib/weather";
 import { Moon } from "lucide-react";
 
+interface MoonPhaseCardProps {
+  weather: WeatherData;
+}
+
 const getMoonEmoji = (phase: string): string => {
   switch (phase) {
     case "New Moon": return "🌑";
@@ -38,9 +42,9 @@ export const MoonPhaseCard = ({ weather }: MoonPhaseCardProps) => {
       </div>
       
       <div className="flex flex-col items-center gap-4">
-        {/* Large Moon Icon */}
-        <div>
-          <MoonPhaseSVG phase={moon_phase} size={80} />
+        {/* Large Moon Emoji */}
+        <div className="text-7xl leading-none">
+          {getMoonEmoji(moon_phase)}
         </div>
         
         {/* Phase Name */}
