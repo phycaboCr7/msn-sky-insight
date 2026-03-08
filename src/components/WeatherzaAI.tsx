@@ -245,7 +245,7 @@ const CodeBlock = ({
             'Content-Type': 'application/json',
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpua3Z3Z3dpandtZWFwY3lqcGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2MDc1NjIsImV4cCI6MjA4MTE4MzU2Mn0.wvFfzKNl5EQzCbzX8_xQdS6cinh7gGNEcaFfPzB8ags'
           },
-          body: JSON.stringify({ code: ${JSON.stringify(children)}, language: '${lang}' })
+          body: JSON.stringify({ code: ${JSON.stringify(editableCode)}, language: '${lang}' })
         });
         const data = await response.json();
         loading.remove();
