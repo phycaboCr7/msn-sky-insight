@@ -843,8 +843,8 @@ All colors MUST be HSL.
 }
 
 @keyframes cwShootingStar {
-  0% { transform: translateX(0) translateY(0); opacity: 0; width: 0; }
+  0% { transform: rotate(var(--shoot-angle)) translateX(0); opacity: 0; width: 0; }
   5% { opacity: 1; }
   60% { opacity: 1; }
-  100% { transform: translateX(var(--shoot-length)) translateY(var(--shoot-length)); opacity: 0; width: var(--shoot-length); }
+  100% { transform: rotate(var(--shoot-angle)) translateX(var(--shoot-length)); opacity: 0; width: var(--shoot-length); }
 }
