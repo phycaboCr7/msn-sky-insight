@@ -826,6 +826,11 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     }
   }, [messages]);
 
+  // Persist AI mode
+  useEffect(() => {
+    localStorage.setItem('weatherza-ai-mode', aiMode);
+  }, [aiMode]);
+
   // Extract text from PDF using pdfjs-dist
   const extractPdfText = async (file: File): Promise<string> => {
     try {
