@@ -113,6 +113,7 @@ FORMATTING RULES (follow strictly):
               model: "google/gemini-3-flash-preview",
               messages: aiMessages,
               stream: true,
+              max_tokens: 16384,
             }),
           });
 
