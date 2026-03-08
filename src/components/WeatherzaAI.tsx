@@ -448,12 +448,12 @@ const useTypingEffect = (text: string, isTyping: boolean, chunkSize: number = 5,
 };
 
 // Message content component with typing effect
-const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void; chatFont?: string }) => {
+const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont, isPro }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void; chatFont?: string; isPro?: boolean }) => {
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
   return (
     <div className="w-full overflow-visible">
-      <div className="weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit" style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
+      <div className={`weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit ${isPro ? 'pro-equations' : ''}`} style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
@@ -1733,7 +1733,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                 >
                   {msg.role === "assistant" ? (
                     <div ref={msg === messages[messages.length - 1] ? lastMessageRef : undefined}>
-                      <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} chatFont={chatFont.family} />
+                      <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} chatFont={chatFont.family} isPro={proMode} />
                     </div>
                   ) : (
                     <div>
