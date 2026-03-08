@@ -1631,17 +1631,17 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar overflow-hidden rounded-2xl">
-          {/* Animated border glow - thin border only, no blur spread */}
+        <div className="relative group/bar overflow-hidden rounded-3xl">
+          {/* Animated border glow - thin border only */}
           <div
             ref={glowOuterRef}
-            className="absolute inset-0 rounded-2xl pointer-events-none"
+            className="absolute inset-0 rounded-3xl pointer-events-none"
             style={{
               background: 'conic-gradient(from 0deg, hsl(28 100% 60%), hsl(280 80% 55%), hsl(260 70% 50%), hsl(220 80% 60%), hsl(28 100% 60%))',
             }}
           />
           <div ref={glowInnerRef} className="hidden" />
-        <div className="relative m-[2px] bg-black/80 backdrop-blur-2xl rounded-[14px] border-0 p-2 flex items-end gap-2 z-10">
+        <div className="relative m-[2px] bg-background backdrop-blur-2xl rounded-[22px] border-0 shadow-none p-2 flex items-end gap-2 z-10">
           <input
             type="file"
             ref={fileInputRef}
@@ -1680,7 +1680,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior });
                 });
               }}
-              className="bg-transparent border-0 min-h-[44px] max-h-[120px] resize-none focus:ring-0 focus:border-0 focus-visible:ring-0 w-full text-sm placeholder:text-white/25"
+              className="bg-transparent border-0 shadow-none min-h-[44px] max-h-[120px] resize-none focus:ring-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none w-full text-sm placeholder:text-white/25"
               style={{ fontFamily: "'Quicksand', sans-serif" }}
               rows={1}
             />
