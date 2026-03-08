@@ -49,20 +49,26 @@ serve(async (req) => {
         });
     }
 
-    // Fetch with timeout and retry
-    const fetchWithRetry = async (fetchUrl: string, retries = 1): Promise<Response> => {
+    // Fetch with timeout and retry on transient errors (502, 504, timeout)
+    const fetchWithRetry = async (fetchUrl: string, retries = 2): Promise<Response> => {
       for (let i = 0; i <= retries; i++) {
         try {
           const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 15000);
+          const timeout = setTimeout(() => controller.abort(), 20000);
           const res = await fetch(fetchUrl, { signal: controller.signal });
           clearTimeout(timeout);
-          if (res.ok || i === retries) return res;
-          await res.text(); // consume body
-          await new Promise(r => setTimeout(r, 800));
+          // Retry on gateway errors
+          if ((res.status === 502 || res.status === 504) && i < retries) {
+            await res.text();
+            console.log(`Retry ${i + 1}/${retries} due to ${res.status}`);
+            await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+            continue;
+          }
+          return res;
         } catch (err) {
           if (i === retries) throw err;
-          await new Promise(r => setTimeout(r, 800));
+          console.log(`Retry ${i + 1}/${retries} due to ${err}`);
+          await new Promise(r => setTimeout(r, 1000 * (i + 1)));
         }
       }
       throw new Error("Max retries reached");
