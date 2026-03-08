@@ -1614,7 +1614,26 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative bg-black/40 backdrop-blur-2xl rounded-2xl border border-white/10 p-2 flex items-end gap-2">
+        <div className="relative group/bar">
+          {/* Animated glow ring */}
+          <div
+            className="absolute -inset-[2px] rounded-[18px] opacity-60 group-hover/bar:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, hsl(28 100% 60% / 0.0), hsl(28 100% 55% / 0.5), hsl(35 95% 55% / 0.6), hsl(28 100% 55% / 0.5), hsl(28 100% 60% / 0.0))',
+              backgroundSize: '200% 100%',
+              animation: 'glow-sweep 3s ease-in-out infinite',
+              filter: 'blur(6px)',
+            }}
+          />
+          <div
+            className="absolute -inset-[1px] rounded-[17px] pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, hsl(28 100% 60% / 0.0), hsl(28 100% 55% / 0.3), hsl(35 95% 55% / 0.4), hsl(28 100% 55% / 0.3), hsl(28 100% 60% / 0.0))',
+              backgroundSize: '200% 100%',
+              animation: 'glow-sweep 3s ease-in-out infinite',
+            }}
+          />
+        <div className="relative bg-black/50 backdrop-blur-2xl rounded-2xl border border-white/[0.08] p-2 flex items-end gap-2 z-10">
           <input
             type="file"
             ref={fileInputRef}
