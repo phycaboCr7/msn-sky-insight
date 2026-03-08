@@ -1463,25 +1463,32 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             </span>
           </CardTitle>
           <div className="flex items-center gap-1">
-            {/* Pro Mode Toggle */}
+            {/* Pro Mode Toggle — sliding switch */}
             <button
               onClick={toggleProMode}
-              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-300 ${
-                proMode
-                  ? 'text-white shadow-lg shadow-primary/30'
-                  : 'text-muted-foreground hover:text-primary hover:bg-white/5'
-              }`}
-              style={proMode ? {
-                background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(280 70% 50%), hsl(260 70% 55%))',
-                boxShadow: '0 0 12px hsl(28 100% 60% / 0.4), 0 0 24px hsl(280 70% 50% / 0.2)',
-              } : undefined}
+              className="flex items-center gap-2 px-2 py-1 rounded-full text-[11px] font-bold transition-all duration-300 hover:bg-white/5"
               title={proMode ? "Disable Pro Mode" : "Enable Pro Mode"}
             >
-              <Zap className={`w-3.5 h-3.5 ${proMode ? 'fill-current' : ''}`} />
-              Pro
-              {proMode && (
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-400 shadow-lg shadow-green-400/50" style={{ animation: 'pulse 2s infinite' }} />
-              )}
+              <Zap className={`w-3.5 h-3.5 transition-colors duration-300 ${proMode ? 'text-primary fill-current' : 'text-muted-foreground'}`} />
+              <span className={`transition-colors duration-300 ${proMode ? 'text-primary' : 'text-muted-foreground'}`}>Pro</span>
+              {/* Sliding switch track */}
+              <div
+                className={`relative w-9 h-5 rounded-full transition-all duration-400 ${
+                  proMode ? 'shadow-lg' : 'bg-white/10'
+                }`}
+                style={proMode ? {
+                  background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(280 70% 50%))',
+                  boxShadow: '0 0 10px hsl(28 100% 60% / 0.4), inset 0 1px 2px hsl(0 0% 100% / 0.2)',
+                } : undefined}
+              >
+                {/* Sliding knob */}
+                <div
+                  className={`absolute top-[2px] w-4 h-4 rounded-full shadow-md transition-all duration-300 ${
+                    proMode ? 'left-[18px] bg-white' : 'left-[2px] bg-white/60'
+                  }`}
+                  style={proMode ? { boxShadow: '0 0 6px hsl(28 100% 60% / 0.5)' } : undefined}
+                />
+              </div>
             </button>
             {messages.some(m => m.role === "assistant") && (
               <>
