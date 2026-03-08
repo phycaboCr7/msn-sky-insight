@@ -1680,7 +1680,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior });
                 });
               }}
-              className="bg-transparent border-0 min-h-[44px] max-h-[120px] resize-none focus:ring-0 focus:border-0 focus-visible:ring-0 w-full text-sm placeholder:text-white/25"
+              className="bg-transparent border-0 shadow-none min-h-[44px] max-h-[120px] resize-none focus:ring-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none w-full text-sm placeholder:text-white/25"
               style={{ fontFamily: "'Quicksand', sans-serif" }}
               rows={1}
             />
