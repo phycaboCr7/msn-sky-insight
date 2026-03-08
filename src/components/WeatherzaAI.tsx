@@ -261,7 +261,7 @@ def get_plot_as_base64():
     return img_str
 \`);
         loading.remove();
-        addLine('✅ Python engine ready! NumPy, Matplotlib, SciPy, SymPy loaded.', 'info-line');
+        addLine('Python engine ready! NumPy, Matplotlib, SciPy, SymPy loaded.', 'info-line');
 
         window._pyodide = pyodide;
 
