@@ -1570,18 +1570,25 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               rows={2}
             />
           </div>
-          <Button 
-            data-send-btn
-            onClick={askAI} 
-            disabled={loading || isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
-            className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
-          >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
+          {loading ? (
+            <Button
+              data-stop-btn
+              onClick={stopGeneration}
+              className="px-4 self-end bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 border-0"
+              title="Stop generating"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+            </Button>
+          ) : (
+            <Button 
+              data-send-btn
+              onClick={askAI} 
+              disabled={isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
+              className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+            >
               <Send className="w-4 h-4" />
-            )}
-          </Button>
+            </Button>
+          )}
         </div>
 
         {/* Voice Overlay */}
