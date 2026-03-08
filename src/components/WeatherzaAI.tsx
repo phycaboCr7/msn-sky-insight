@@ -1632,23 +1632,23 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         )}
 
         {/* Input Area - unified bar */}
-        <div className="relative group/bar rounded-full mb-3">
+        <div className="relative group/bar rounded-full mb-3 p-[2px]">
           {/* Blurred glow layer — sits behind everything */}
           <div
             ref={glowInnerRef}
             className="absolute rounded-full pointer-events-none z-0"
             style={{
-              inset: '-4px',
-              filter: 'blur(14px)',
-              opacity: 0.5,
+              inset: '-6px',
+              filter: 'blur(16px)',
+              opacity: 0.55,
             }}
           />
-          {/* Sharp animated border */}
+          {/* Sharp animated border — fills wrapper including the 2px padding */}
           <div
             ref={glowOuterRef}
             className="absolute inset-0 rounded-full pointer-events-none z-[1]"
           />
-        <div className="relative m-[2px] bg-background backdrop-blur-2xl rounded-full border-0 shadow-none p-2 flex items-end gap-2 z-10">
+        <div className="relative bg-background backdrop-blur-2xl rounded-full border-0 shadow-none p-2 flex items-end gap-2 z-10">
           <input
             type="file"
             ref={fileInputRef}
