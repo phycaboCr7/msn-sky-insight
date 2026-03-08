@@ -783,6 +783,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
+  const [aiMode, setAiMode] = useState<'weather' | 'code' | 'math' | 'conversation'>(() => {
+    return (localStorage.getItem('weatherza-ai-mode') as any) || 'weather';
+  });
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [pyodideCode, setPyodideCode] = useState<string | null>(null);
   const lastMessageRef = useRef<HTMLDivElement>(null);
