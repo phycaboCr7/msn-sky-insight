@@ -204,8 +204,8 @@ const CodeBlock = ({
     <span id="status"></span>
   </div>
   <div class="output" id="output">
-    <div class="info-line">🐍 PYTHON Interactive Shell</div>
-    <div class="loading" id="loading">⏳ Loading Python engine (Pyodide)...</div>
+    <div class="info-line">PYTHON Interactive Shell</div>
+    <div class="loading" id="loading">Loading Python engine (Pyodide)...</div>
   </div>
   ${isPython ? '<div class="input-form" id="inputForm" style="display:none"><span class="prompt-label">&gt;&gt;&gt; </span><input type="text" id="cmdInput" placeholder="Type code here..." autocomplete="off" /></div>' : ''}
   <div class="footer">
