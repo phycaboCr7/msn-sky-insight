@@ -42,7 +42,7 @@ serve(async (req) => {
 
 WEATHER: ${weatherContext.location}, ${weatherContext.country} | ${weatherContext.temperature}°C (feels ${weatherContext.feelsLike}°C) | ${weatherContext.condition} | 💧${weatherContext.humidity}% | 💨${weatherContext.windSpeed}km/h | UV ${weatherContext.uvIndex} | Rain ${weatherContext.precipChance}% | Hi/Lo ${weatherContext.maxTemp}°/${weatherContext.minTemp}°C | AQI ${actualAQI || 'N/A'}
 
-RULES: Bold key values. Use emojis. LaTeX for math ($inline$, $$block$$). Code must be non-interactive (no input()). Python: matplotlib AGG only, end with print(get_plot_as_base64()). Turtle: t=SimpleTurtle(), print(t.draw()). HTML: single file, inline styles. Structure with headings/bullets/tables. Be thorough. Never fabricate data. End with --- then 💡 **Want me to help with more?** + 2-3 suggestions.`;
+RULES: Only bold KEY information like temperatures, percentages, important values — NOT every single word. Use emojis sparingly at bullet starts. LaTeX for math ($inline$, $$block$$). Code must be non-interactive (no input()). Python: matplotlib AGG only, end with print(get_plot_as_base64()). Turtle: t=SimpleTurtle(), print(t.draw()). HTML: single file, inline styles. Structure with headings/bullets/tables. Be thorough. Never fabricate data. End with --- then 💡 **Want me to help with more?** + 2-3 suggestions.`;
 
     const groqSystemPrompt = `You are Weatherza AI by Rakshit Jain. Warm, precise, emoji-rich weather assistant.
 
@@ -50,12 +50,12 @@ ${weatherContext.location}, ${weatherContext.country}: **${weatherContext.temper
 💧 **${weatherContext.humidity}%** | 💨 **${weatherContext.windSpeed} km/h** | ☀️ UV **${weatherContext.uvIndex}** | 🌧️ **${weatherContext.precipChance}%** | **${weatherContext.maxTemp}°/${weatherContext.minTemp}°C** | AQI **${actualAQI || 'N/A'}**
 
 FORMATTING RULES (follow strictly):
-- Start EVERY sentence/bullet with a relevant emoji (🌡️💧💨☀️🌧️🧥☂️🕶️🏃‍♂️🌤️⚠️✅🔥❄️🌈)
-- Use **bold** for ALL numbers, temperatures, percentages, and key terms
-- Keep paragraphs SHORT — max 2-3 lines each, NO excessive vertical spacing
+- Use emojis at bullet starts only — don't overdo it
+- Only bold KEY numbers and important values (temperatures, percentages, critical info) — NOT every word
+- Keep paragraphs SHORT — max 2-3 lines each
 - Use compact bullet lists, NOT long paragraphs
 - Be concise but informative — no filler text
-- ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 emoji-prefixed suggestions`;
+- ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 suggestions`;
 
     // ─── VISION ───
     if (hasImages && GROQ_API_KEY) {

@@ -579,6 +579,7 @@ const generatePDF = async (content: string, _elementRef?: HTMLElement | null, fi
 // Word Generation helper - improved emoji and text handling
 const generateWord = async (content: string, filename: string = "Weatherza_AI_Generated.docx") => {
   try {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await loadDocx();
     // Parse content into paragraphs with proper emoji support
     const paragraphs: any[] = [];
     
@@ -599,8 +600,7 @@ const generateWord = async (content: string, filename: string = "Weatherza_AI_Ge
     );
     
     // Helper to create runs with emoji support
-    const createTextRuns = (text: string, isBold: boolean = false): TextRun[] => {
-      // Split by emojis but keep them
+    const createTextRuns = (text: string, isBold: boolean = false): InstanceType<typeof TextRun>[] => {
       const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
       const parts = text.split(emojiRegex).filter(Boolean);
       
@@ -611,7 +611,6 @@ const generateWord = async (content: string, filename: string = "Weatherza_AI_Ge
       }));
     };
     
-    // Clean and split content
     const lines = content.split('\n');
     
     for (const line of lines) {
@@ -621,7 +620,6 @@ const generateWord = async (content: string, filename: string = "Weatherza_AI_Ge
         continue;
       }
       
-      // Check for headings
       if (trimmedLine.startsWith('### ')) {
         paragraphs.push(
           new Paragraph({
@@ -659,7 +657,6 @@ const generateWord = async (content: string, filename: string = "Weatherza_AI_Ge
           })
         );
       } else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
-        // Bullet points
         const bulletText = trimmedLine.replace(/^[-*]\s/, '');
         paragraphs.push(
           new Paragraph({
@@ -668,7 +665,6 @@ const generateWord = async (content: string, filename: string = "Weatherza_AI_Ge
           })
         );
       } else if (/^\d+\.\s/.test(trimmedLine)) {
-        // Numbered lists
         paragraphs.push(
           new Paragraph({
             children: createTextRuns(trimmedLine),
@@ -676,26 +672,21 @@ const generateWord = async (content: string, filename: string = "Weatherza_AI_Ge
           })
         );
       } else {
-        // Regular paragraph - handle bold and italic text with emojis
-        const runs: TextRun[] = [];
+        const runs: InstanceType<typeof TextRun>[] = [];
         let remaining = trimmedLine;
         
-        // Process bold text
         const boldRegex = /\*\*(.*?)\*\*/g;
         let lastIndex = 0;
         let match;
         
         while ((match = boldRegex.exec(remaining)) !== null) {
-          // Add text before bold
           if (match.index > lastIndex) {
             runs.push(...createTextRuns(remaining.slice(lastIndex, match.index)));
           }
-          // Add bold text
           runs.push(...createTextRuns(match[1], true));
           lastIndex = match.index + match[0].length;
         }
         
-        // Add remaining text
         if (lastIndex < remaining.length) {
           runs.push(...createTextRuns(remaining.slice(lastIndex)));
         }
@@ -713,14 +704,9 @@ const generateWord = async (content: string, filename: string = "Weatherza_AI_Ge
       }
     }
     
-    // Add footer
     paragraphs.push(
       new Paragraph({
-        children: [
-          new TextRun({
-            text: "",
-          }),
-        ],
+        children: [new TextRun({ text: "" })],
         spacing: { before: 200 },
       })
     );
@@ -839,6 +825,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   // Extract text from PDF using pdfjs-dist
   const extractPdfText = async (file: File): Promise<string> => {
     try {
+      const pdfjsLib = await loadPdfjs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       
@@ -869,6 +856,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   // Extract text from DOCX using mammoth
   const extractDocxText = async (file: File): Promise<string> => {
+    const mammoth = await loadMammoth();
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer });
     return result.value;
