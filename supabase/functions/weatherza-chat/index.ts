@@ -220,7 +220,7 @@ FORMATTING RULES (follow strictly):
                   contents: geminiContents,
                   generationConfig: {
                     temperature: mode === 'code' ? 0.3 : mode === 'math' ? 0.2 : 0.6,
-                    maxOutputTokens: 8192,
+                    maxOutputTokens: 16384,
                   },
                 }),
               }
