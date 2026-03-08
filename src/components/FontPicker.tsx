@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Check, Type } from "lucide-react";
+import { Check, Type, X } from "lucide-react";
 
 export interface FontOption {
   name: string;
   family: string;
   category: 'playful' | 'royal' | 'normal' | 'modern' | 'handwritten';
-  googleFont: string; // Google Fonts import name
+  googleFont: string;
 }
 
 export const FONT_OPTIONS: FontOption[] = [
@@ -59,7 +59,7 @@ export const getStoredFont = (): FontOption => {
       if (found) return found;
     }
   } catch {}
-  return FONT_OPTIONS[0]; // Quicksand default
+  return FONT_OPTIONS[0];
 };
 
 export const loadGoogleFont = (font: FontOption) => {
@@ -93,26 +93,45 @@ export const FontPicker = ({ selectedFont, onSelectFont, isOpen, onClose }: Font
   };
 
   return (
-    <div className="absolute bottom-full left-0 right-0 mb-2 z-50 animate-fade-in">
-      <div className="bg-background/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl p-4 max-h-[360px] overflow-hidden">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Type className="w-4 h-4 text-primary" />
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="bg-background/95 backdrop-blur-xl border border-white/15 rounded-3xl shadow-2xl w-[90vw] max-w-[540px] max-h-[75vh] flex flex-col overflow-hidden animate-fade-in"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-5 pb-3">
+          <h3 className="text-lg font-bold text-foreground flex items-center gap-2.5" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <div className="p-2 rounded-xl bg-primary/20">
+              <Type className="w-5 h-5 text-primary" />
+            </div>
             Choose Chat Font
-          </h4>
-          <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground transition-colors">✕</button>
+          </h3>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Current font indicator */}
+        <div className="px-6 pb-3">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20">
+            <span className="text-xs text-muted-foreground">Current:</span>
+            <span className="text-sm font-semibold text-primary" style={{ fontFamily: selectedFont.family }}>{selectedFont.name}</span>
+          </div>
         </div>
 
         {/* Category tabs */}
-        <div className="flex gap-1 mb-3 overflow-x-auto pb-1">
+        <div className="flex gap-1.5 px-6 pb-3 overflow-x-auto">
           {Object.entries(CATEGORY_LABELS).map(([key, { label, emoji }]) => (
             <button
               key={key}
               onClick={() => setActiveCategory(key)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 activeCategory === key
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'bg-white/5 text-muted-foreground hover:bg-white/10'
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                  : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'
               }`}
             >
               <span>{emoji}</span>
@@ -121,37 +140,40 @@ export const FontPicker = ({ selectedFont, onSelectFont, isOpen, onClose }: Font
           ))}
         </div>
 
-        {/* Font list with preview */}
-        <div className="space-y-1.5 overflow-y-auto max-h-[220px] pr-1">
-          {filteredFonts.map(font => {
-            // Preload font for preview
-            loadGoogleFont(font);
-            const isSelected = selectedFont.name === font.name;
-            return (
-              <button
-                key={font.name}
-                onClick={() => handleSelect(font)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all ${
-                  isSelected
-                    ? 'bg-primary/20 border border-primary/40'
-                    : 'bg-white/5 border border-transparent hover:bg-white/10 hover:border-white/10'
-                }`}
-              >
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[11px] text-muted-foreground font-medium">{font.name}</span>
-                  <span
-                    className="text-base text-foreground"
-                    style={{ fontFamily: font.family }}
-                  >
-                    The quick brown fox jumps over the lazy dog
-                  </span>
-                </div>
-                {isSelected && (
-                  <Check className="w-4 h-4 text-primary flex-shrink-0 ml-2" />
-                )}
-              </button>
-            );
-          })}
+        {/* Font grid */}
+        <div className="flex-1 overflow-y-auto px-6 pb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {filteredFonts.map(font => {
+              loadGoogleFont(font);
+              const isSelected = selectedFont.name === font.name;
+              return (
+                <button
+                  key={font.name}
+                  onClick={() => handleSelect(font)}
+                  className={`flex items-center justify-between px-4 py-3.5 rounded-2xl text-left transition-all group ${
+                    isSelected
+                      ? 'bg-primary/20 border-2 border-primary/50 shadow-md shadow-primary/10'
+                      : 'bg-white/5 border-2 border-transparent hover:bg-white/10 hover:border-white/10'
+                  }`}
+                >
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{font.name}</span>
+                    <span
+                      className="text-[15px] text-foreground truncate"
+                      style={{ fontFamily: font.family }}
+                    >
+                      Hello, how's the weather?
+                    </span>
+                  </div>
+                  {isSelected && (
+                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 ml-3">
+                      <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

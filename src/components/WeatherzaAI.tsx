@@ -1674,8 +1674,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
         {/* Chat Viewport — fixed height, flex column, no collapse */}
         <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh' }}>
         {/* Mode Selector */}
-        <div className="flex items-center gap-1 px-1 pb-3">
-          <div className="flex gap-1 flex-1">
+        <div className="flex gap-1 px-1 pb-3">
           {([
             { key: 'weather', label: 'Weather', icon: CloudSun },
             { key: 'code', label: 'Code', icon: Code },
@@ -1696,28 +1695,6 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               {label}
             </button>
           ))}
-          </div>
-          {/* Font picker button — signed-in users only */}
-          {isSignedIn && (
-            <div className="relative">
-              <button
-                onClick={() => setFontPickerOpen(!fontPickerOpen)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  fontPickerOpen ? 'bg-primary text-primary-foreground' : 'bg-white/5 text-muted-foreground hover:bg-white/10'
-                }`}
-                title="Choose chat font"
-              >
-                <Type className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline" style={{ fontFamily: chatFont.family }}>{chatFont.name}</span>
-              </button>
-              <FontPicker
-                isOpen={fontPickerOpen}
-                onClose={() => setFontPickerOpen(false)}
-                selectedFont={chatFont}
-                onSelectFont={(font) => { setChatFont(font); setFontPickerOpen(false); }}
-              />
-            </div>
-          )}
         </div>
 
         {/* Messages Scroll Area */}
@@ -1885,6 +1862,19 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             >
               <Mic className="w-4 h-4" />
             </button>
+            {/* Font picker button — beside mic, signed-in only */}
+            {isSignedIn && (
+              <button
+                type="button"
+                onClick={() => setFontPickerOpen(!fontPickerOpen)}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                  fontPickerOpen ? 'bg-primary/30 text-primary' : 'bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary'
+                }`}
+                title="Choose chat font"
+              >
+                <Type className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <div className="flex-1">
             <Textarea
@@ -1953,6 +1943,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             <PyodideRunner code={pyodideCode} onClose={() => setPyodideCode(null)} />
           </Suspense>
         )}
+
+        {/* Font Picker Overlay */}
+        <FontPicker
+          isOpen={fontPickerOpen}
+          onClose={() => setFontPickerOpen(false)}
+          selectedFont={chatFont}
+          onSelectFont={(font) => { setChatFont(font); setFontPickerOpen(false); }}
+        />
       </CardContent>
     </Card>
   );
