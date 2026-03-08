@@ -247,6 +247,17 @@ You sometimes receive real-time internet search results prepended to user messag
 
 You have access to the full conversation history. Reference previous messages naturally to maintain context and continuity. Build on earlier discussions rather than repeating information.`;
 
+    // Condensed system prompt for Groq (to stay under token limits)
+    const groqSystemPrompt = `You are Weatherza AI, created by Rakshit Jain (Alwar, Rajasthan, India). You are a warm, precise weather assistant.
+
+Current weather for ${weatherContext.location}, ${weatherContext.country}:
+🌡️ ${weatherContext.temperature}°C (feels ${weatherContext.feelsLike}°C) | ${weatherContext.condition}
+💧 Humidity: ${weatherContext.humidity}% | 💨 Wind: ${weatherContext.windSpeed} km/h ${weatherContext.windDirection || ''}
+☀️ UV: ${weatherContext.uvIndex} | 🌧️ Rain: ${weatherContext.precipChance}% | High/Low: ${weatherContext.maxTemp}°/${weatherContext.minTemp}°C
+👁️ Vis: ${weatherContext.visibility || 'N/A'} km | 🌬️ Pressure: ${weatherContext.pressure || 'N/A'} mb | AQI: ${actualAQI || 'N/A'}
+
+Use markdown formatting. Give actionable weather advice. Be concise but helpful. Include emojis naturally.`;
+
     // For vision queries, use Groq's Llama 4 Scout (only vision model available)
     if (hasImages && GROQ_API_KEY) {
       const latestMessage = messages[messages.length - 1];
@@ -266,8 +277,8 @@ You have access to the full conversation history. Reference previous messages na
       }
 
       const groqMessages = [
-        { role: "system", content: systemPrompt },
-        ...messages.slice(0, -1).map((msg: any) => ({ role: msg.role, content: msg.content })),
+        { role: "system", content: groqSystemPrompt },
+        ...messages.slice(-3).map((msg: any) => ({ role: msg.role, content: msg.content })),
         { role: "user", content: contentParts }
       ];
 
@@ -298,10 +309,19 @@ You have access to the full conversation history. Reference previous messages na
       });
     }
 
-    // For text queries: build messages
-    const aiMessages = [
+    // For Gemini modes: use full system prompt with full history
+    const geminiMessages = [
       { role: "system", content: systemPrompt },
       ...messages.slice(-8).map((msg: any) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+    ];
+
+    // For Groq (weather mode): use condensed prompt with limited history
+    const groqMessages = [
+      { role: "system", content: groqSystemPrompt },
+      ...messages.slice(-4).map((msg: any) => ({
         role: msg.role,
         content: msg.content,
       })),
