@@ -5,33 +5,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const API_KEY = Deno.env.get("EULERPOOL_API_KEY") || "";
-const BASE = "https://api.eulerpool.com";
+const YF_BASE = "https://query1.finance.yahoo.com";
 
-// Simple in-memory cache (per function invocation lifetime)
-const cache = new Map<string, { data: unknown; ts: number }>();
-const CACHE_TTL = 60_000; // 1 minute
-
-function getCached(key: string): unknown | null {
-  const entry = cache.get(key);
-  if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
-  cache.delete(key);
-  return null;
-}
-
-function setCache(key: string, data: unknown) {
-  cache.set(key, { data, ts: Date.now() });
-}
-
-async function fetchJSON(url: string) {
-  console.log(`Fetching: ${url.replace(API_KEY, "***")}`);
+async function fetchYahoo(url: string): Promise<any> {
+  console.log(`Yahoo fetch: ${url}`);
   const resp = await fetch(url, {
-    headers: { Accept: "application/json" },
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "Accept": "application/json",
+    },
   });
   if (!resp.ok) {
     const text = await resp.text();
-    console.error(`API error ${resp.status}: ${text}`);
-    throw new Error(`API returned ${resp.status}`);
+    console.error(`Yahoo error ${resp.status}: ${text.substring(0, 200)}`);
+    throw new Error(`Yahoo API returned ${resp.status}`);
   }
   return resp.json();
 }
@@ -45,49 +32,97 @@ serve(async (req) => {
     const body = await req.json();
     const { action, symbol, timeframe, from, to } = body;
 
-    const cacheKey = JSON.stringify({ action, symbol, timeframe, from, to });
-    const cached = getCached(cacheKey);
-    if (cached) {
-      return new Response(JSON.stringify(cached), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    let data: unknown;
+    let result: any;
 
     switch (action) {
       case "price": {
-        // GET /v1/equities/{ticker}/price
-        const url = `${BASE}/v1/equities/${encodeURIComponent(symbol)}/price?token=${API_KEY}`;
-        data = await fetchJSON(url);
+        // Use Yahoo v8 quote endpoint
+        const url = `${YF_BASE}/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1m&includePrePost=false`;
+        const data = await fetchYahoo(url);
+        const chart = data?.chart?.result?.[0];
+        if (!chart) throw new Error("No data for symbol");
+
+        const meta = chart.meta;
+        const quotes = chart.indicators?.quote?.[0];
+        const timestamps = chart.timestamp || [];
+
+        // Get OHLCV from the latest available data
+        const closes = quotes?.close?.filter((c: any) => c != null) || [];
+        const opens = quotes?.open?.filter((o: any) => o != null) || [];
+        const highs = quotes?.high?.filter((h: any) => h != null) || [];
+        const lows = quotes?.low?.filter((l: any) => l != null) || [];
+        const vols = quotes?.volume?.filter((v: any) => v != null) || [];
+
+        const currentPrice = meta.regularMarketPrice || closes[closes.length - 1] || 0;
+        const prevClose = meta.chartPreviousClose || meta.previousClose || 0;
+        const change = currentPrice - prevClose;
+        const changePct = prevClose ? (change / prevClose) * 100 : 0;
+
+        result = {
+          ticker: meta.symbol || symbol,
+          price: currentPrice,
+          open: opens[0] || meta.regularMarketOpen || 0,
+          high: Math.max(...(highs.length ? highs : [0])),
+          low: Math.min(...(lows.filter((l: number) => l > 0).length ? lows.filter((l: number) => l > 0) : [0])),
+          volume: vols.reduce((a: number, b: number) => a + b, 0),
+          change: change,
+          changePct: changePct,
+          previousClose: prevClose,
+          date: meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+          currency: meta.currency || "USD",
+        };
         break;
       }
 
       case "search": {
-        // GET /v1/equities/search?q={keyword}
-        const url = `${BASE}/v1/equities/search?q=${encodeURIComponent(symbol)}&token=${API_KEY}`;
-        data = await fetchJSON(url);
+        const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(symbol)}&quotesCount=10&newsCount=0&listsCount=0`;
+        const data = await fetchYahoo(url);
+        const quotes = data?.quotes || [];
+        result = quotes.map((q: any) => ({
+          ticker: q.symbol,
+          symbol: q.symbol,
+          name: q.shortname || q.longname || q.symbol,
+          type: q.quoteType || "Equity",
+          exchange: q.exchange || "",
+          region: q.exchDisp || "",
+          currency: q.currency || "USD",
+        }));
         break;
       }
 
       case "history": {
-        // GET /v1/equities/{ticker}/ohlcv?interval={interval}&from={from}&to={to}
-        const interval = timeframe || "1d";
-        let url = `${BASE}/v1/equities/${encodeURIComponent(symbol)}/ohlcv?interval=${interval}&token=${API_KEY}`;
-        if (from) url += `&from=${from}`;
-        if (to) url += `&to=${to}`;
-        data = await fetchJSON(url);
-        break;
-      }
+        // Map interval strings
+        const intervalMap: Record<string, string> = {
+          "15m": "15m", "1h": "60m", "1d": "1d", "1w": "1wk", "1mo": "1mo",
+        };
+        const interval = intervalMap[timeframe] || "1d";
 
-      case "quote": {
-        // Fallback: use /api/1/equity/quotes/{identifier}
-        const identifier = body.identifier || symbol;
-        let qp = `token=${API_KEY}`;
-        if (from) qp += `&from=${from}`;
-        if (to) qp += `&to=${to}`;
-        const url = `${BASE}/api/1/equity/quotes/${encodeURIComponent(identifier)}?${qp}`;
-        data = await fetchJSON(url);
+        // Calculate period timestamps
+        const fromTs = from ? Math.floor(new Date(from).getTime() / 1000) : Math.floor(Date.now() / 1000) - 86400;
+        const toTs = to ? Math.floor(new Date(to).getTime() / 1000) : Math.floor(Date.now() / 1000);
+
+        const url = `${YF_BASE}/v8/finance/chart/${encodeURIComponent(symbol)}?period1=${fromTs}&period2=${toTs}&interval=${interval}&includePrePost=false`;
+        const data = await fetchYahoo(url);
+        const chart = data?.chart?.result?.[0];
+
+        if (!chart || !chart.timestamp) {
+          result = { data: [] };
+          break;
+        }
+
+        const quotes = chart.indicators?.quote?.[0] || {};
+        const timestamps = chart.timestamp;
+
+        result = {
+          data: timestamps.map((ts: number, i: number) => ({
+            date: new Date(ts * 1000).toISOString(),
+            close: quotes.close?.[i] ?? null,
+            open: quotes.open?.[i] ?? null,
+            high: quotes.high?.[i] ?? null,
+            low: quotes.low?.[i] ?? null,
+            volume: quotes.volume?.[i] ?? 0,
+          })).filter((d: any) => d.close != null),
+        };
         break;
       }
 
@@ -98,9 +133,7 @@ serve(async (req) => {
         });
     }
 
-    setCache(cacheKey, data);
-
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
