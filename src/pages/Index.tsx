@@ -82,13 +82,8 @@ const Index = () => {
         },
         (error) => {
           console.error("Geolocation error:", error);
-          toast({
-            title: "Location Error",
-            description: "Unable to get your location. Please search for a city instead.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          setInitialLoading(false);
+          // Fallback to a default location instead of showing blank screen
+          fetchWeather("New Delhi");
         }
       );
     } else {
