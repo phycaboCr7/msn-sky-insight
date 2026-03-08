@@ -1434,8 +1434,9 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
 
   const askAI = async () => {
     if (!question.trim() && !uploadedImage && !extractedDocText) return;
+    if (!canSendPrompt()) return;
 
-    let messageContent = question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document");
+    if (!isSignedIn) setPromptCount(prev => prev + 1);
 
     if (extractedDocText) {
       messageContent = `DOCUMENT CONTENT START\n${extractedDocText}\nDOCUMENT CONTENT END\n\n${messageContent}`;
