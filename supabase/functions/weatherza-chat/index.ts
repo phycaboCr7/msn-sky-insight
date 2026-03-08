@@ -43,8 +43,7 @@ serve(async (req) => {
       throw new Error("GROQ_API_KEY is not configured");
     }
 
-    // Also keep GROQ for vision fallback
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+    // GROQ_API_KEY already fetched above
 
     const actualAQI = weatherContext.pm25 ? calculateAQI(weatherContext.pm25) : weatherContext.aqi;
 
