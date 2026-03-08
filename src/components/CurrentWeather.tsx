@@ -90,16 +90,20 @@ const WeatherParticles = ({ condition, isDay, temp }: { condition: string; isDay
         />
       )}
       {isSnow && particles.map((p) => (
-        <div
-          key={p.id}
-          className="absolute rounded-full opacity-60"
-          style={{
-            left: p.left, top: '-10px', width: p.size, height: p.size,
-            background: 'white', boxShadow: '0 0 6px hsl(0 0% 100% / 0.6)',
-            animation: `cwSnowFall ${p.duration} linear infinite`,
-            animationDelay: p.delay,
-          }}
-        />
+        <div key={p.id} className="absolute" style={{ left: p.left, top: '-10px' }}>
+          {/* Snowflake shape */}
+          <div
+            className="text-white/70"
+            style={{
+              fontSize: p.size || '8px',
+              animation: `cwSnowFall ${p.duration} linear infinite`,
+              animationDelay: p.delay,
+              filter: 'drop-shadow(0 0 4px hsl(210 80% 90% / 0.6))',
+            }}
+          >
+            ❄
+          </div>
+        </div>
       ))}
       {isSunny && isDay && (
         <div className="absolute -top-20 -right-20 w-64 h-64 opacity-20"
