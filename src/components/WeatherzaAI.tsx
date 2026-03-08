@@ -442,7 +442,7 @@ const useTypingEffect = (text: string, isTyping: boolean, chunkSize: number = 5,
 };
 
 // Message content component with typing effect
-const MessageContent = ({ content, isTyping, onOpenPyodide }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void }) => {
+const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void; chatFont?: string }) => {
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
   return (
