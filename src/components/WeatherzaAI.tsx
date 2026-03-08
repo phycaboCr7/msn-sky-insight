@@ -897,8 +897,78 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const glowOuterRef = useRef<HTMLDivElement>(null);
   const glowInnerRef = useRef<HTMLDivElement>(null);
 
-  // Pro Mode toggle handler
+  // Auth state
+  const [authUser, setAuthUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [promptCount, setPromptCount] = useState<number>(() => {
+    return parseInt(localStorage.getItem(PROMPT_COUNT_KEY) || '0', 10);
+  });
+  const [showSignInGate, setShowSignInGate] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+
+  const isSignedIn = !!authUser;
+  const remainingFreePrompts = Math.max(0, FREE_PROMPT_LIMIT - promptCount);
+
+  // Listen to auth state
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setAuthUser({ id: session.user.id, name, email: session.user.email || '' });
+        setShowSignInGate(false);
+      } else {
+        setAuthUser(null);
+        // If not signed in, also disable pro mode
+        setProMode(false);
+        localStorage.setItem('weatherza-pro-mode', 'false');
+      }
+    });
+
+    // Check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const name = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User';
+        setAuthUser({ id: session.user.id, name, email: session.user.email || '' });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Persist prompt count
+  useEffect(() => {
+    localStorage.setItem(PROMPT_COUNT_KEY, String(promptCount));
+  }, [promptCount]);
+
+  // Google sign in handler
+  const handleGoogleSignIn = async () => {
+    setSigningIn(true);
+    try {
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error("Sign in error:", err);
+      toast({ title: "Sign-in failed", description: "Could not sign in with Google. Try again.", variant: "destructive" });
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  // Sign out handler
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setAuthUser(null);
+    toast({ title: "Signed out", description: "You've been signed out." });
+  };
+
+  // Pro Mode toggle handler — only for signed-in users
   const toggleProMode = () => {
+    if (!isSignedIn) {
+      setShowSignInGate(true);
+      toast({ title: "Sign in required", description: "Pro Mode is available for signed-in users only.", variant: "destructive" });
+      return;
+    }
     const next = !proMode;
     setProMode(next);
     localStorage.setItem('weatherza-pro-mode', String(next));
