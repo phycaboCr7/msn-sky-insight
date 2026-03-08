@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, lazy, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
