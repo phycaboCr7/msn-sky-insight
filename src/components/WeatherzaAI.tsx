@@ -453,7 +453,7 @@ const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont, isPro }: {
 
   return (
     <div className="w-full overflow-visible">
-      <div className="weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit" style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
+      <div className={`weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit ${isPro ? 'pro-equations' : ''}`} style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
