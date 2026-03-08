@@ -53,6 +53,21 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
     return [];
   }, [isDay]);
 
+  const shootingStars = useMemo(() => {
+    if (!isDay) {
+      return Array.from({ length: 3 }, (_, i) => ({
+        id: i,
+        top: `${5 + Math.random() * 40}%`,
+        left: `${Math.random() * 60}%`,
+        delay: `${i * 4 + Math.random() * 3}s`,
+        duration: `${0.8 + Math.random() * 0.4}s`,
+        angle: 15 + Math.random() * 30,
+        length: 60 + Math.random() * 40,
+      }));
+    }
+    return [];
+  }, [isDay]);
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-[6]">
       {(isRain || isThunder) && particles.map((p) => (
@@ -125,6 +140,22 @@ const WeatherParticles = ({ condition, isDay }: { condition: string; isDay: bool
             animationDelay: s.delay,
           }}
         />
+      ))}
+      {!isDay && shootingStars.map((s) => (
+        <div key={`shoot-${s.id}`} className="absolute" style={{ top: s.top, left: s.left }}>
+          <div
+            className="h-[1.5px] rounded-full"
+            style={{
+              '--shoot-length': `${s.length}px`,
+              background: 'linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.8), hsl(0 0% 100% / 0.3))',
+              transform: `rotate(${s.angle}deg)`,
+              animation: `cwShootingStar ${s.duration} ease-out infinite`,
+              animationDelay: s.delay,
+              transformOrigin: 'left center',
+              boxShadow: '0 0 4px hsl(0 0% 100% / 0.5)',
+            } as React.CSSProperties}
+          />
+        </div>
       ))}
     </div>
   );
