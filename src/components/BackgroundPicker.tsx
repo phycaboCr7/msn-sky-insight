@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Search, X, RotateCcw, ImageIcon, Loader2, Check } from "lucide-react";
+import { useState } from "react";
+import { Search, X, RotateCcw, ImageIcon, Loader2, Check, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const BG_STORAGE_KEY = 'weatherza-custom-bg';
 const BG_COUNT_KEY = 'weatherza-bg-change-count';
-const MAX_BG_CHANGES = 2;
+const MAX_BG_CHANGES = 10;
 
 export interface CustomBg {
   url: string;
@@ -43,6 +43,8 @@ export const BackgroundPicker = ({ isOpen, onClose, onSelectBg, currentBg }: Bac
   const [results, setResults] = useState<PixabayHit[]>([]);
   const [loading, setLoading] = useState(false);
   const [changeCount, setChangeCount] = useState(getBgChangeCount);
+  const [previewBg, setPreviewBg] = useState<CustomBg | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const remaining = MAX_BG_CHANGES - changeCount;
 
   if (!isOpen) return null;
@@ -64,150 +66,230 @@ export const BackgroundPicker = ({ isOpen, onClose, onSelectBg, currentBg }: Bac
     }
   };
 
-  const selectImage = (hit: PixabayHit) => {
+  const startPreview = (hit: PixabayHit) => {
     if (remaining <= 0) return;
     const bg: CustomBg = { url: hit.largeImageURL || hit.webformatURL, query: searchQuery };
-    localStorage.setItem(BG_STORAGE_KEY, JSON.stringify(bg));
+    setPreviewBg(bg);
+    // Temporarily apply preview
+    onSelectBg(bg);
+  };
+
+  const confirmApply = () => {
+    if (!previewBg || remaining <= 0) return;
+    localStorage.setItem(BG_STORAGE_KEY, JSON.stringify(previewBg));
     const newCount = changeCount + 1;
     localStorage.setItem(BG_COUNT_KEY, String(newCount));
     setChangeCount(newCount);
-    onSelectBg(bg);
+    setPreviewBg(null);
+    setConfirmOpen(false);
     onClose();
+  };
+
+  const cancelPreview = () => {
+    // Revert to previous bg
+    onSelectBg(currentBg);
+    setPreviewBg(null);
+    setConfirmOpen(false);
   };
 
   const revertBg = () => {
     localStorage.removeItem(BG_STORAGE_KEY);
     onSelectBg(null);
+    setPreviewBg(null);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="bg-background/95 backdrop-blur-xl border border-white/15 rounded-3xl shadow-2xl w-[92vw] max-w-[600px] max-h-[80vh] flex flex-col overflow-hidden animate-fade-in"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-3">
-          <h3 className="text-lg font-bold text-foreground flex items-center gap-2.5" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-            <div className="p-2 rounded-xl bg-primary/20">
-              <ImageIcon className="w-5 h-5 text-primary" />
-            </div>
-            Set Background Image
-          </h3>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
+    <>
+      {/* Confirmation dialog */}
+      {confirmOpen && previewBg && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={cancelPreview}>
+          <div
+            className="bg-background/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl w-[90vw] max-w-[420px] p-6 animate-fade-in"
+            onClick={e => e.stopPropagation()}
           >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Usage counter & current bg */}
-        <div className="px-6 pb-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {remaining > 0 ? (
-                <>🎨 <span className="text-primary font-semibold">{remaining}</span> background change{remaining !== 1 ? 's' : ''} remaining</>
-              ) : (
-                <>⚠️ No background changes remaining</>
-              )}
-            </span>
-            {currentBg && (
+            <h4 className="text-base font-bold text-foreground mb-3" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              Apply this background permanently?
+            </h4>
+            <div className="relative rounded-xl overflow-hidden h-32 mb-4 border border-primary/20">
+              <img src={previewBg.url} alt="Preview" className="w-full h-full object-cover" />
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">
+              This will use <span className="text-primary font-semibold">1</span> of your <span className="text-primary font-semibold">{remaining}</span> remaining change{remaining !== 1 ? 's' : ''}. This background will stay until you revert it.
+            </p>
+            <div className="flex gap-3">
               <button
-                onClick={revertBg}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
+                onClick={cancelPreview}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-all"
               >
-                <RotateCcw className="w-3 h-3" />
-                Revert to Default
+                Cancel
               </button>
+              <button
+                onClick={confirmApply}
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-primary-foreground transition-all"
+                style={{ background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(28 100% 45%))' }}
+              >
+                Apply Forever
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => { cancelPreview(); onClose(); }}>
+        <div
+          className="bg-background/95 backdrop-blur-xl border border-white/15 rounded-3xl shadow-2xl w-[92vw] max-w-[600px] max-h-[80vh] flex flex-col overflow-hidden animate-fade-in"
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 pt-5 pb-3">
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2.5" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              <div className="p-2 rounded-xl bg-primary/20">
+                <ImageIcon className="w-5 h-5 text-primary" />
+              </div>
+              Set Background Image
+            </h3>
+            <button
+              onClick={() => { cancelPreview(); onClose(); }}
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Usage counter & current bg */}
+          <div className="px-6 pb-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {remaining > 0 ? (
+                  <>🎨 <span className="text-primary font-semibold">{remaining}</span> background change{remaining !== 1 ? 's' : ''} remaining</>
+                ) : (
+                  <>⚠️ No background changes remaining</>
+                )}
+              </span>
+              {currentBg && !previewBg && (
+                <button
+                  onClick={revertBg}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Revert to Default
+                </button>
+              )}
+            </div>
+
+            {/* Preview banner */}
+            {previewBg && (
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-primary/10 border border-primary/30">
+                <Eye className="w-4 h-4 text-primary" />
+                <span className="text-xs text-primary font-semibold flex-1">Previewing — look at the background behind this dialog</span>
+                <button
+                  onClick={() => setConfirmOpen(true)}
+                  className="px-3 py-1 rounded-lg text-xs font-bold text-primary-foreground"
+                  style={{ background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(28 100% 45%))' }}
+                >
+                  Apply
+                </button>
+                <button
+                  onClick={cancelPreview}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-foreground hover:bg-white/10 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {currentBg && !previewBg && (
+              <div className="relative rounded-xl overflow-hidden h-16 border border-primary/20">
+                <img src={currentBg.url} alt="Current background" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <span className="text-xs text-white/80 font-medium">Current Background</span>
+                </div>
+              </div>
             )}
           </div>
 
-          {currentBg && (
-            <div className="relative rounded-xl overflow-hidden h-16 border border-primary/20">
-              <img src={currentBg.url} alt="Current background" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                <span className="text-xs text-white/80 font-medium">Current Background</span>
+          {/* Search bar */}
+          <div className="px-6 pb-3">
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && searchImages()}
+                  placeholder="Search backgrounds... (e.g. aurora, mountains, ocean)"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary/40 transition-all"
+                />
               </div>
+              <button
+                onClick={searchImages}
+                disabled={loading || !searchQuery.trim()}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 text-primary-foreground"
+                style={{ background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(28 100% 45%))' }}
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* Search bar */}
-        <div className="px-6 pb-3">
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && searchImages()}
-                placeholder="Search backgrounds... (e.g. aurora, mountains, ocean)"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary/40 transition-all"
-              />
-            </div>
-            <button
-              onClick={searchImages}
-              disabled={loading || !searchQuery.trim()}
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 text-primary-foreground"
-              style={{ background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(28 100% 45%))' }}
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
-            </button>
           </div>
-        </div>
 
-        {/* Results grid */}
-        <div className="flex-1 overflow-y-auto px-6 pb-5">
-          {results.length === 0 && !loading && (
-            <div className="text-center py-12 text-muted-foreground text-sm">
-              Search for nature images to set as your AI background
+          {/* Results grid */}
+          <div className="flex-1 overflow-y-auto px-6 pb-5">
+            {results.length === 0 && !loading && (
+              <div className="text-center py-12 text-muted-foreground text-sm">
+                Search for nature images to set as your AI background
+              </div>
+            )}
+            {loading && (
+              <div className="text-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+                <span className="text-sm text-muted-foreground">Searching Pixabay...</span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {results.map(hit => {
+                const hitUrl = hit.largeImageURL || hit.webformatURL;
+                const isCurrentBg = currentBg?.url === hitUrl;
+                const isPreviewing = previewBg?.url === hitUrl;
+                return (
+                  <button
+                    key={hit.id}
+                    onClick={() => startPreview(hit)}
+                    disabled={remaining <= 0}
+                    className={`relative group rounded-xl overflow-hidden aspect-video border-2 transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed ${
+                      isPreviewing ? 'border-primary shadow-lg shadow-primary/20 ring-2 ring-primary/30' : isCurrentBg ? 'border-primary/50 shadow-md' : 'border-transparent hover:border-white/20'
+                    }`}
+                  >
+                    <img
+                      src={hit.webformatURL}
+                      alt={hit.tags}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                      {isPreviewing ? (
+                        <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
+                          <Eye className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                      ) : isCurrentBg ? (
+                        <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                      ) : (
+                        <span className="text-white text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Preview</span>
+                      )}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-1 bg-gradient-to-t from-black/60 to-transparent">
+                      <span className="text-[9px] text-white/70 line-clamp-1">{hit.tags}</span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          )}
-          {loading && (
-            <div className="text-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
-              <span className="text-sm text-muted-foreground">Searching Pixabay...</span>
-            </div>
-          )}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {results.map(hit => {
-              const isCurrentBg = currentBg?.url === (hit.largeImageURL || hit.webformatURL);
-              return (
-                <button
-                  key={hit.id}
-                  onClick={() => selectImage(hit)}
-                  disabled={remaining <= 0}
-                  className={`relative group rounded-xl overflow-hidden aspect-video border-2 transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed ${
-                    isCurrentBg ? 'border-primary shadow-lg shadow-primary/20' : 'border-transparent hover:border-white/20'
-                  }`}
-                >
-                  <img
-                    src={hit.webformatURL}
-                    alt={hit.tags}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                    {isCurrentBg ? (
-                      <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="w-4 h-4 text-primary-foreground" />
-                      </div>
-                    ) : (
-                      <span className="text-white text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">Select</span>
-                    )}
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-1 bg-gradient-to-t from-black/60 to-transparent">
-                    <span className="text-[9px] text-white/70 line-clamp-1">{hit.tags}</span>
-                  </div>
-                </button>
-              );
-            })}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
