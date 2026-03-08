@@ -244,7 +244,7 @@ const CodeBlock = ({
     (async function() {
       try {
         const pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
-        loading.textContent = '📦 Loading packages (numpy, matplotlib)...';
+        loading.textContent = 'Loading packages (numpy, matplotlib)...';
         await pyodide.loadPackage(['numpy', 'matplotlib', 'scipy', 'sympy']);
         await pyodide.runPythonAsync(\`
 import matplotlib
