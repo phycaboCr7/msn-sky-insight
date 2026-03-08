@@ -1613,9 +1613,8 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
           </div>
         )}
 
-        {/* Input Area */}
-        <div className="flex gap-2 items-end">
-          {/* Hidden file input */}
+        {/* Input Area - unified bar */}
+        <div className="relative bg-black/40 backdrop-blur-2xl rounded-2xl border border-white/10 p-2 flex items-end gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -1623,32 +1622,25 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
             accept="image/*,.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             className="hidden"
           />
-          
-          {/* File upload button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => fileInputRef.current?.click()}
-            className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
-            title="Upload image or document"
-          >
-            {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
-          </Button>
-
-          {/* Voice input button - opens Groq Whisper voice overlay */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => setVoiceOverlayOpen(true)}
-            className="shrink-0 border-white/20 hover:bg-primary/20 hover:border-primary/50"
-            title="Start voice input (Groq Whisper)"
-          >
-            <Mic className="w-4 h-4" />
-          </Button>
-
-          <div className="flex-1 relative">
+          <div className="flex gap-1 self-end pb-0.5">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
+              title="Upload image or document"
+            >
+              {extractedDocName ? <FileText className="w-4 h-4" /> : <Image className="w-4 h-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setVoiceOverlayOpen(true)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-primary transition-all"
+              title="Voice input"
+            >
+              <Mic className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1">
             <Textarea
               placeholder={uploadedImage ? "Ask about this image..." : extractedDocName ? `Ask about "${extractedDocName}"...` : "Ask me anything - math, science, coding, weather..."}
               value={question}
@@ -1656,34 +1648,34 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               onKeyDown={handleKeyDown}
               onFocus={(e) => {
                 e.preventDefault();
-                // Prevent browser from scrolling the page when textarea is focused
                 const scrollY = window.scrollY;
                 requestAnimationFrame(() => {
                   window.scrollTo({ top: scrollY, behavior: 'instant' as ScrollBehavior });
                 });
               }}
-              className="bg-white/5 border-white/20 min-h-[60px] max-h-[120px] resize-none focus:border-primary/50 transition-colors w-full"
-              rows={2}
+              className="bg-transparent border-0 min-h-[44px] max-h-[120px] resize-none focus:ring-0 focus:border-0 focus-visible:ring-0 w-full text-sm placeholder:text-white/25"
+              style={{ fontFamily: "'Quicksand', sans-serif" }}
+              rows={1}
             />
           </div>
           {loading ? (
-            <Button
+            <button
               data-stop-btn
               onClick={stopGeneration}
-              className="px-4 self-end bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 border-0"
+              className="self-end w-10 h-10 rounded-xl flex items-center justify-center bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/25 transition-all active:scale-95"
               title="Stop generating"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
-            </Button>
+            </button>
           ) : (
-            <Button 
+            <button
               data-send-btn
-              onClick={askAI} 
+              onClick={askAI}
               disabled={isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
-              className="px-4 self-end bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
+              className="self-end w-10 h-10 rounded-xl flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
-            </Button>
+            </button>
           )}
         </div>
 
