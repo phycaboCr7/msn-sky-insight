@@ -49,7 +49,26 @@ serve(async (req) => {
         });
     }
 
-    const response = await fetch(url);
+    // Fetch with timeout and retry
+    const fetchWithRetry = async (fetchUrl: string, retries = 2): Promise<Response> => {
+      for (let i = 0; i <= retries; i++) {
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 8000);
+          const res = await fetch(fetchUrl, { signal: controller.signal });
+          clearTimeout(timeout);
+          if (res.ok || i === retries) return res;
+          await res.text(); // consume body
+          await new Promise(r => setTimeout(r, 500 * (i + 1)));
+        } catch (err) {
+          if (i === retries) throw err;
+          await new Promise(r => setTimeout(r, 500 * (i + 1)));
+        }
+      }
+      throw new Error("Max retries reached");
+    };
+
+    const response = await fetchWithRetry(url);
     if (!response.ok) {
       const errText = await response.text();
       console.error("WeatherAPI error:", response.status, errText);
