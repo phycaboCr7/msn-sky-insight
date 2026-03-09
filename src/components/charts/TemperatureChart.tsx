@@ -69,7 +69,7 @@ export const TemperatureChart = ({ weather }: TemperatureChartProps) => {
   const avgTemp = Math.round(temps.reduce((a, b) => a + b, 0) / temps.length);
 
   return (
-    <WeatherCard className="p-5 sm:p-6 col-span-full lg:col-span-2">
+    <WeatherCard className="p-5 sm:p-6 col-span-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <h3

@@ -108,24 +108,32 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
     },
   ];
 
+  // Group advice items into pairs for a compact 2-per-card layout
+  const pairs = [];
+  for (let i = 0; i < adviceItems.length; i += 2) {
+    pairs.push(adviceItems.slice(i, i + 2));
+  }
+
   return (
     <>
-      {adviceItems.map((item, index) => (
-        <WeatherCard key={index} className="animate-fade-in group hover:scale-[1.02] transition-transform duration-300">
-          <div className="p-4 sm:p-5">
-            <div className="flex items-center gap-3">
-              <div className={`flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br ${item.iconColor} border border-white/10 ${item.iconText} shadow-lg`}>
-                {item.icon}
+      {pairs.map((pair, pairIndex) => (
+        <WeatherCard key={pairIndex} className="animate-fade-in group hover:scale-[1.02] transition-transform duration-300">
+          <div className="p-4 sm:p-5 space-y-3">
+            {pair.map((item, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className={`flex-shrink-0 p-2 rounded-xl bg-gradient-to-br ${item.iconColor} border border-white/10 ${item.iconText} shadow-lg`}>
+                  {item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-foreground tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">
+                    {item.advice}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-foreground tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  {item.title}
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">
-                  {item.advice}
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </WeatherCard>
       ))}
