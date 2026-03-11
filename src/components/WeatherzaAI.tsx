@@ -1544,36 +1544,31 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
     <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-visible relative rounded-3xl">
       {/* AI-specific background image */}
       <AIBackground weather={weather} customBg={customBg} />
-      <CardHeader className="pb-2 pt-3 sm:pt-4 px-3 sm:px-5 relative z-10">
-        <div className="flex flex-wrap items-center justify-between gap-y-2">
-          <CardTitle className="flex items-center gap-1.5 sm:gap-2.5 text-sm sm:text-lg shrink-0">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-gradient-to-br from-primary/25 to-purple-500/20 shadow-lg shadow-primary/10">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+      <CardHeader className="pb-2 pt-4 px-5 relative z-10">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2.5 text-lg">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-primary/25 to-purple-500/20 shadow-lg shadow-primary/10">
+              <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <span 
-              className="text-foreground font-semibold text-glow-sweep hidden sm:inline"
+              className="text-foreground font-semibold text-glow-sweep"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Rakshit's Weatherza AI
             </span>
-            <span 
-              className="text-foreground font-semibold text-glow-sweep sm:hidden"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
-              Weatherza AI
-            </span>
           </CardTitle>
-          <div className="flex items-center flex-wrap gap-0.5 sm:gap-1">
+          <div className="flex items-center gap-1">
             {/* Pro Mode Toggle — sliding switch */}
             <button
               onClick={toggleProMode}
-              className="flex items-center gap-1 sm:gap-2.5 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:bg-white/5"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:bg-white/5"
               title={proMode ? "Disable Pro Mode" : "Enable Pro Mode"}
             >
-              <Zap className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors duration-300 ${proMode ? 'text-primary fill-current' : 'text-muted-foreground'}`} />
-              <span className={`transition-colors duration-300 text-[11px] sm:text-[13px] ${proMode ? 'text-primary' : 'text-muted-foreground'}`}>Pro</span>
+              <Zap className={`w-4 h-4 transition-colors duration-300 ${proMode ? 'text-primary fill-current' : 'text-muted-foreground'}`} />
+              <span className={`transition-colors duration-300 text-[13px] ${proMode ? 'text-primary' : 'text-muted-foreground'}`}>Pro</span>
+              {/* Sliding switch track */}
               <div
-                className={`relative w-9 sm:w-12 h-5 sm:h-6 rounded-full transition-all duration-400 ${
+                className={`relative w-12 h-6 rounded-full transition-all duration-400 ${
                   proMode ? 'shadow-lg' : 'bg-white/10'
                 }`}
                 style={proMode ? {
@@ -1581,9 +1576,10 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
                   boxShadow: '0 0 10px hsl(28 100% 60% / 0.4), inset 0 1px 2px hsl(0 0% 100% / 0.2)',
                 } : undefined}
               >
+                {/* Sliding knob */}
                 <div
-                  className={`absolute top-[2px] sm:top-[3px] w-[16px] sm:w-[18px] h-[16px] sm:h-[18px] rounded-full shadow-md transition-all duration-300 ${
-                    proMode ? 'left-[19px] sm:left-[27px] bg-white' : 'left-[2px] sm:left-[3px] bg-white/60'
+                  className={`absolute top-[3px] w-[18px] h-[18px] rounded-full shadow-md transition-all duration-300 ${
+                    proMode ? 'left-[27px] bg-white' : 'left-[3px] bg-white/60'
                   }`}
                   style={proMode ? { boxShadow: '0 0 6px hsl(28 100% 60% / 0.5)' } : undefined}
                 />
@@ -1593,55 +1589,56 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
               <>
                 <button
                   onClick={exportToPDF}
-                  className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
                   title="Export to PDF"
                 >
-                  <FileDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  <span className="hidden xs:inline sm:inline">PDF</span>
+                  <FileDown className="w-3.5 h-3.5" />
+                  PDF
                 </button>
                 <button
                   onClick={exportToWord}
-                  className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
                   title="Export to Word"
                 >
-                  <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  <span className="hidden xs:inline sm:inline">Word</span>
+                  <Download className="w-3.5 h-3.5" />
+                  Word
                 </button>
               </>
             )}
             {messages.length > 0 && (
               <button
                 onClick={clearChat}
-                className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
               >
-                <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span className="hidden sm:inline">Clear</span>
+                <Trash2 className="w-3.5 h-3.5" />
+                Clear
               </button>
             )}
             {/* Auth: Sign in / User info */}
             {isSignedIn ? (
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] sm:text-[11px] text-primary font-semibold truncate max-w-[60px] sm:max-w-[80px]">{authUser.name}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-primary font-semibold truncate max-w-[80px]">{authUser.name}</span>
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-1 px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
+                  className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
                   title="Sign out"
                 >
-                  <LogOut className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={handleGoogleSignIn}
-                className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
               >
-                <LogIn className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span className="hidden sm:inline">Sign in</span>
+                <LogIn className="w-3.5 h-3.5" />
+                Sign in
               </button>
             )}
+            {/* Free prompt counter for non-signed-in users */}
             {!isSignedIn && (
-              <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 px-0.5 sm:px-1">
-                {remainingFreePrompts}/{FREE_PROMPT_LIMIT}
+              <span className="text-[10px] text-muted-foreground/70 px-1">
+                {remainingFreePrompts}/{FREE_PROMPT_LIMIT} free
               </span>
             )}
           </div>
