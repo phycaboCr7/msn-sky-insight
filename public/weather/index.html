@@ -1,32 +1,30 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 
-<title>Weather | Weatherza</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script>
-function getCity() {
-  const path = window.location.pathname;
-  const city = path.split("/").pop();
-  return city;
-}
+<title>Weatherza | Global Weather Forecast</title>
 
-document.addEventListener("DOMContentLoaded", () => {
-  const city = getCity();
-  document.title = "Weather in " + city + " | Weatherza";
-});
-</script>
+<meta name="description" content="Weatherza provides real-time weather forecasts for cities worldwide including temperature, humidity, wind speed and conditions.">
+
+<meta name="robots" content="index, follow">
+
+<link rel="canonical" href="https://weatherza.vercel.app/">
+
+<meta property="og:title" content="Weatherza Weather Forecast">
+<meta property="og:description" content="Check real time weather conditions for cities around the world.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://weatherza.vercel.app/">
 
 </head>
 
 <body>
 
-<h1 id="cityTitle"></h1>
-
-<script>
-const city = getCity();
-document.getElementById("cityTitle").innerText = "Weather in " + city;
-</script>
+<h1>Weatherza</h1>
+<p>Check live weather forecasts for cities worldwide.</p>
 
 </body>
 </html>
