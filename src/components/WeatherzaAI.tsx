@@ -1347,7 +1347,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       }
     }
 
-    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
+  const CHAT_URL = "/api/weatherza-chat";
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
