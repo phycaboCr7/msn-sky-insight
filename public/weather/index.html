@@ -1,30 +1,49 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Weatherza | Global Weather Forecast</title>
-
-<meta name="description" content="Weatherza provides real-time weather forecasts for cities worldwide including temperature, humidity, wind speed and conditions.">
+<title>Weather | Weatherza</title>
 
 <meta name="robots" content="index, follow">
 
-<link rel="canonical" href="https://weatherza.vercel.app/">
+<script>
+function getCity() {
+  const path = window.location.pathname;
+  const city = path.split("/").pop();
+  return city;
+}
 
-<meta property="og:title" content="Weatherza Weather Forecast">
-<meta property="og:description" content="Check real time weather conditions for cities around the world.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://weatherza.vercel.app/">
+document.addEventListener("DOMContentLoaded", () => {
+  const city = getCity();
+
+  document.title = "Weather in " + city + " | Weatherza";
+
+  document.getElementById("cityTitle").innerText =
+  "Weather in " + city;
+});
+</script>
+
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"WeatherForecast",
+ "name":"Weather Forecast",
+ "url":"https://weatherza.vercel.app",
+ "provider":{
+ "@type":"Organization",
+ "name":"Weatherza"
+ }
+}
+</script>
 
 </head>
 
 <body>
 
-<h1>Weatherza</h1>
-<p>Check live weather forecasts for cities worldwide.</p>
+<h1 id="cityTitle"></h1>
 
 </body>
 </html>
