@@ -33,9 +33,9 @@
 </url>
     
 <url>
-    <loc>https://weatherza.vercel.app/weather/tokyo</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
+<loc>https://weatherza.vercel.app/weather/tokyo</loc>
+<changefreq>hourly</changefreq>
+<priority>0.9</priority>
   </url>
   <url>
     <loc>https://weatherza.vercel.app/weather/jakarta</loc>
@@ -4587,6 +4587,4 @@
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
-  <u
-
 </urlset>
