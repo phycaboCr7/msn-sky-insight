@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Weather | Weatherza</title>
+
+<script>
+function getCity() {
+  const path = window.location.pathname;
+  const city = path.split("/").pop();
+  return city;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const city = getCity();
+  document.title = "Weather in " + city + " | Weatherza";
+});
+</script>
+
+</head>
+
+<body>
+
+<h1 id="cityTitle"></h1>
+
+<script>
+const city = getCity();
+document.getElementById("cityTitle").innerText = "Weather in " + city;
+</script>
+
+</body>
+</html>
