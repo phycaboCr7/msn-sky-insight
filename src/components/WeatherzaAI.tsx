@@ -1222,18 +1222,19 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       systemPrompt = `You are a helpful AI assistant.`;
     }
 
-    // Check for internet search
-    const latestUserMsg = messagesForAI[messagesForAI.length - 1];
-    if (latestUserMsg?.role === "user" && needsSearch(latestUserMsg.content)) {
-      const searchResults = await performSearch(latestUserMsg.content);
-      if (searchResults) {
-        messagesForAI = messagesForAI.map((m, i) =>
-          i === messagesForAI.length - 1
-            ? { ...m, content: `${searchResults}\n\nUser question: ${m.content}` }
-            : m
-        );
-      }
+   (async () => {
+  const latestUserMsg = messagesForAI[messagesForAI.length - 1];
+  if (latestUserMsg?.role === "user" && needsSearch(latestUserMsg.content)) {
+    const searchResults = await performSearch(latestUserMsg.content);
+    if (searchResults) {
+      messagesForAI = messagesForAI.map((m, i) =>
+        i === messagesForAI.length - 1
+          ? { ...m, content: `${searchResults}\n\nUser question: ${m.content}` }
+          : m
+      );
     }
+  }
+})();
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
