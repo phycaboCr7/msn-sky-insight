@@ -1,35 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Favicon -->
-<link rel="icon" href="/favicon.ico" sizes="any">
 
-<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-<link rel="manifest" href="/site.webmanifest">
-
-<!-- Android / PWA icons -->
-<link rel="icon" type="image/png" sizes="192x192" href="/web-app-manifest-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/web-app-manifest-512x512.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Weatherza | Global Weather Forecast</title>
+<title>Weatherza | Real-Time Weather Forecast</title>
 
-<meta name="description" content="Weatherza provides real-time weather forecasts for cities worldwide including temperature, humidity, wind speed and conditions.">
+<meta name="description" content="Weatherza provides accurate real-time weather forecasts, temperature, humidity, and wind updates for cities worldwide.">
 
 <meta name="robots" content="index, follow">
 
 <link rel="canonical" href="https://weatherza.vercel.app/">
 
-<meta property="og:title" content="Weatherza Weather Forecast">
-<meta property="og:description" content="Check real time weather conditions for cities around the world.">
+<!-- Favicon -->
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<!-- Android icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="/web-app-manifest-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/web-app-manifest-512x512.png">
+
+<link rel="manifest" href="/site.webmanifest">
+
+<!-- Open Graph (social sharing) -->
+<meta property="og:title" content="Weatherza – Real-Time Weather Forecast">
+<meta property="og:description" content="Check accurate real-time weather forecasts and conditions worldwide.">
+<meta property="og:url" content="https://weatherza.vercel.app">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://weatherza.vercel.app/">
+<meta property="og:image" content="https://weatherza.vercel.app/web-app-manifest-512x512.png">
+
+<!-- Twitter preview -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Weatherza – Weather Forecast">
+<meta name="twitter:description" content="Accurate real-time weather forecasts for cities worldwide.">
+<meta name="twitter:image" content="https://weatherza.vercel.app/web-app-manifest-512x512.png">
+
+<!-- Google Logo Schema -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "Organization",
+ "name": "Weatherza",
+ "url": "https://weatherza.vercel.app",
+ "logo": "https://weatherza.vercel.app/web-app-manifest-512x512.png"
+}
+</script>
+
+<!-- Dynamic city title -->
+<script>
+function getCity() {
+  const path = window.location.pathname;
+  const city = path.split("/").pop();
+  return city;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const city = getCity();
+
+  if(city && city !== ""){
+    document.title = "Weather in " + city + " | Weatherza";
+    document.getElementById("cityTitle").innerText = "Weather in " + city;
+  }
+});
+</script>
 
 </head>
 
