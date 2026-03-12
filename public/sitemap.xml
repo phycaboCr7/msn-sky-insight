@@ -1,10 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
     <loc>https://weatherza.vercel.app/</loc>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>hourly</changefreq>
     <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://weatherza.vercel.app/?city=delhi</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://weatherza.vercel.app/?city=london</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://weatherza.vercel.app/?city=new-york</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://weatherza.vercel.app/?city=tokyo</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://weatherza.vercel.app/?city=mumbai</loc>
+    <lastmod>2026-03-12</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
   </url>
 
 </urlset>
