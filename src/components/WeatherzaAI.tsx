@@ -261,12 +261,19 @@ const CodeBlock = ({
     // Pre-load essential packages
     loading.textContent = 'Loading essential Python packages...';
     await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
+``
+async function initPython() {
+  try {
+    const pyodide = await loadPyodide({
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+    });
 
     // Pre-load essential packages
-loading.textContent = 'Loading essential Python packages...';
-await pyodide.loadPackage(['numpy','matplotlib','scipy','sympy','pandas','micropip']);
-`
-await pyodide.runPythonAsync(`
+    loading.textContent = "Loading essential Python packages...";
+    await pyodide.loadPackage(["numpy", "matplotlib", "micropip"]);
+
+    // Run Python setup code
+    await pyodide.runPythonAsync(`
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -283,14 +290,16 @@ def get_plot_as_base64():
 `);
 
     loading.remove();
-    addLine('✅ Python ready! NumPy, Matplotlib, SciPy, SymPy, Pandas loaded.', 'info-line');
-    addLine('💡 Need more libraries? They will auto-install on first use!', 'info-line');
+    addLine("✅ Python ready! NumPy and Matplotlib loaded.", "info-line");
+    addLine("💡 Need more libraries? They will auto-install on first use!", "info-line");
+
+    return pyodide;
 
   } catch (e) {
     loading.remove();
-    addLine('Error: Failed to load Python: ' + e.message, 'error-line');
+    addLine("Error: Failed to load Python: " + e.message, "error-line");
   }
-})();
+}
 
 
 async function runCode(pyodide, code) {
