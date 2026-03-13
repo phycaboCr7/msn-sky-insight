@@ -265,7 +265,7 @@ const CodeBlock = ({
     // Pre-load essential packages
 loading.textContent = 'Loading essential Python packages...';
 await pyodide.loadPackage(['numpy','matplotlib','scipy','sympy','pandas','micropip']);
-
+`
 await pyodide.runPythonAsync(`
 import matplotlib
 matplotlib.use("Agg")
