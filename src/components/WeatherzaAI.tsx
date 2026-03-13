@@ -258,12 +258,12 @@ const CodeBlock = ({
 
 // Pre-load essential packages
 loading.textContent = 'Loading essential Python packages...';
-await pyodide.loadPackage(['numpy', 'matplotlib', 'scipy', 'sympy', 'pandas', 'micropip']);
+await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
 
 // Setup matplotlib + auto-install capability
 await pyodide.runPythonAsync(`
 import matplotlib
-matplotlib.use('AGG')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io, base64
 import micropip
