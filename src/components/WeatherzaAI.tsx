@@ -274,6 +274,7 @@ await pyodide.loadPackage(["numpy", "matplotlib", "micropip"]);
 
 // Run Python setup code
 await pyodide.runPythonAsync(`
+import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import io, base64
