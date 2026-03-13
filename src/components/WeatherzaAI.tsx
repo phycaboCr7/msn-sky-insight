@@ -261,7 +261,7 @@ const CodeBlock = ({
     // Pre-load essential packages
     loading.textContent = 'Loading essential Python packages...';
     await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
-``
+
 async function initPython() {
   try {
     const pyodide = await loadPyodide({
@@ -309,13 +309,13 @@ async function runCode(pyodide, code) {
     
     let execCode = code;
     
-    // Check for missing imports and auto-install
+   
     const importLines = code.match(/^(?:from|import)\s+(\w+)/gm) || [];
     for (const line of importLines) {
       const match = line.match(/^(?:from|import)\s+(\w+)/);
       if (match) {
         const pkg = match[1];
-        // Try to import, install if missing
+       
         try {
         await pyodide.loadPackage(["numpy", "matplotlib"]);
 
@@ -335,7 +335,7 @@ def get_plot_as_base64():
     return img_str
 `);
 
-loading.remove();
+ loading.remove();
     
     if (hasPlot) {
       execCode = execCode.replace(/plt\.show\(\)/g, '');
@@ -366,7 +366,7 @@ loading.remove();
 import micropip
 await micropip.install("${pkgMatch[1]}")
 `);
-        addLine(`📦 Installing missing package: ${pkgMatch[1]}...`, 'info-line');
+     
 
 try {
   await pyodide.runPythonAsync(`
@@ -377,7 +377,7 @@ await micropip.install("${pkgMatch[1]}")
   console.error(error);
 }
 
-        // Show input form
+      
         const form = document.getElementById('inputForm');
         const inp = document.getElementById('cmdInput');
         if (form && inp) {
