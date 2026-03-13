@@ -311,15 +311,15 @@ async function runCode(pyodide, code) {
         const pkg = match[1];
         // Try to import, install if missing
         try {
-          await pyodide.runPythonAsync(`
+         await pyodide.runPythonAsync(\`
 try:
-    import ${pkg}
+    import \${pkg}
 except ImportError:
     import micropip
-    await micropip.install('${pkg}')
-    import ${pkg}
-    print('📦 Installed: ${pkg}')
-`);
+    await micropip.install('\${pkg}')
+    import \${pkg}
+    print('📦 Installed: \${pkg}')
+\`);
         } catch (e) {
           // Ignore if package doesn't exist in Pyodide
         }
