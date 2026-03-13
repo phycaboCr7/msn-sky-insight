@@ -303,20 +303,25 @@ async function runCode(pyodide, code) {
         const pkg = match[1];
         // Try to import, install if missing
         try {
-         await pyodide.runPythonAsync(\`
-try:
-    import \${pkg}
-except ImportError:
-    import micropip
-    await micropip.install('\${pkg}')
-    import \${pkg}
-    print('📦 Installed: \${pkg}')
-\`);
-        } catch (e) {
-          // Ignore if package doesn't exist in Pyodide
-        }
-      }
-    }
+        await pyodide.loadPackage(["numpy", "matplotlib"]);
+
+await pyodide.runPythonAsync(`
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import io
+import base64
+
+def get_plot_as_base64():
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode()
+    plt.close("all")
+    return img_str
+`);
+
+loading.remove();
     
     if (hasPlot) {
       execCode = execCode.replace(/plt\.show\(\)/g, '');
