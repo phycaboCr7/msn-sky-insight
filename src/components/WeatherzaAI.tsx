@@ -1237,7 +1237,7 @@ const streamFromAI = async (
   abortControllerRef.current = controller;
 
   try {
-    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+   const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "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";
     if (!GROQ_API_KEY) throw new Error("API key not configured");
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
