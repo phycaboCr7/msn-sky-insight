@@ -260,18 +260,12 @@ const CodeBlock = ({
 loading.textContent = 'Loading essential Python packages...';
 await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
 
-await pyodide.runPythonAsync(`
-import matplotlib
+await pyodide.runPythonAsync
+('import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import io, base64
 import micropip
-
-async def ensure_package(package_name):
-    try:
-        __import__(package_name)
-    except ImportError:
-        await micropip.install(package_name)
 
 def get_plot_as_base64():
     buf = io.BytesIO()
@@ -279,9 +273,7 @@ def get_plot_as_base64():
     buf.seek(0)
     img_str = base64.b64encode(buf.read()).decode()
     plt.close("all")
-    return img_str
-`)
-
+    return img_str');
 
 async def ensure_package(package_name):
     """Auto-install package if not available"""
@@ -304,7 +296,7 @@ def get_plot_as_base64():
 loading.remove();
 addLine('✅ Python ready! NumPy, Matplotlib, SciPy, SymPy, Pandas loaded.', 'info-line');
 addLine('💡 Need more libraries? They will auto-install on first use!', 'info-line');
-```
+`
 
 
 async function runCode(pyodide, code) {
