@@ -268,17 +268,16 @@ async function initPython() {
       indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
     });
 
-    // Pre-load essential packages
-    loading.textContent = "Loading essential Python packages...";
-    await pyodide.loadPackage(["numpy", "matplotlib", "micropip"]);
+  // Pre-load essential packages
+loading.textContent = "Loading essential Python packages...";
+await pyodide.loadPackage(["numpy", "matplotlib", "micropip"]);
 
-    // Run Python setup code
-    await pyodide.runPythonAsync(`
+// Run Python setup code
+await pyodide.runPythonAsync(`
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import io, base64
-import micropip
 
 def get_plot_as_base64():
     buf = io.BytesIO()
@@ -289,18 +288,16 @@ def get_plot_as_base64():
     return img_str
 `);
 
-    loading.remove();
-    addLine("✅ Python ready! NumPy and Matplotlib loaded.", "info-line");
-    addLine("💡 Need more libraries? They will auto-install on first use!", "info-line");
+loading.remove();
+addLine("✅ Python ready! NumPy and Matplotlib loaded.", "info-line");
+addLine("💡 Need more libraries? They will auto-install on first use!", "info-line");
 
-    return pyodide;
+return pyodide;
 
-  } catch (e) {
-    loading.remove();
-    addLine("Error: Failed to load Python: " + e.message, "error-line");
-  }
+} catch (e) {
+  loading.remove();
+  addLine("Error: Failed to load Python: " + e.message, "error-line");
 }
-
 
 async function runCode(pyodide, code) {
   try {
