@@ -260,12 +260,11 @@ const CodeBlock = ({
 loading.textContent = 'Loading essential Python packages...';
 await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
 
-await pyodide.runPythonAsync
-('import matplotlib
+await pyodide.runPythonAsync(`
+import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import io, base64
-import micropip
 
 def get_plot_as_base64():
     buf = io.BytesIO()
@@ -273,23 +272,6 @@ def get_plot_as_base64():
     buf.seek(0)
     img_str = base64.b64encode(buf.read()).decode()
     plt.close("all")
-    return img_str');
-
-async def ensure_package(package_name):
-    """Auto-install package if not available"""
-    try:
-        __import__(package_name)
-    except ImportError:
-        print(f"📦 Installing {package_name}...")
-        await micropip.install(package_name)
-        print(f"✅ {package_name} installed!")
-
-def get_plot_as_base64():
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', facecolor='#1a1a2e', edgecolor='none', pad_inches=0.1)
-    buf.seek(0)
-    img_str = base64.b64encode(buf.read()).decode()
-    plt.close('all')
     return img_str
 `);
 
@@ -357,10 +339,10 @@ except ImportError:
       if (pkgMatch) {
         addLine(`📦 Installing missing package: ${pkgMatch[1]}...`, 'info-line');
         try {
-          await pyodide.runPythonAsync(`
+          await pyodide.runPythonAsync("
 import micropip
 await micropip.install('${pkgMatch[1]}')
-`);
+');
           addLine(`✅ Installed! Re-run your code.`, 'info-line');
         } catch (installError) {
           addLine(`❌ Could not install ${pkgMatch[1]}: ${installError}`, 'error-line');
