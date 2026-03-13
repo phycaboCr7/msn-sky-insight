@@ -348,19 +348,19 @@ loading.remove();
       if (pkgMatch) {
         addLine(`📦 Installing missing package: ${pkgMatch[1]}...`, 'info-line');
         try {
-          await pyodide.runPythonAsync('
+          await pyodide.runPythonAsync(`
 import micropip
-await micropip.install('${pkgMatch[1]}')
+await micropip.install('${pkgMatch[1]}`)
 ');
-         addLine(`📦 Installing missing package: ${pkgMatch[1]}...`, 'info-line');
+        addLine(`📦 Installing missing package: ${pkgMatch[1]}...`, 'info-line');
 
 try {
   await pyodide.runPythonAsync(`
 import micropip
 await micropip.install("${pkgMatch[1]}")
 `);
-} catch (err) {
-  console.error(err);
+} catch (error) {
+  console.error(error);
 }
 
         // Show input form
