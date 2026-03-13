@@ -352,15 +352,15 @@ loading.remove();
 import micropip
 await micropip.install('${pkgMatch[1]}')
 ');
-          addLine(`✅ Installed! Re-run your code.`, 'info-line');
-        } catch (installError) {
-          addLine(`❌ Could not install ${pkgMatch[1]}: ${installError}`, 'error-line');
-        }
-      }
-    } else {
-      addLine('Error: ' + errorMsg, 'error-line');
-    }
-  }
+         addLine(`📦 Installing missing package: ${pkgMatch[1]}...`, 'info-line');
+
+try {
+  await pyodide.runPythonAsync(`
+import micropip
+await micropip.install("${pkgMatch[1]}")
+`);
+} catch (err) {
+  console.error(err);
 }
 
         // Show input form
