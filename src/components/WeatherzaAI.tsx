@@ -1308,53 +1308,7 @@ const streamFromAI = async (
   }
 };
     // Check if the latest user message needs internet search
- 
-
- const sendWeatherzaChat = async () => {
-  const CHAT_URL = "/api/weatherza-chat";
-
-  const controller = new AbortController();
-  abortControllerRef.current = controller;
-
-  try {
-    const resp = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
-      body: JSON.stringify({ messages: messagesForAI, weatherContext: weatherCtx, mode, isPro: proMode }),
-      signal: controller.signal,
-    });
-
-    if (!resp.ok) {
-      const contentType = resp.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        const errData = await resp.json();
-        throw new Error(errData.error || `Error ${resp.status}`);
-      }
-      throw new Error(`AI request failed: ${resp.status}`);
-    }
-
-    const data = await resp.json();
-    return data;
-  } catch (error) {
-    console.error("Weatherza API error:", error);
-    throw error;
-  } finally {
-    abortControllerRef.current = null;
-  }
-};
-
-    if (!resp.ok) {
-      // Try to parse JSON error
-      const contentType = resp.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        const errData = await resp.json();
-        throw new Error(errData.error || `Error ${resp.status}`);
-      }
-      throw new Error(`AI request failed: ${resp.status}`);
-    }
+   
 
     const contentType = resp.headers.get("content-type") || "";
 
