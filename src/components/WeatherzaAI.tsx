@@ -1204,25 +1204,23 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   };
 
   // Streaming helper — reads SSE from the edge function
- const streamFromAI = async (
-    messagesForAI: any[],
-    weatherCtx: any,
-    updatedMessages: Message[],
-    mode: string = 'weather'
-  ) => {
-    // Build system prompt
-    let systemPrompt = '';
-    if (mode === 'weather') {
-      systemPrompt = `You are Weatherza AI, a helpful weather assistant. Current weather: ${JSON.stringify(weatherCtx)}. Provide practical advice.`;
-    } else if (mode === 'code') {
-      systemPrompt = `You are an expert coding assistant. Use markdown code blocks.`;
-    } else if (mode === 'math') {
-      systemPrompt = `You are a mathematics expert. Use LaTeX for equations (wrap in $ or $$).`;
-    } else {
-      systemPrompt = `You are a helpful AI assistant.`;
-    }
+const streamFromAI = async (
+  messagesForAI: any[],
+  weatherCtx: any,
+  updatedMessages: Message[],
+  mode: string = 'weather'
+) => {
+  let systemPrompt = '';
+  if (mode === 'weather') {
+    systemPrompt = `You are Weatherza AI, a helpful weather assistant. Current weather: ${JSON.stringify(weatherCtx)}. Provide practical, location-specific weather advice.`;
+  } else if (mode === 'code') {
+    systemPrompt = `You are an expert coding assistant. Help with programming questions, write clean code, and explain technical concepts clearly. Use markdown code blocks with language tags.`;
+  } else if (mode === 'math') {
+    systemPrompt = `You are a mathematics expert. Solve problems step-by-step, use LaTeX for equations (wrap in $ or $$), and explain mathematical concepts clearly.`;
+  } else {
+    systemPrompt = `You are a helpful AI assistant. Provide clear, accurate, and friendly responses.`;
+  }
 
-   (async () => {
   const latestUserMsg = messagesForAI[messagesForAI.length - 1];
   if (latestUserMsg?.role === "user" && needsSearch(latestUserMsg.content)) {
     const searchResults = await performSearch(latestUserMsg.content);
@@ -1234,106 +1232,81 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
       );
     }
   }
-})();
 
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+  const controller = new AbortController();
+  abortControllerRef.current = controller;
 
-    try {
-      // Use Hugging Face Inference API (FREE, no backend needed)
-      const HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1";
-      
-      // Build prompt for the model
-      const fullPrompt = `${systemPrompt}\n\n${messagesForAI.map(m => 
-        `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`
-      ).join('\n\n')}\n\nAssistant:`;
+  try {
+    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+    if (!GROQ_API_KEY) throw new Error("API key not configured");
 
-      const response = await fetch(HF_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: fullPrompt,
-          parameters: {
-            max_new_tokens: 2048,
-            temperature: 0.7,
-            return_full_text: false,
-            stream: true,
-          },
-          options: {
-            wait_for_model: true,
-          }
-        }),
-        signal: controller.signal,
-      });
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messagesForAI.map((m: any) => ({ role: m.role, content: m.content })),
+        ],
+        temperature: 0.7,
+        max_tokens: 4096,
+        stream: true,
+      }),
+      signal: controller.signal,
+    });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
 
-      const assistantId = genMsgId();
-      setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
+    const assistantId = genMsgId();
+    setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body");
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No response body");
 
-      const decoder = new TextDecoder();
-      let assistantText = "";
+    const decoder = new TextDecoder();
+    let assistantText = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n').filter(line => line.trim());
 
-        for (const line of lines) {
-          if (line.startsWith('data:')) {
-            try {
-              const jsonStr = line.slice(5).trim();
-              if (jsonStr === '[DONE]') continue;
-              
-              const data = JSON.parse(jsonStr);
-              const text = data.token?.text || data.generated_text || '';
-              
-              if (text) {
-                assistantText += text;
-                setMessages(prev => prev.map((m, i) =>
-                  i === prev.length - 1 ? { ...m, content: assistantText } : m
-                ));
-              }
-            } catch (e) {
-              // Skip malformed JSON
+      for (const line of lines) {
+        if (line.startsWith('data:')) {
+          const jsonStr = line.slice(5).trim();
+          if (jsonStr === '[DONE]') continue;
+
+          try {
+            const data = JSON.parse(jsonStr);
+            const text = data.choices?.[0]?.delta?.content || '';
+            if (text) {
+              assistantText += text;
+              setMessages(prev => prev.map((m, i) =>
+                i === prev.length - 1 ? { ...m, content: assistantText } : m
+              ));
             }
-          }
+          } catch (e) {}
         }
       }
-
-      // If no streaming data, try regular response
-      if (!assistantText) {
-        const data = await response.json();
-        assistantText = data[0]?.generated_text || "Sorry, no response received.";
-        setMessages(prev => prev.map((m, i) =>
-          i === prev.length - 1 ? { ...m, content: assistantText } : m
-        ));
-      }
-
-    } catch (error: any) {
-      console.error("AI Error:", error);
-      if (error.name === 'AbortError') {
-        // Stream was stopped by user
-        return;
-      }
-      setMessages(prev => [...prev, { 
-        id: genMsgId(), 
-        role: "assistant", 
-        content: "Sorry, I encountered an error. Please try again." 
-      }]);
-    } finally {
-      abortControllerRef.current = null;
     }
-  };
+  } catch (error: any) {
+    console.error("AI Error:", error);
+    if (error.name === 'AbortError') return;
+    setMessages(prev => [...prev, { 
+      id: genMsgId(), 
+      role: "assistant", 
+      content: "Sorry, I encountered an error. Please try again." 
+    }]);
+  } finally {
+    abortControllerRef.current = null;
+  }
+};
     // Check if the latest user message needs internet search
  
 
