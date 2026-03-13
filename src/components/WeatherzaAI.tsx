@@ -252,37 +252,45 @@ const CodeBlock = ({
     }
     function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    (async function() {
-      try {
-        const pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
+   (async function() {
+  try {
+    const pyodide = await loadPyodide({ 
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' 
+    });
 
-// Pre-load essential packages
+    // Pre-load essential packages
+    loading.textContent = 'Loading essential Python packages...';
+    await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
+
+    // Pre-load essential packages
 loading.textContent = 'Loading essential Python packages...';
-await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
+await pyodide.loadPackage(['numpy','matplotlib','scipy','sympy','pandas','micropip']);
 
-
-
-// Run Python setup
-await pyodide.runPythonAsync('
+await pyodide.runPythonAsync(`
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import io
-import base64
+import io, base64
+import micropip
 
 def get_plot_as_base64():
     buf = io.BytesIO()
     plt.savefig(buf, format="png")
     buf.seek(0)
-    img_str = base64.b64encode(buf.read()).decode("utf-8")
+    img_str = base64.b64encode(buf.read()).decode()
     plt.close("all")
     return img_str
-');
+`);
 
-loading.remove();
-addLine('✅ Python ready! NumPy, Matplotlib, SciPy, SymPy, Pandas loaded.', 'info-line');
-addLine('💡 Need more libraries? They will auto-install on first use!', 'info-line');
-`
+    loading.remove();
+    addLine('✅ Python ready! NumPy, Matplotlib, SciPy, SymPy, Pandas loaded.', 'info-line');
+    addLine('💡 Need more libraries? They will auto-install on first use!', 'info-line');
+
+  } catch (e) {
+    loading.remove();
+    addLine('Error: Failed to load Python: ' + e.message, 'error-line');
+  }
+})();
 
 
 async function runCode(pyodide, code) {
