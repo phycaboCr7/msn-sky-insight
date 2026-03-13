@@ -260,15 +260,29 @@ const CodeBlock = ({
 loading.textContent = 'Loading essential Python packages...';
 await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
 
-// Setup matplotlib + auto-install capability
 await pyodide.runPythonAsync(`
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import io, base64
 import micropip
 
-# Auto-install helper function
+async def ensure_package(package_name):
+    try:
+        __import__(package_name)
+    except ImportError:
+        await micropip.install(package_name)
+
+def get_plot_as_base64():
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    img_str = base64.b64encode(buf.read()).decode()
+    plt.close("all")
+    return img_str
+`)
+
+
 async def ensure_package(package_name):
     """Auto-install package if not available"""
     try:
@@ -1597,7 +1611,7 @@ from bs4 import BeautifulSoup
 Matplotlib is pre-configured with 'AGG' backend for inline image generation:
 \`\`\`python
 import matplotlib
-matplotlib.use('AGG')  # Already configured
+matplotlib.use('Agg')  # Already configured
 import matplotlib.pyplot as plt
 import numpy as np
 
