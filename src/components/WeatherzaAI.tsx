@@ -260,20 +260,24 @@ const CodeBlock = ({
 loading.textContent = 'Loading essential Python packages...';
 await pyodide.loadPackage(['numpy', 'matplotlib', 'micropip']);
 
-await pyodide.runPythonAsync(`
+
+
+// Run Python setup
+await pyodide.runPythonAsync('
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import io, base64
+import io
+import base64
 
 def get_plot_as_base64():
     buf = io.BytesIO()
     plt.savefig(buf, format="png")
     buf.seek(0)
-    img_str = base64.b64encode(buf.read()).decode()
+    img_str = base64.b64encode(buf.read()).decode("utf-8")
     plt.close("all")
     return img_str
-`);
+');
 
 loading.remove();
 addLine('✅ Python ready! NumPy, Matplotlib, SciPy, SymPy, Pandas loaded.', 'info-line');
