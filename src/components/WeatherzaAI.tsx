@@ -997,6 +997,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   });
   const [showSignInGate, setShowSignInGate] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
+  const [thinkingSteps, setThinkingSteps] = useState<string[]>([]);
+
+  const thinkingStepsList = [
+    "🌐 Connecting to AI...",
+    "🧠 Processing request...",
+    "📡 Fetching weather intelligence...",
+    "⚡ Generating response...",
+  ];
 
   const isSignedIn = !!authUser;
   const remainingFreePrompts = Math.max(0, FREE_PROMPT_LIMIT - promptCount);
@@ -1272,17 +1280,6 @@ const streamFromAI = async (
   mode: string = 'weather',
   retryCount: number = 0
 ) => {
-  let systemPrompt = `You are **Weatherza AI**, an advanced artificial intelligence assistant created by **Rakshit Jain**, a talented software developer from Alwar, Rajasthan, India.
-
-You are Weatherza AI - a powerful, intelligent assistant with complete Python environment (20+ pre-loaded libraries), real-time weather data, and advanced capabilities. Provide beautiful, well-formatted responses using markdown, LaTeX for math, and code blocks with language tags. Be helpful, accurate, and engaging.
-
-**Current Mode: ${mode.toUpperCase()}**
-**User Location: ${weatherCtx?.location}, ${weatherCtx?.country}**
-
-${mode === 'weather' ? `**WEATHER DATA:** Temperature ${weatherCtx?.temperature}°C (feels like ${weatherCtx?.feelsLike}°C), Humidity ${weatherCtx?.humidity}%, UV ${weatherCtx?.uvIndex}, AQI ${weatherCtx?.aqi}` : ''}
-
-Format responses beautifully with markdown, use LaTeX for equations ($ inline, $$ display), and provide complete runnable code with proper syntax highlighting.`;
-  
   const latestUserMsg = messagesForAI[messagesForAI.length - 1];
   if (latestUserMsg?.role === "user" && needsSearch(latestUserMsg.content)) {
     const searchResults = await performSearch(latestUserMsg.content);
@@ -1299,24 +1296,21 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
   abortControllerRef.current = controller;
 
   try {
-    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "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";
-    if (!GROQ_API_KEY) throw new Error("API key not configured");
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    // Route through the weatherza-chat Supabase edge function.
+    // API keys (GROQ_API_KEY, GEMINI_API_KEY, LOVABLE_API_KEY) are stored
+    // server-side only – never exposed to the browser.
+    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
+    const response = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messagesForAI.map((m: any) => ({ role: m.role, content: m.content })),
-        ],
-        temperature: 0.7,
-        max_tokens: 4096,
-        stream: true,
+        messages: messagesForAI,
+        weatherContext: weatherCtx,
+        mode,
+        isPro: proMode,
       }),
       signal: controller.signal,
     });
@@ -1326,12 +1320,10 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
       if (retryCount < MAX_RETRIES) {
         const retryDelay = INITIAL_RETRY_DELAY * Math.pow(2, retryCount);
         console.log(`Rate limited. Retrying in ${retryDelay}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-        
         toast({
           title: "⏳ Rate limit reached",
           description: `Retrying in ${retryDelay / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`,
         });
-
         await sleep(retryDelay);
         return streamFromAI(messagesForAI, weatherCtx, updatedMessages, mode, retryCount + 1);
       } else {
@@ -1344,6 +1336,18 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
       throw new Error(`API error ${response.status}: ${errorText}`);
     }
 
+    const contentType = response.headers.get("Content-Type") || "";
+
+    // ── Non-streaming path (Gemini / Lovable returns JSON {answer}) ──
+    if (contentType.includes("application/json")) {
+      const data = await response.json();
+      const answer = data?.answer || data?.text || "No response";
+      const assistantId = genMsgId();
+      setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: answer, isTyping: true }]);
+      return;
+    }
+
+    // ── Streaming SSE path (Groq) ──
     const assistantId = genMsgId();
     setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
 
@@ -1507,6 +1511,18 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
     setExtractedDocText(null);
     setExtractedDocName(null);
     setLoading(true);
+    setThinkingSteps([]);
+
+    // Animate thinking steps before AI responds (cancelled when response arrives)
+    let thinkingCancelled = false;
+    const animateThinking = async () => {
+      for (let i = 0; i < thinkingStepsList.length; i++) {
+        if (thinkingCancelled) break;
+        await new Promise<void>(resolve => setTimeout(resolve, 500));
+        if (!thinkingCancelled) setThinkingSteps(prev => [...prev, thinkingStepsList[i]]);
+      }
+    };
+    animateThinking();
 
     try {
       const weatherCtx = buildWeatherContext();
@@ -1529,7 +1545,9 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
       });
       setMessages(messages);
     } finally {
+      thinkingCancelled = true;
       setLoading(false);
+      setThinkingSteps([]);
     }
   };
 
@@ -1811,7 +1829,7 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
                 <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary animate-pulse" />
                 </div>
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20 glow">
                   <div className="flex items-center gap-3">
                     <div className="writing-animation flex gap-1">
                       <span className="writing-dot"></span>
@@ -1820,6 +1838,13 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
                     </div>
                     <span className="text-muted-foreground text-sm blur-text">Rakshit's AI is thinking...</span>
                   </div>
+                  {thinkingSteps.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {thinkingSteps.map((step, i) => (
+                        <li key={i} className="text-xs text-primary/80 animate-fade-in">{step}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             )}

@@ -34,7 +34,8 @@ serve(async (req) => {
     console.log("Chat request:", { count: messages?.length || 0, location: weatherContext?.location, hasImages, mode });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY is not configured");
+    // GROQ_API_KEY is optional — Groq is tried first when available;
+    // if missing or failing, falls back to Gemini then Lovable AI Gateway.
 
     const actualAQI = weatherContext.pm25 ? calculateAQI(weatherContext.pm25) : weatherContext.aqi;
 
@@ -260,42 +261,47 @@ FORMATTING RULES (follow strictly):
       }
     }
 
-    // ─── GROQ WEATHER (fast streaming) ───
-    // Limit to last 3 messages to stay within Groq's 6000 TPM limit
-    const groqMessages = [
-      { role: "system", content: groqSystemPrompt },
-      ...messages.slice(-3).map((m: any) => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 2000) : m.content })),
-    ];
+    // ─── GROQ WEATHER (fast streaming, primary) → Lovable/Gemini fallback ───
+    if (GROQ_API_KEY) {
+      // Limit to last 3 messages to stay within Groq's 6000 TPM limit
+      const groqMessages = [
+        { role: "system", content: groqSystemPrompt },
+        ...messages.slice(-3).map((m: any) => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 2000) : m.content })),
+      ];
 
-    let response: Response | null = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-maverick-17b-128e-instruct",
-          messages: groqMessages,
-          stream: true,
-          temperature: 0.5,
-          max_tokens: 4096,
-        }),
-      });
+      let response: Response | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+            messages: groqMessages,
+            stream: true,
+            temperature: 0.5,
+            max_tokens: 4096,
+          }),
+        });
 
-      if ((response.status === 429 || response.status === 413) && attempt < 2) {
-        const delay = (attempt + 1) * 2000;
-        console.log(`Rate limited/too large, retry in ${delay}ms`);
-        await response.text();
-        if (response.status === 413) {
-          // Further reduce messages on retry
-          groqMessages.splice(1, Math.min(1, groqMessages.length - 2));
+        if ((response.status === 429 || response.status === 413) && attempt < 2) {
+          const delay = (attempt + 1) * 2000;
+          console.log(`Rate limited/too large, retry in ${delay}ms`);
+          await response.text();
+          if (response.status === 413) {
+            groqMessages.splice(1, Math.min(1, groqMessages.length - 2));
+          }
+          await new Promise(r => setTimeout(r, delay));
+          continue;
         }
-        await new Promise(r => setTimeout(r, delay));
-        continue;
+        break;
       }
-      break;
-    }
 
-    if (!response || !response.ok) {
+      if (response?.ok) {
+        return new Response(response.body, {
+          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+        });
+      }
+
       if (response?.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -306,14 +312,85 @@ FORMATTING RULES (follow strictly):
           status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = response ? await response.text() : "No response";
-      console.error("Groq error:", response?.status, t);
-      throw new Error(`Groq API error: ${response?.status}`);
+      const groqErrText = response ? await response.text() : "no response";
+      console.warn(`Groq weather failed (${response?.status}): ${groqErrText} — falling back to Gemini`);
+    } else {
+      console.log("GROQ_API_KEY not set — skipping Groq, using Gemini/Lovable for weather");
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
+    // ─── WEATHER FALLBACK: Gemini ───
+    const GEMINI_API_KEY_WEATHER = Deno.env.get("GEMINI_API_KEY");
+    if (GEMINI_API_KEY_WEATHER) {
+      const weatherAiMessages = [
+        { role: "system", content: groqSystemPrompt },
+        ...messages.slice(-3).map((m: any) => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 2000) : m.content })),
+      ];
+      const geminiContents = weatherAiMessages
+        .filter(m => m.role !== "system")
+        .map(m => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] }));
+      for (const model of ["gemini-2.5-flash", "gemini-2.0-flash"]) {
+        try {
+          const resp = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY_WEATHER}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: groqSystemPrompt }] },
+                contents: geminiContents,
+                generationConfig: { temperature: 0.5, maxOutputTokens: 4096 },
+              }),
+            }
+          );
+          if (resp.ok) {
+            const data = await resp.json();
+            const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            if (answer) {
+              console.log(`Weather Gemini ${model} success`);
+              return new Response(JSON.stringify({ answer }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+          }
+        } catch (e) {
+          console.error(`Weather Gemini ${model} error:`, e);
+        }
+      }
+    }
+
+    // ─── WEATHER FALLBACK: Lovable AI Gateway ───
+    const LOVABLE_API_KEY_WEATHER = Deno.env.get("LOVABLE_API_KEY");
+    if (LOVABLE_API_KEY_WEATHER) {
+      try {
+        const weatherGatewayMessages = [
+          { role: "system", content: groqSystemPrompt },
+          ...messages.slice(-3).map((m: any) => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 2000) : m.content })),
+        ];
+        const gatewayResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY_WEATHER}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: weatherGatewayMessages,
+            stream: true,
+            max_tokens: 4096,
+          }),
+        });
+        if (gatewayResp.ok && gatewayResp.body) {
+          console.log("Weather Lovable AI Gateway streaming response");
+          return new Response(gatewayResp.body, {
+            headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+          });
+        }
+      } catch (e) {
+        console.error("Weather Lovable AI Gateway error:", e);
+      }
+    }
+
+    throw new Error("No AI provider available. Please configure GROQ_API_KEY or GEMINI_API_KEY in Supabase secrets.");
   } catch (error) {
     console.error("weatherza-chat error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
