@@ -91,6 +91,16 @@ export const WorldMap = ({ weather }: WorldMapProps) => {
       map.current.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
       map.current.scrollZoom.disable();
 
+      // Provide a 1×1 transparent PNG for any sprite image the style references
+      // but that isn't bundled (e.g. "wood-pattern" from the OpenFreeMap liberty style).
+      map.current.on('styleimagemissing', (e) => {
+        if (!map.current) return;
+        const id = e.id;
+        const size = 1;
+        const data = new Uint8Array(size * size * 4); // all zeros = fully transparent
+        map.current.addImage(id, { width: size, height: size, data });
+      });
+
       map.current.on('load', () => {
         setIsMapLoaded(true);
         setIsLoading(false);
