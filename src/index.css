@@ -988,3 +988,14 @@ pre::-webkit-scrollbar-track, code::-webkit-scrollbar-track {
 .maplibregl-ctrl-attrib a {
   color: hsl(28 100% 60% / 0.7) !important;
 }
+
+/* Glow animation for AI thinking bubble */
+.glow {
+  animation: glowPulse 1.5s infinite;
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 5px #00f; }
+  50% { box-shadow: 0 0 20px #00f; }
+  100% { box-shadow: 0 0 5px #00f; }
+}

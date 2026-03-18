@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
+import { smartQuery, callGemini } from "../services/aiService";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -997,6 +998,14 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   });
   const [showSignInGate, setShowSignInGate] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
+  const [thinkingSteps, setThinkingSteps] = useState<string[]>([]);
+
+  const thinkingStepsList = [
+    "🌐 Connecting to AI...",
+    "🧠 Processing request...",
+    "📡 Fetching weather intelligence...",
+    "⚡ Generating response...",
+  ];
 
   const isSignedIn = !!authUser;
   const remainingFreePrompts = Math.max(0, FREE_PROMPT_LIMIT - promptCount);
@@ -1299,7 +1308,21 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
   abortControllerRef.current = controller;
 
   try {
-    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "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";
+    // Attempt Gemini first (non-streaming); fall back to Groq streaming on failure
+    const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (geminiApiKey) {
+      try {
+        const fullPrompt = `${systemPrompt}\n\n${messagesForAI.map((m: { role: string; content: string }) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')}`;
+        const geminiReply = await callGemini(fullPrompt);
+        const assistantId = genMsgId();
+        setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: geminiReply, isTyping: false }]);
+        return;
+      } catch (geminiErr) {
+        console.warn("Gemini failed → falling back to Groq streaming", geminiErr);
+      }
+    }
+
+    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
     if (!GROQ_API_KEY) throw new Error("API key not configured");
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -1507,6 +1530,18 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
     setExtractedDocText(null);
     setExtractedDocName(null);
     setLoading(true);
+    setThinkingSteps([]);
+
+    // Animate thinking steps before AI responds (cancelled when response arrives)
+    let thinkingCancelled = false;
+    const animateThinking = async () => {
+      for (let i = 0; i < thinkingStepsList.length; i++) {
+        if (thinkingCancelled) break;
+        await new Promise<void>(resolve => setTimeout(resolve, 500));
+        if (!thinkingCancelled) setThinkingSteps(prev => [...prev, thinkingStepsList[i]]);
+      }
+    };
+    animateThinking();
 
     try {
       const weatherCtx = buildWeatherContext();
@@ -1529,7 +1564,9 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
       });
       setMessages(messages);
     } finally {
+      thinkingCancelled = true;
       setLoading(false);
+      setThinkingSteps([]);
     }
   };
 
@@ -1811,7 +1848,7 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
                 <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
                   <Bot className="w-4 h-4 text-primary animate-pulse" />
                 </div>
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20 glow">
                   <div className="flex items-center gap-3">
                     <div className="writing-animation flex gap-1">
                       <span className="writing-dot"></span>
@@ -1820,6 +1857,13 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
                     </div>
                     <span className="text-muted-foreground text-sm blur-text">Rakshit's AI is thinking...</span>
                   </div>
+                  {thinkingSteps.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {thinkingSteps.map((step, i) => (
+                        <li key={i} className="text-xs text-primary/80 animate-fade-in">{step}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             )}
