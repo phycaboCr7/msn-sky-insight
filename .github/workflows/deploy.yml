@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write # Needed for OIDC auth with Deno Deploy (fallback)
       contents: read # Needed to clone the repository
 
     steps:
@@ -42,6 +41,7 @@ jobs:
           project: "weatherza"
           entrypoint: "https://deno.land/std@0.217.0/http/file_server.ts"
           root: "dist"
-          # Use token-based auth to avoid environment protection approval requirement.
-          # If DENO_DEPLOY_TOKEN is not set, falls back to OIDC (id-token: write).
+          # Token-based auth: bypasses GitHub environment protection rules.
+          # Set DENO_DEPLOY_TOKEN in repository Settings → Secrets → Actions.
+          # Get your token from: https://dash.deno.com/account#access-tokens
           token: ${{ secrets.DENO_DEPLOY_TOKEN }}
