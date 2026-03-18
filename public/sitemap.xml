@@ -1,95 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<urlset
- xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="
- http://www.sitemaps.org/schemas/sitemap/0.9
- http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-
-<url>
-<loc>https://weatherza.vercel.app/</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>daily</changefreq>
-<priority>1.0</priority>
-</url>
-
-<!-- Major world cities -->
-
-<url>
-<loc>https://weatherza.vercel.app/weather/delhi</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/mumbai</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/london</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/new-york</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/tokyo</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/paris</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.8</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/berlin</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.8</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/singapore</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.8</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/dubai</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.8</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/sydney</loc>
-<lastmod>2026-03-12</lastmod>
-<changefreq>hourly</changefreq>
-<priority>0.8</priority>
-</url>
-
-<url>
-<loc>https://weatheza.me/about.html</loc>
-<changefreq>monthly</changefreq>
-<priority>0.8</priority>
-</url>
-
-</urlset>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://weatheza.me/sitemap-main.xml</loc>
+    <lastmod>2026-03-18</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://weatheza.me/sitemap-cities.xml</loc>
+    <lastmod>2026-03-18</lastmod>
+  </sitemap>
+</sitemapindex>
