@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Mail, ExternalLink, Wrench, X } from "lucide-react";
 
 interface MaintenanceModalProps {
@@ -7,41 +8,37 @@ interface MaintenanceModalProps {
 }
 
 export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
+  // Close on Escape key
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open) {
-      if (!dialog.open) dialog.showModal();
-    } else {
-      if (dialog.open) dialog.close();
-    }
-  }, [open]);
-
-  // Allow closing via Escape key
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    const handleCancel = (e: Event) => {
-      e.preventDefault();
-      onClose();
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
     };
-    dialog.addEventListener("cancel", handleCancel);
-    return () => dialog.removeEventListener("cancel", handleCancel);
-  }, [onClose]);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
-  return (
-    <dialog
-      ref={dialogRef}
-      className="maintenance-dialog"
-      onClick={(e) => { if (e.target === dialogRef.current) onClose(); }}
-      style={{ border: "none", background: "transparent", padding: 0, maxWidth: "100vw", maxHeight: "100vh" }}
+  if (!open) return null;
+
+  return createPortal(
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 99999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+        background: "rgba(0,0,0,0.75)",
+        backdropFilter: "blur(4px)",
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Modal card */}
       <div
-        className="relative w-full max-w-md rounded-2xl border border-white/15 bg-[#18181b] shadow-2xl p-6 text-center flex flex-col gap-4"
         style={{ minWidth: "min(28rem, 90vw)" }}
+        className="relative w-full max-w-md rounded-2xl border border-white/15 bg-[#18181b] shadow-2xl p-6 text-center flex flex-col gap-4"
       >
         {/* Close button */}
         <button
@@ -109,6 +106,7 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
           Got it!
         </button>
       </div>
-    </dialog>
+    </div>,
+    document.body
   );
 }
