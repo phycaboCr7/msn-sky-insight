@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
+import { createPortal } from "react-dom";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -1460,8 +1461,8 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
   };
 
   const handleVoiceSend = (text: string) => {
-    if (!text.trim()) return;
-    if (!canSendPrompt()) return;
+    setShowMaintenance(true);
+    return;
 
     if (!isSignedIn) setPromptCount(prev => prev + 1);
 
@@ -1586,7 +1587,10 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
 
   return (
     <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-visible relative rounded-3xl">
-      <MaintenanceModal open={showMaintenance} onClose={() => setShowMaintenance(false)} />
+      {createPortal(
+        <MaintenanceModal open={showMaintenance} onClose={() => setShowMaintenance(false)} />,
+        document.body
+      )}
       <AIBackground weather={weather} customBg={customBg} />
       <CardHeader className="pb-2 pt-3 sm:pt-4 px-3 sm:px-5 relative z-10">
         <div className="flex flex-wrap items-center justify-between gap-y-2">

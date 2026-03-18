@@ -1,13 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Wrench, Mail, ExternalLink } from "lucide-react";
+import { Mail, ExternalLink, Wrench, X } from "lucide-react";
 
 interface MaintenanceModalProps {
   open: boolean;
@@ -15,60 +6,91 @@ interface MaintenanceModalProps {
 }
 
 export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
-      <DialogContent className="sm:max-w-md text-center">
-        <DialogHeader className="items-center">
-          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-yellow-100 dark:bg-yellow-900/30 mb-2 mx-auto">
-            <Wrench className="w-7 h-7 text-yellow-600 dark:text-yellow-400" />
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 9999 }}
+      className="flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div
+        style={{ position: "fixed", inset: 0, zIndex: -1 }}
+        className="bg-black/70 backdrop-blur-sm"
+      />
+
+      {/* Modal card */}
+      <div
+        className="relative w-full max-w-md rounded-2xl border border-white/15 bg-[#18181b] shadow-2xl p-6 text-center flex flex-col gap-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-white/40 hover:text-white/80 transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Icon */}
+        <div className="flex justify-center">
+          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-yellow-500/15">
+            <Wrench className="w-7 h-7 text-yellow-400" />
           </div>
-          <DialogTitle className="text-xl font-bold">
-            🚧 Weatherza AI — Under Maintenance
-          </DialogTitle>
-        </DialogHeader>
+        </div>
 
-        <DialogDescription asChild>
-          <div className="space-y-3 text-sm text-foreground/80 text-center">
-            <p>
-              The <span className="font-semibold text-foreground">Weatherza AI</span> chatbot
-              (created by <span className="font-semibold text-foreground">rAkshIt Jain</span>) is
-              currently <span className="font-semibold text-yellow-600 dark:text-yellow-400">under maintenance</span>.
-            </p>
-            <p>
-              rAkshIt Jain is currently busy with exams and cannot consistently keep the AI running.
-              Once he is free, the AI will be back up and running for you! 🙏
-            </p>
-            <p className="text-xs text-muted-foreground">
-              We apologise for the inconvenience.
-            </p>
+        {/* Title */}
+        <h2 className="text-lg font-bold text-white leading-tight">
+          🚧 Weatherza AI — Under Maintenance
+        </h2>
 
-            <div className="flex flex-col gap-2 pt-2">
-              <a
-                href="mailto:PHYCABO33@gmail.com"
-                className="inline-flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                <Mail className="w-4 h-4" />
-                PHYCABO33@gmail.com
-              </a>
-              <a
-                href="https://guns.lol/phycabo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                <ExternalLink className="w-4 h-4" />
-                guns.lol/phycabo
-              </a>
-            </div>
+        {/* Body */}
+        <div className="space-y-3 text-sm text-white/75 text-center">
+          <p>
+            The <span className="font-semibold text-white">Weatherza AI</span> chatbot
+            (created by <span className="font-semibold text-white">Rakshit Jain</span>) is
+            currently{" "}
+            <span className="font-semibold text-yellow-400">under maintenance</span>.
+          </p>
+          <p>
+            Rakshit Jain is currently busy with exams and cannot consistently keep the AI
+            running. Once he is free, the AI will be back up and running for you! 🙏
+          </p>
+          <p className="text-xs text-white/40">
+            We apologise for the inconvenience.
+          </p>
+
+          <div className="flex flex-col gap-2 pt-1">
+            <a
+              href="mailto:PHYCABO33@gmail.com"
+              className="inline-flex items-center justify-center gap-2 text-sm text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+            >
+              <Mail className="w-4 h-4" />
+              PHYCABO33@gmail.com
+            </a>
+            <a
+              href="https://guns.lol/phycabo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 text-sm text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              guns.lol/phycabo
+            </a>
           </div>
-        </DialogDescription>
+        </div>
 
-        <DialogFooter className="sm:justify-center">
-          <Button onClick={onClose} className="w-full sm:w-auto">
-            Got it!
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        {/* Button */}
+        <button
+          onClick={onClose}
+          className="mt-1 w-full rounded-xl py-2.5 px-4 font-semibold text-white text-sm transition-opacity hover:opacity-90"
+          style={{ background: "linear-gradient(135deg, hsl(28 100% 55%), hsl(28 100% 45%))" }}
+        >
+          Got it!
+        </button>
+      </div>
+    </div>
   );
 }
