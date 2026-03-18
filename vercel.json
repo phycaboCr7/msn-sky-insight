@@ -1,8 +1,4 @@
 {
-  "routes": [
-    {
-      "src": "/weather/(.*)",
-      "dest": "/weather/index.html"
-    }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }
