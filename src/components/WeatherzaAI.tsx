@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
-import { smartQuery, callGemini } from "../services/aiService";
 import { WeatherData } from "@/lib/weather";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -1281,17 +1280,6 @@ const streamFromAI = async (
   mode: string = 'weather',
   retryCount: number = 0
 ) => {
-  let systemPrompt = `You are **Weatherza AI**, an advanced artificial intelligence assistant created by **Rakshit Jain**, a talented software developer from Alwar, Rajasthan, India.
-
-You are Weatherza AI - a powerful, intelligent assistant with complete Python environment (20+ pre-loaded libraries), real-time weather data, and advanced capabilities. Provide beautiful, well-formatted responses using markdown, LaTeX for math, and code blocks with language tags. Be helpful, accurate, and engaging.
-
-**Current Mode: ${mode.toUpperCase()}**
-**User Location: ${weatherCtx?.location}, ${weatherCtx?.country}**
-
-${mode === 'weather' ? `**WEATHER DATA:** Temperature ${weatherCtx?.temperature}°C (feels like ${weatherCtx?.feelsLike}°C), Humidity ${weatherCtx?.humidity}%, UV ${weatherCtx?.uvIndex}, AQI ${weatherCtx?.aqi}` : ''}
-
-Format responses beautifully with markdown, use LaTeX for equations ($ inline, $$ display), and provide complete runnable code with proper syntax highlighting.`;
-  
   const latestUserMsg = messagesForAI[messagesForAI.length - 1];
   if (latestUserMsg?.role === "user" && needsSearch(latestUserMsg.content)) {
     const searchResults = await performSearch(latestUserMsg.content);
@@ -1308,38 +1296,21 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
   abortControllerRef.current = controller;
 
   try {
-    // Attempt Gemini first (non-streaming); fall back to Groq streaming on failure
-    const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (geminiApiKey) {
-      try {
-        const fullPrompt = `${systemPrompt}\n\n${messagesForAI.map((m: { role: string; content: string }) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')}`;
-        const geminiReply = await callGemini(fullPrompt);
-        const assistantId = genMsgId();
-        setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: geminiReply, isTyping: false }]);
-        return;
-      } catch (geminiErr) {
-        console.warn("Gemini failed → falling back to Groq streaming", geminiErr);
-      }
-    }
-
-    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-    if (!GROQ_API_KEY) throw new Error("API key not configured");
-
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    // Route through the weatherza-chat Supabase edge function.
+    // API keys (GROQ_API_KEY, GEMINI_API_KEY, LOVABLE_API_KEY) are stored
+    // server-side only – never exposed to the browser.
+    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
+    const response = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messagesForAI.map((m: any) => ({ role: m.role, content: m.content })),
-        ],
-        temperature: 0.7,
-        max_tokens: 4096,
-        stream: true,
+        messages: messagesForAI,
+        weatherContext: weatherCtx,
+        mode,
+        isPro: proMode,
       }),
       signal: controller.signal,
     });
@@ -1349,12 +1320,10 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
       if (retryCount < MAX_RETRIES) {
         const retryDelay = INITIAL_RETRY_DELAY * Math.pow(2, retryCount);
         console.log(`Rate limited. Retrying in ${retryDelay}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-        
         toast({
           title: "⏳ Rate limit reached",
           description: `Retrying in ${retryDelay / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`,
         });
-
         await sleep(retryDelay);
         return streamFromAI(messagesForAI, weatherCtx, updatedMessages, mode, retryCount + 1);
       } else {
@@ -1367,6 +1336,18 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
       throw new Error(`API error ${response.status}: ${errorText}`);
     }
 
+    const contentType = response.headers.get("Content-Type") || "";
+
+    // ── Non-streaming path (Gemini / Lovable returns JSON {answer}) ──
+    if (contentType.includes("application/json")) {
+      const data = await response.json();
+      const answer = data?.answer || data?.text || "No response";
+      const assistantId = genMsgId();
+      setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: answer, isTyping: true }]);
+      return;
+    }
+
+    // ── Streaming SSE path (Groq) ──
     const assistantId = genMsgId();
     setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
 
