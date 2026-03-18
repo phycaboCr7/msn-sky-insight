@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://weatherza.vercel.app/sitemap.xml
-Sitemap: https://weatherza.vercel.app/sitemap-cities.xml
+Sitemap: https://weatheza.me/sitemap.xml
+Sitemap: https://weatheza.me/sitemap-main.xml
+Sitemap: https://weatheza.me/sitemap-cities.xml
