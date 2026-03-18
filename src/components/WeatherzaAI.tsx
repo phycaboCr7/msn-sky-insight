@@ -969,7 +969,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
-  const [showMaintenance, setShowMaintenance] = useState(false);
+  const [showMaintenance, setShowMaintenance] = useState(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [aiMode, setAiMode] = useState<'weather' | 'code' | 'math' | 'conversation'>(() => {
     return (localStorage.getItem('weatherza-ai-mode') as any) || 'weather';
@@ -1459,81 +1459,12 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
     return true;
   };
 
-  const handleVoiceSend = (text: string) => {
+  const handleVoiceSend = (_text: string) => {
     setShowMaintenance(true);
-    return;
-
-    if (!isSignedIn) setPromptCount(prev => prev + 1);
-
-    const userMessage: Message = { id: genMsgId(), role: "user", content: text.trim() };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setQuestion("");
-    setLoading(true);
-
-    const weatherCtx = buildWeatherContext();
-    const messagesForAI = updatedMessages.map(m => ({ role: m.role, content: m.content }));
-
-    streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode)
-      .catch((err) => {
-        console.error("Voice send error:", err);
-        setMessages(prev => [...prev, { id: genMsgId(), role: "assistant", content: "Sorry, something went wrong. Please try again." }]);
-      })
-      .finally(() => setLoading(false));
   };
 
   const askAI = async () => {
     setShowMaintenance(true);
-    return;
-    if (!canSendPrompt()) return;
-
-    if (!isSignedIn) setPromptCount(prev => prev + 1);
-
-    let messageContent = question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document");
-
-    if (extractedDocText) {
-      messageContent = `DOCUMENT CONTENT START\n${extractedDocText}\nDOCUMENT CONTENT END\n\n${messageContent}`;
-    }
-
-    const userMessage: Message = {
-      id: genMsgId(),
-      role: "user",
-      content: question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document"),
-      image: uploadedImage || undefined,
-      documentText: extractedDocText || undefined,
-      documentName: extractedDocName || undefined
-    };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setQuestion("");
-    setUploadedImage(null);
-    setExtractedDocText(null);
-    setExtractedDocName(null);
-    setLoading(true);
-
-    try {
-      const weatherCtx = buildWeatherContext();
-
-      const messagesForAI = updatedMessages.map(m => {
-        let content = m.content;
-        if (m.documentText) {
-          content = `DOCUMENT CONTENT START\n${m.documentText}\nDOCUMENT CONTENT END\n\nUser question: ${m.content}`;
-        }
-        return { role: m.role, content, image: m.image };
-      });
-
-      await streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode);
-    } catch (error) {
-      console.error("AI Error:", error);
-      toast({
-        title: "AI Error",
-        description: "Failed to get a response. Please try again.",
-        variant: "destructive",
-      });
-      setMessages(messages);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -1968,8 +1899,7 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
             <button
               data-send-btn
               onClick={askAI}
-              disabled={isExtracting || (!question.trim() && !uploadedImage && !extractedDocText)}
-              className="self-end w-10 h-10 rounded-full flex items-center justify-center text-white transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="self-end w-10 h-10 rounded-full flex items-center justify-center text-white transition-all active:scale-95"
               style={{
                 background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(28 100% 45%))',
                 boxShadow: '0 0 12px hsl(28 100% 55% / 0.4), 0 4px 8px hsl(28 100% 40% / 0.3)',
