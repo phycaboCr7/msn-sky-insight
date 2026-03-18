@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal, Paperclip, Mic, XCircle, FileText, Download, FileDown, BarChart3, Code, Calculator, MessageCircle, CloudSun, Square, Zap, LogIn, LogOut, Crown, Type, ImageIcon } from "lucide-react";
 import { VoiceOverlay } from "@/components/VoiceOverlay";
+import { MaintenanceModal } from "@/components/MaintenanceModal";
 import { FontPicker, FontOption, getStoredFont, loadGoogleFont } from "@/components/FontPicker";
 import { BackgroundPicker, CustomBg, getStoredBg } from "@/components/BackgroundPicker";
 import { supabase } from "@/integrations/supabase/client";
@@ -968,6 +969,7 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [loading, setLoading] = useState(false);
+  const [showMaintenance, setShowMaintenance] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [aiMode, setAiMode] = useState<'weather' | 'code' | 'math' | 'conversation'>(() => {
     return (localStorage.getItem('weatherza-ai-mode') as any) || 'weather';
@@ -1481,7 +1483,8 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
   };
 
   const askAI = async () => {
-    if (!question.trim() && !uploadedImage && !extractedDocText) return;
+    setShowMaintenance(true);
+    return;
     if (!canSendPrompt()) return;
 
     if (!isSignedIn) setPromptCount(prev => prev + 1);
@@ -1583,6 +1586,7 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
 
   return (
     <Card className="col-span-full bg-black/50 backdrop-blur-2xl border border-white/12 shadow-2xl overflow-visible relative rounded-3xl">
+      <MaintenanceModal open={showMaintenance} onClose={() => setShowMaintenance(false)} />
       <AIBackground weather={weather} customBg={customBg} />
       <CardHeader className="pb-2 pt-3 sm:pt-4 px-3 sm:px-5 relative z-10">
         <div className="flex flex-wrap items-center justify-between gap-y-2">
