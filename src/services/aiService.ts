@@ -33,7 +33,7 @@ export async function smartQuery(prompt: string): Promise<string> {
 
     const contentType = res.headers.get("Content-Type") || "";
 
-    // Non-streaming path (Gemini/Lovable returns JSON {answer})
+    // Non-streaming path (Gemini / Lovable returns JSON {answer})
     if (contentType.includes("application/json")) {
       const data = await res.json();
       return data?.answer || data?.text || "No response";
