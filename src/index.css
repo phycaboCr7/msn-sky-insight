@@ -988,3 +988,9 @@ pre::-webkit-scrollbar-track, code::-webkit-scrollbar-track {
 .maplibregl-ctrl-attrib a {
   color: hsl(28 100% 60% / 0.7) !important;
 }
+/* Native <dialog> backdrop for maintenance modal */
+dialog#maintenance-dialog::backdrop,
+dialog.maintenance-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+}

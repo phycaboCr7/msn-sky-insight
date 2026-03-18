@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Mail, ExternalLink, Wrench, X } from "lucide-react";
 
 interface MaintenanceModalProps {
@@ -6,24 +7,41 @@ interface MaintenanceModalProps {
 }
 
 export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
-  if (!open) return null;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open) {
+      if (!dialog.open) dialog.showModal();
+    } else {
+      if (dialog.open) dialog.close();
+    }
+  }, [open]);
+
+  // Allow closing via Escape key
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const handleCancel = (e: Event) => {
+      e.preventDefault();
+      onClose();
+    };
+    dialog.addEventListener("cancel", handleCancel);
+    return () => dialog.removeEventListener("cancel", handleCancel);
+  }, [onClose]);
 
   return (
-    <div
-      style={{ position: "fixed", inset: 0, zIndex: 9999 }}
-      className="flex items-center justify-center p-4"
-      onClick={onClose}
+    <dialog
+      ref={dialogRef}
+      className="maintenance-dialog"
+      onClick={(e) => { if (e.target === dialogRef.current) onClose(); }}
+      style={{ border: "none", background: "transparent", padding: 0, maxWidth: "100vw", maxHeight: "100vh" }}
     >
-      {/* Backdrop */}
-      <div
-        style={{ position: "fixed", inset: 0, zIndex: -1 }}
-        className="bg-black/70 backdrop-blur-sm"
-      />
-
       {/* Modal card */}
       <div
         className="relative w-full max-w-md rounded-2xl border border-white/15 bg-[#18181b] shadow-2xl p-6 text-center flex flex-col gap-4"
-        onClick={(e) => e.stopPropagation()}
+        style={{ minWidth: "min(28rem, 90vw)" }}
       >
         {/* Close button */}
         <button
@@ -91,6 +109,6 @@ export function MaintenanceModal({ open, onClose }: MaintenanceModalProps) {
           Got it!
         </button>
       </div>
-    </div>
+    </dialog>
   );
 }
