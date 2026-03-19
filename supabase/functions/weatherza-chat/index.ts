@@ -34,7 +34,6 @@ serve(async (req) => {
     console.log("Chat request:", { count: messages?.length || 0, location: weatherContext?.location, hasImages, mode });
 
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY is not configured");
 
     const actualAQI = weatherContext.pm25 ? calculateAQI(weatherContext.pm25) : weatherContext.aqi;
 
@@ -261,58 +260,65 @@ FORMATTING RULES (follow strictly):
     }
 
     // ─── GROQ WEATHER (fast streaming) ───
-    // Limit to last 3 messages to stay within Groq's 6000 TPM limit
-    const groqMessages = [
-      { role: "system", content: groqSystemPrompt },
-      ...messages.slice(-3).map((m: any) => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 2000) : m.content })),
-    ];
+    if (GROQ_API_KEY) {
+      // Limit to last 3 messages to stay within Groq's 6000 TPM limit
+      const groqMessages = [
+        { role: "system", content: groqSystemPrompt },
+        ...messages.slice(-3).map((m: any) => ({ role: m.role, content: typeof m.content === 'string' ? m.content.slice(0, 2000) : m.content })),
+      ];
 
-    let response: Response | null = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-maverick-17b-128e-instruct",
-          messages: groqMessages,
-          stream: true,
-          temperature: 0.5,
-          max_tokens: 4096,
-        }),
-      });
+      let response: Response | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "meta-llama/llama-4-maverick-17b-128e-instruct",
+            messages: groqMessages,
+            stream: true,
+            temperature: 0.5,
+            max_tokens: 4096,
+          }),
+        });
 
-      if ((response.status === 429 || response.status === 413) && attempt < 2) {
-        const delay = (attempt + 1) * 2000;
-        console.log(`Rate limited/too large, retry in ${delay}ms`);
-        await response.text();
-        if (response.status === 413) {
-          // Further reduce messages on retry
-          groqMessages.splice(1, Math.min(1, groqMessages.length - 2));
+        if ((response.status === 429 || response.status === 413) && attempt < 2) {
+          const delay = (attempt + 1) * 2000;
+          console.log(`Rate limited/too large, retry in ${delay}ms`);
+          await response.text();
+          if (response.status === 413) {
+            // Further reduce messages on retry
+            groqMessages.splice(1, Math.min(1, groqMessages.length - 2));
+          }
+          await new Promise(r => setTimeout(r, delay));
+          continue;
         }
-        await new Promise(r => setTimeout(r, delay));
-        continue;
+        break;
       }
-      break;
-    }
 
-    if (!response || !response.ok) {
-      if (response?.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      if (!response || !response.ok) {
+        if (response?.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (response?.status === 413) {
+          return new Response(JSON.stringify({ error: "Message too long. Please start a new conversation or shorten your message." }), {
+            status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const t = response ? await response.text() : "No response";
+        console.error("Groq error:", response?.status, t);
+      } else {
+        return new Response(response.body, {
+          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
         });
       }
-      if (response?.status === 413) {
-        return new Response(JSON.stringify({ error: "Message too long. Please start a new conversation or shorten your message." }), {
-          status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = response ? await response.text() : "No response";
-      console.error("Groq error:", response?.status, t);
-      throw new Error(`Groq API error: ${response?.status}`);
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    // ─── FINAL FALLBACK ───
+    console.warn("All AI providers unavailable, returning fallback response");
+    return new Response(JSON.stringify({ answer: "🌤️ Weather AI is temporarily busy. Please try again in a moment." }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("weatherza-chat error:", error);

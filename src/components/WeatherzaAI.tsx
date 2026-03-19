@@ -1384,29 +1384,19 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
     console.error("AI Error:", error);
     if (error.name === 'AbortError') return;
     
-    let errorMessage = "Sorry, I encountered an error. ";
+    let fallbackMessage = "🌤️ Weather AI is temporarily busy. Please try again in a moment.";
     
-    if (error.message?.includes("Rate limit")) {
-      errorMessage = "⚠️ Too many requests. The AI service is currently rate-limited. Please wait a few minutes and try again, or sign in for higher limits.";
-    } else if (error.message?.includes("429")) {
-      errorMessage = "⚠️ Rate limit exceeded. Please wait 1-2 minutes before sending another message.";
-    } else if (error.message?.includes("API key")) {
-      errorMessage = "⚠️ API configuration error. Please contact support.";
-    } else {
-      errorMessage += "Please try again.";
+    if (error.message?.includes("Rate limit") || error.message?.includes("429")) {
+      fallbackMessage = "⚠️ Too many requests. Please wait a moment and try again.";
+    } else if (error.message?.includes("413")) {
+      fallbackMessage = "⚠️ Message too long. Please start a new conversation or shorten your message.";
     }
     
     setMessages(prev => [...prev, { 
       id: genMsgId(), 
       role: "assistant", 
-      content: errorMessage 
+      content: fallbackMessage 
     }]);
-    
-    toast({
-      title: "Error",
-      description: errorMessage,
-      variant: "destructive",
-    });
   } finally {
     abortControllerRef.current = null;
   }
