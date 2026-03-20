@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { WeatherData, getForecastWeather, getLocationFromCoords } from "@/lib/weather";
+import { WeatherData, getForecastWeather } from "@/lib/weather";
 import { CurrentWeather } from "@/components/CurrentWeather";
 import { SearchLocation } from "@/components/SearchLocation";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
+import { MaintenanceNotice, MAINTENANCE_DISMISS_KEY } from "@/components/MaintenanceNotice";
 
 // Lazy load non-critical components for faster initial load
 const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })));
@@ -38,7 +39,26 @@ const Index = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showMaintenance, setShowMaintenance] = useState(false);
+  const [maintenanceMessage, setMaintenanceMessage] = useState<string | undefined>();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const maintenanceEnabled = import.meta.env.VITE_MAINTENANCE_ENABLED === "true";
+    const envMessage = import.meta.env.VITE_MAINTENANCE_MESSAGE as string | undefined;
+    const wasDismissed = (() => {
+      try {
+        return !!localStorage.getItem(MAINTENANCE_DISMISS_KEY);
+      } catch {
+        return false;
+      }
+    })();
+
+    if (maintenanceEnabled && !wasDismissed) {
+      setMaintenanceMessage(envMessage);
+      setShowMaintenance(true);
+    }
+  }, []);
 
   const fetchWeather = async (location: string) => {
     setLoading(true);
@@ -47,6 +67,8 @@ const Index = () => {
       setWeather(data);
     } catch (error) {
       console.error("Error fetching weather:", error);
+      setShowMaintenance(true);
+      setMaintenanceMessage("We're having trouble reaching the weather service. It may be undergoing maintenance.");
       toast({
         title: "Error",
         description: "Failed to fetch weather data. Please try again.",
@@ -58,7 +80,7 @@ const Index = () => {
     }
   };
 
-  const getCurrentLocation = () => {
+    const getCurrentLocation = () => {
     setLoading(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -71,6 +93,8 @@ const Index = () => {
             setWeather(forecastData);
           } catch (error) {
             console.error("Error fetching location weather:", error);
+            setShowMaintenance(true);
+            setMaintenanceMessage("Location weather is temporarily unavailable during maintenance. Try searching a city instead.");
             toast({
               title: "Error",
               description: "Failed to fetch weather for your location.",
@@ -159,12 +183,17 @@ const Index = () => {
       })
     : null;
 
-  return (
-    <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden">
-      {/* Dynamic weather-based background */}
-      <Suspense fallback={null}>
-        <DynamicBackground weather={weather} />
-      </Suspense>
+    return (
+      <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden">
+        <MaintenanceNotice
+          open={showMaintenance}
+          onDismiss={() => setShowMaintenance(false)}
+          message={maintenanceMessage}
+        />
+        {/* Dynamic weather-based background */}
+        <Suspense fallback={null}>
+          <DynamicBackground weather={weather} />
+        </Suspense>
       
       {/* Subtle background overlay */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">

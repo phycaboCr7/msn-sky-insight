@@ -1,7 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, MapPin, Loader2, Navigation } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Search, MapPin, Loader2, Navigation, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Place {
@@ -18,6 +16,17 @@ interface SearchLocationProps {
   isLoading?: boolean;
 }
 
+const IMPORTANT_PLACES: Place[] = [
+  { name: "New York City", region: "New York", country: "United States", lat: 40.7128, lon: -74.006 },
+  { name: "London", region: "England", country: "United Kingdom", lat: 51.5074, lon: -0.1278 },
+  { name: "Tokyo", region: "Tokyo", country: "Japan", lat: 35.6762, lon: 139.6503 },
+  { name: "Sydney", region: "New South Wales", country: "Australia", lat: -33.8688, lon: 151.2093 },
+  { name: "Dubai", region: "Dubai", country: "United Arab Emirates", lat: 25.2048, lon: 55.2708 },
+  { name: "Paris", region: "Île-de-France", country: "France", lat: 48.8566, lon: 2.3522 },
+  { name: "Singapore", region: "", country: "Singapore", lat: 1.3521, lon: 103.8198 },
+  { name: "Toronto", region: "Ontario", country: "Canada", lat: 43.6532, lon: -79.3832 },
+];
+
 export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading }: SearchLocationProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Place[]>([]);
@@ -26,6 +35,16 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
   const [isFocused, setIsFocused] = useState(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const curatedResults = useMemo(() => {
+    const term = searchQuery.trim().toLowerCase();
+    if (!term) return IMPORTANT_PLACES.slice(0, 6);
+    return IMPORTANT_PLACES.filter((place) =>
+      [place.name, place.region, place.country].some((value) =>
+        value.toLowerCase().includes(term)
+      )
+    ).slice(0, 6);
+  }, [searchQuery]);
 
   const detectPlaces = async (query: string) => {
     if (!query || query.trim().length < 2) {
@@ -206,6 +225,33 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
           </div>
         )}
       </div>
+
+      {/* Important places quick finder */}
+      {curatedResults.length > 0 && (
+        <div className="mt-3 bg-black/30 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-inner shadow-black/20">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span>Important places</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {curatedResults.map((place) => (
+              <button
+                key={`${place.name}-${place.country}`}
+                type="button"
+                onClick={() => handleSelectPlace(place)}
+                className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-primary/10 text-left transition-all duration-200 text-xs sm:text-sm"
+              >
+                <div className="font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+                  {place.name}
+                </div>
+                <div className="text-[11px] text-muted-foreground" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+                  {place.region ? `${place.region}, ` : ""}{place.country}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Suggestions dropdown */}
       {showSuggestions && suggestions.length > 0 && (
