@@ -16,6 +16,7 @@ interface SearchLocationProps {
   isLoading?: boolean;
 }
 
+const MAX_CURATED_RESULTS = 6;
 const IMPORTANT_PLACES: Place[] = [
   { name: "New York City", region: "New York", country: "United States", lat: 40.7128, lon: -74.006 },
   { name: "London", region: "England", country: "United Kingdom", lat: 51.5074, lon: -0.1278 },
@@ -38,12 +39,12 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
 
   const curatedResults = useMemo(() => {
     const term = searchQuery.trim().toLowerCase();
-    if (!term) return IMPORTANT_PLACES.slice(0, 6);
+    if (!term) return IMPORTANT_PLACES.slice(0, MAX_CURATED_RESULTS);
     return IMPORTANT_PLACES.filter((place) =>
       [place.name, place.region, place.country].some((value) =>
         value.toLowerCase().includes(term)
       )
-    ).slice(0, 6);
+    ).slice(0, MAX_CURATED_RESULTS);
   }, [searchQuery]);
 
   const detectPlaces = async (query: string) => {
