@@ -43,10 +43,11 @@ const Index = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [showMaintenance, setShowMaintenance] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState<string | undefined>();
+  const [maintenanceDismissed, setMaintenanceDismissed] = useState(false);
   const { toast } = useToast();
 
   const showMaintenanceIfNeeded = (message: string) => {
-    if (MAINTENANCE_ENABLED || !navigator.onLine) {
+    if ((MAINTENANCE_ENABLED || !navigator.onLine) && !maintenanceDismissed) {
       setMaintenanceMessage(message);
       setShowMaintenance(true);
     }
@@ -61,6 +62,7 @@ const Index = () => {
         return false;
       }
     })();
+    setMaintenanceDismissed(wasDismissed);
 
     if (MAINTENANCE_ENABLED && !wasDismissed) {
       setMaintenanceMessage(envMessage);
@@ -193,7 +195,10 @@ const Index = () => {
       <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden">
         <MaintenanceNotice
           open={showMaintenance}
-          onDismiss={() => setShowMaintenance(false)}
+          onDismiss={() => {
+            setMaintenanceDismissed(true);
+            setShowMaintenance(false);
+          }}
           message={maintenanceMessage}
         />
         {/* Dynamic weather-based background */}

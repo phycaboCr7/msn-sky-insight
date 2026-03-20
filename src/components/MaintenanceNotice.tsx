@@ -36,7 +36,7 @@ export const MaintenanceNotice = ({ open, onDismiss, message }: MaintenanceNotic
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <DialogTitle className="text-lg font-semibold">Scheduled Maintenance</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Service Notice</DialogTitle>
             <DialogDescription className="text-muted-foreground text-sm">
               We’ll be back to full speed shortly.
             </DialogDescription>

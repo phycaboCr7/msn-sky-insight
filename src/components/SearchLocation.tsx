@@ -231,7 +231,7 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
         <div className="mt-3 bg-black/30 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-inner shadow-black/20">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <span>Important places</span>
+            <span>Popular cities</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {curatedResults.map((place) => (
