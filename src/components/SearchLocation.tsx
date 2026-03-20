@@ -24,7 +24,7 @@ const IMPORTANT_PLACES: Place[] = [
   { name: "Sydney", region: "New South Wales", country: "Australia", lat: -33.8688, lon: 151.2093 },
   { name: "Dubai", region: "Dubai", country: "United Arab Emirates", lat: 25.2048, lon: 55.2708 },
   { name: "Paris", region: "Île-de-France", country: "France", lat: 48.8566, lon: 2.3522 },
-  { name: "Singapore", region: "", country: "Singapore", lat: 1.3521, lon: 103.8198 },
+  { name: "Singapore", region: "Singapore", country: "Singapore", lat: 1.3521, lon: 103.8198 },
   { name: "Toronto", region: "Ontario", country: "Canada", lat: 43.6532, lon: -79.3832 },
 ];
 
@@ -41,9 +41,9 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
     const term = searchQuery.trim().toLowerCase();
     if (!term) return IMPORTANT_PLACES.slice(0, MAX_CURATED_RESULTS);
     return IMPORTANT_PLACES.filter((place) =>
-      [place.name, place.region, place.country].some((value) =>
-        value.toLowerCase().includes(term)
-      )
+      [place.name, place.region, place.country]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(term))
     ).slice(0, MAX_CURATED_RESULTS);
   }, [searchQuery]);
 
