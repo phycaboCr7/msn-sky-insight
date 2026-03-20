@@ -42,9 +42,9 @@ const Index = () => {
   const [showMaintenance, setShowMaintenance] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState<string | undefined>();
   const { toast } = useToast();
+  const maintenanceEnabled = import.meta.env.VITE_MAINTENANCE_ENABLED === "true";
 
   useEffect(() => {
-    const maintenanceEnabled = import.meta.env.VITE_MAINTENANCE_ENABLED === "true";
     const envMessage = import.meta.env.VITE_MAINTENANCE_MESSAGE as string | undefined;
     const wasDismissed = (() => {
       try {
@@ -67,8 +67,10 @@ const Index = () => {
       setWeather(data);
     } catch (error) {
       console.error("Error fetching weather:", error);
-      setShowMaintenance(true);
-      setMaintenanceMessage("We're having trouble reaching the weather service. It may be undergoing maintenance.");
+      if (maintenanceEnabled || !navigator.onLine) {
+        setShowMaintenance(true);
+        setMaintenanceMessage("The weather service is temporarily unavailable. It may be maintenance or a connectivity issue.");
+      }
       toast({
         title: "Error",
         description: "Failed to fetch weather data. Please try again.",
@@ -93,8 +95,10 @@ const Index = () => {
             setWeather(forecastData);
           } catch (error) {
             console.error("Error fetching location weather:", error);
-            setShowMaintenance(true);
-            setMaintenanceMessage("Location weather is temporarily unavailable during maintenance. Try searching a city instead.");
+            if (maintenanceEnabled || !navigator.onLine) {
+              setShowMaintenance(true);
+              setMaintenanceMessage("Location weather is temporarily unavailable. It could be maintenance or connectivity related. Try searching a city instead.");
+            }
             toast({
               title: "Error",
               description: "Failed to fetch weather for your location.",

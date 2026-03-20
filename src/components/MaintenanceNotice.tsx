@@ -9,7 +9,7 @@ interface MaintenanceNoticeProps {
   message?: string;
 }
 
-const DISMISS_KEY = "weatherza-maintenance-dismissed";
+const MAINTENANCE_DISMISS_KEY = "weatherza-maintenance-dismissed";
 
 export const MaintenanceNotice = ({ open, onDismiss, message }: MaintenanceNoticeProps) => {
   const resolvedMessage = useMemo(
@@ -21,7 +21,7 @@ export const MaintenanceNotice = ({ open, onDismiss, message }: MaintenanceNotic
 
   const handleDismiss = () => {
     try {
-      localStorage.setItem(DISMISS_KEY, new Date().toISOString());
+      localStorage.setItem(MAINTENANCE_DISMISS_KEY, new Date().toISOString());
     } catch (err) {
       console.warn("Could not persist maintenance dismissal", err);
     }
@@ -75,4 +75,4 @@ export const MaintenanceNotice = ({ open, onDismiss, message }: MaintenanceNotic
   );
 };
 
-export const MAINTENANCE_DISMISS_KEY = DISMISS_KEY;
+export { MAINTENANCE_DISMISS_KEY };

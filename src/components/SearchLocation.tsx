@@ -241,10 +241,10 @@ export const SearchLocation = ({ onLocationSelect, onCurrentLocation, isLoading 
                 onClick={() => handleSelectPlace(place)}
                 className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-primary/10 text-left transition-all duration-200 text-xs sm:text-sm"
               >
-                <div className="font-semibold text-foreground" style={{ fontFamily: "'Bodoni Moda', serif" }}>
+                <div className="font-semibold text-foreground font-serif">
                   {place.name}
                 </div>
-                <div className="text-[11px] text-muted-foreground" style={{ fontFamily: "'Quicksand', sans-serif" }}>
+                <div className="text-[11px] text-muted-foreground font-sans">
                   {place.region ? `${place.region}, ` : ""}{place.country}
                 </div>
               </button>
