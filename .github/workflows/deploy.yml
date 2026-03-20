@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - copilot/add-user-location-coordinates
   pull_request:
     branches:
       - main
