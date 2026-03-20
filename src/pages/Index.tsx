@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
 import { MaintenanceNotice, MAINTENANCE_DISMISS_KEY } from "@/components/MaintenanceNotice";
 
+const MAINTENANCE_ENABLED = import.meta.env.VITE_MAINTENANCE_ENABLED === "true";
+
 // Lazy load non-critical components for faster initial load
 const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })));
 const WeatherDetails = lazy(() => import("@/components/WeatherDetails").then(m => ({ default: m.WeatherDetails })));
@@ -42,7 +44,13 @@ const Index = () => {
   const [showMaintenance, setShowMaintenance] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState<string | undefined>();
   const { toast } = useToast();
-  const maintenanceEnabled = import.meta.env.VITE_MAINTENANCE_ENABLED === "true";
+
+  const showMaintenanceIfNeeded = (message: string) => {
+    if (MAINTENANCE_ENABLED || !navigator.onLine) {
+      setMaintenanceMessage(message);
+      setShowMaintenance(true);
+    }
+  };
 
   useEffect(() => {
     const envMessage = import.meta.env.VITE_MAINTENANCE_MESSAGE as string | undefined;
@@ -54,7 +62,7 @@ const Index = () => {
       }
     })();
 
-    if (maintenanceEnabled && !wasDismissed) {
+    if (MAINTENANCE_ENABLED && !wasDismissed) {
       setMaintenanceMessage(envMessage);
       setShowMaintenance(true);
     }
@@ -67,10 +75,7 @@ const Index = () => {
       setWeather(data);
     } catch (error) {
       console.error("Error fetching weather:", error);
-      if (maintenanceEnabled || !navigator.onLine) {
-        setShowMaintenance(true);
-        setMaintenanceMessage("The weather service is temporarily unavailable. It may be maintenance or a connectivity issue.");
-      }
+      showMaintenanceIfNeeded("The weather service is temporarily unavailable. It may be maintenance or a connectivity issue.");
       toast({
         title: "Error",
         description: "Failed to fetch weather data. Please try again.",
@@ -95,10 +100,7 @@ const Index = () => {
             setWeather(forecastData);
           } catch (error) {
             console.error("Error fetching location weather:", error);
-            if (maintenanceEnabled || !navigator.onLine) {
-              setShowMaintenance(true);
-              setMaintenanceMessage("Location weather is temporarily unavailable. It could be maintenance or connectivity related. Try searching a city instead.");
-            }
+            showMaintenanceIfNeeded("Location weather is temporarily unavailable. It could be maintenance or connectivity related. Try searching a city instead.");
             toast({
               title: "Error",
               description: "Failed to fetch weather for your location.",

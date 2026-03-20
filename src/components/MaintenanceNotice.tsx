@@ -9,7 +9,7 @@ interface MaintenanceNoticeProps {
   message?: string;
 }
 
-const MAINTENANCE_DISMISS_KEY = "weatherza-maintenance-dismissed";
+export const MAINTENANCE_DISMISS_KEY = "weatherza-maintenance-dismissed";
 
 export const MaintenanceNotice = ({ open, onDismiss, message }: MaintenanceNoticeProps) => {
   const resolvedMessage = useMemo(
@@ -74,5 +74,3 @@ export const MaintenanceNotice = ({ open, onDismiss, message }: MaintenanceNotic
     </Dialog>
   );
 };
-
-export { MAINTENANCE_DISMISS_KEY };
