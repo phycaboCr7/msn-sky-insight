@@ -10,6 +10,7 @@ import { FontPicker, FontOption, getStoredFont, loadGoogleFont } from "@/compone
 import { BackgroundPicker, CustomBg, getStoredBg } from "@/components/BackgroundPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
+import { smartQuery } from "@/services/aiService";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -1383,6 +1384,27 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
   } catch (error: any) {
     console.error("AI Error:", error);
     if (error.name === 'AbortError') return;
+
+    // Before surfacing an error to the user, attempt the fallback service
+    // (Gemini → Groq non-streaming). This keeps the chat alive even when the
+    // primary streaming endpoint is unavailable or rate-limited.
+    try {
+      const lastUserMsg = messagesForAI[messagesForAI.length - 1]?.content || '';
+      // Pass the full conversation history so the fallback has proper context
+      const history = messagesForAI
+        .slice(0, -1)
+        .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+        .map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content as string }));
+      const fallbackReply = await smartQuery(lastUserMsg, history);
+      setMessages(prev => [...prev, {
+        id: genMsgId(),
+        role: "assistant",
+        content: fallbackReply,
+      }]);
+      return;
+    } catch (fallbackErr) {
+      console.error("Fallback also failed:", fallbackErr);
+    }
     
     let errorMessage = "Sorry, I encountered an error. ";
     
