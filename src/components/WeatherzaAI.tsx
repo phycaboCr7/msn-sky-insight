@@ -1272,17 +1272,6 @@ const streamFromAI = async (
   mode: string = 'weather',
   retryCount: number = 0
 ) => {
-  let systemPrompt = `You are **Weatherza AI**, an advanced artificial intelligence assistant created by **Rakshit Jain**, a talented software developer from Alwar, Rajasthan, India.
-
-You are Weatherza AI - a powerful, intelligent assistant with complete Python environment (20+ pre-loaded libraries), real-time weather data, and advanced capabilities. Provide beautiful, well-formatted responses using markdown, LaTeX for math, and code blocks with language tags. Be helpful, accurate, and engaging.
-
-**Current Mode: ${mode.toUpperCase()}**
-**User Location: ${weatherCtx?.location}, ${weatherCtx?.country}**
-
-${mode === 'weather' ? `**WEATHER DATA:** Temperature ${weatherCtx?.temperature}°C (feels like ${weatherCtx?.feelsLike}°C), Humidity ${weatherCtx?.humidity}%, UV ${weatherCtx?.uvIndex}, AQI ${weatherCtx?.aqi}` : ''}
-
-Format responses beautifully with markdown, use LaTeX for equations ($ inline, $$ display), and provide complete runnable code with proper syntax highlighting.`;
-  
   const latestUserMsg = messagesForAI[messagesForAI.length - 1];
   if (latestUserMsg?.role === "user" && needsSearch(latestUserMsg.content)) {
     const searchResults = await performSearch(latestUserMsg.content);
@@ -1299,44 +1288,39 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
   abortControllerRef.current = controller;
 
   try {
-    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || "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";
-    if (!GROQ_API_KEY) throw new Error("API key not configured");
+    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/weatherza-chat`;
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messagesForAI.map((m: any) => ({ role: m.role, content: m.content })),
-        ],
-        temperature: 0.7,
-        max_tokens: 4096,
-        stream: true,
+        messages: messagesForAI,
+        weatherContext: weatherCtx,
+        mode,
+        isPro: proMode,
       }),
       signal: controller.signal,
     });
 
-    // Handle rate limit error (429)
+    // Handle rate limit / payment errors
     if (response.status === 429) {
       if (retryCount < MAX_RETRIES) {
         const retryDelay = INITIAL_RETRY_DELAY * Math.pow(2, retryCount);
-        console.log(`Rate limited. Retrying in ${retryDelay}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-        
         toast({
           title: "⏳ Rate limit reached",
-          description: `Retrying in ${retryDelay / 1000} seconds... (${retryCount + 1}/${MAX_RETRIES})`,
+          description: `Retrying in ${retryDelay / 1000}s... (${retryCount + 1}/${MAX_RETRIES})`,
         });
-
         await sleep(retryDelay);
         return streamFromAI(messagesForAI, weatherCtx, updatedMessages, mode, retryCount + 1);
-      } else {
-        throw new Error("Rate limit exceeded. Please wait a few minutes and try again.");
       }
+      throw new Error("Rate limit exceeded. Please wait a few minutes and try again.");
+    }
+
+    if (response.status === 413) {
+      throw new Error("Message too long. Please start a new conversation or shorten your message.");
     }
 
     if (!response.ok) {
@@ -1344,64 +1328,119 @@ Format responses beautifully with markdown, use LaTeX for equations ($ inline, $
       throw new Error(`API error ${response.status}: ${errorText}`);
     }
 
+    const contentType = response.headers.get("content-type") || "";
+
+    // Non-streaming JSON response (Gemini fallback)
+    if (contentType.includes("application/json")) {
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      const answer = data.answer || "No response received.";
+      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: false }]);
+      return;
+    }
+
+    // SSE streaming response
     const assistantId = genMsgId();
-    setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: false }]);
+    setMessages([...updatedMessages, { id: assistantId, role: "assistant", content: "", isTyping: true }]);
 
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No response body");
 
     const decoder = new TextDecoder();
     let assistantText = "";
+    let textBuffer = "";
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n').filter(line => line.trim());
+      textBuffer += decoder.decode(value, { stream: true });
 
-      for (const line of lines) {
-        if (line.startsWith('data:')) {
-          const jsonStr = line.slice(5).trim();
-          if (jsonStr === '[DONE]') continue;
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
 
-          try {
-            const data = JSON.parse(jsonStr);
-            const text = data.choices?.[0]?.delta?.content || '';
-            if (text) {
-              assistantText += text;
-              setMessages(prev => prev.map((m, i) =>
-                i === prev.length - 1 ? { ...m, content: assistantText } : m
-              ));
-            }
-          } catch (e) {
-            // Ignore JSON parse errors in streaming
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data:") && !line.startsWith("data: ")) continue;
+
+        const jsonStr = line.replace(/^data:\s*/, "").trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const data = JSON.parse(jsonStr);
+          const text = data.choices?.[0]?.delta?.content || "";
+          if (text) {
+            assistantText += text;
+            setMessages(prev => prev.map((m, i) =>
+              i === prev.length - 1 ? { ...m, content: assistantText } : m
+            ));
           }
+        } catch {
+          // partial JSON, skip
         }
+      }
+    }
+
+    // Final flush
+    if (textBuffer.trim()) {
+      for (let raw of textBuffer.split("\n")) {
+        if (!raw) continue;
+        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+        if (!raw.startsWith("data:") && !raw.startsWith("data: ")) continue;
+        const jsonStr = raw.replace(/^data:\s*/, "").trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content || "";
+          if (content) {
+            assistantText += content;
+            setMessages(prev => prev.map((m, i) =>
+              i === prev.length - 1 ? { ...m, content: assistantText } : m
+            ));
+          }
+        } catch { /* ignore */ }
+      }
+    }
+
+    // Mark typing done
+    setMessages(prev => prev.map((m, i) =>
+      i === prev.length - 1 ? { ...m, isTyping: false } : m
+    ));
+
+    // Check truncation
+    if (assistantText.length > 0) {
+      const lastChunk = assistantText.slice(-100);
+      if (!lastChunk.includes('.') && !lastChunk.includes('!') && !lastChunk.includes('?') && !lastChunk.includes('```') && !lastChunk.includes('$$')) {
+        setMessages(prev => prev.map((m, i) =>
+          i === prev.length - 1
+            ? { ...m, content: m.content + "\n\n⚠️ *Response was truncated due to length limits. Ask me to continue if needed.*" }
+            : m
+        ));
       }
     }
   } catch (error: any) {
     console.error("AI Error:", error);
     if (error.name === 'AbortError') return;
-    
+
     let errorMessage = "Sorry, I encountered an error. ";
-    
     if (error.message?.includes("Rate limit")) {
-      errorMessage = "⚠️ Too many requests. The AI service is currently rate-limited. Please wait a few minutes and try again, or sign in for higher limits.";
+      errorMessage = "⚠️ Too many requests. Please wait a few minutes and try again, or sign in for higher limits.";
     } else if (error.message?.includes("429")) {
       errorMessage = "⚠️ Rate limit exceeded. Please wait 1-2 minutes before sending another message.";
-    } else if (error.message?.includes("API key")) {
-      errorMessage = "⚠️ API configuration error. Please contact support.";
+    } else if (error.message?.includes("413")) {
+      errorMessage = "⚠️ Message too long. Please start a new conversation or shorten your message.";
     } else {
       errorMessage += "Please try again.";
     }
-    
-    setMessages(prev => [...prev, { 
-      id: genMsgId(), 
-      role: "assistant", 
-      content: errorMessage 
+
+    setMessages(prev => [...prev, {
+      id: genMsgId(),
+      role: "assistant",
+      content: errorMessage
     }]);
-    
+
     toast({
       title: "Error",
       description: errorMessage,
