@@ -1642,16 +1642,16 @@ const streamFromAI = async (
               Weatherza AI
             </span>
           </CardTitle>
-          <div className="flex items-center flex-wrap gap-0.5 sm:gap-1">
+          <div className="flex items-center flex-wrap gap-0.5 sm:gap-1 max-w-full overflow-hidden">
             <button
               onClick={toggleProMode}
-              className="flex items-center gap-1 sm:gap-2.5 px-1.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:bg-white/5"
+              className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:bg-white/5 shrink-0"
               title={proMode ? "Disable Pro Mode" : "Enable Pro Mode"}
             >
-              <Zap className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors duration-300 ${proMode ? 'text-primary fill-current' : 'text-muted-foreground'}`} />
+              <Zap className={`w-3.5 h-3.5 transition-colors duration-300 ${proMode ? 'text-primary fill-current' : 'text-muted-foreground'}`} />
               <span className={`transition-colors duration-300 text-[11px] sm:text-[13px] ${proMode ? 'text-primary' : 'text-muted-foreground'}`}>Pro</span>
               <div
-                className={`relative w-9 sm:w-12 h-5 sm:h-6 rounded-full transition-all duration-400 ${
+                className={`relative w-8 sm:w-10 h-4 sm:h-5 rounded-full transition-all duration-400 ${
                   proMode ? 'shadow-lg' : 'bg-white/10'
                 }`}
                 style={proMode ? {
@@ -1660,8 +1660,8 @@ const streamFromAI = async (
                 } : undefined}
               >
                 <div
-                  className={`absolute top-[2px] sm:top-[3px] w-[16px] sm:w-[18px] h-[16px] sm:h-[18px] rounded-full shadow-md transition-all duration-300 ${
-                    proMode ? 'left-[19px] sm:left-[27px] bg-white' : 'left-[2px] sm:left-[3px] bg-white/60'
+                  className={`absolute top-[2px] w-[12px] sm:w-[16px] h-[12px] sm:h-[16px] rounded-full shadow-md transition-all duration-300 ${
+                    proMode ? 'left-[14px] sm:left-[20px] bg-white' : 'left-[2px] bg-white/60'
                   }`}
                   style={proMode ? { boxShadow: '0 0 6px hsl(28 100% 60% / 0.5)' } : undefined}
                 />
@@ -1671,33 +1671,33 @@ const streamFromAI = async (
               <>
                 <button
                   onClick={exportToPDF}
-                  className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
+                  className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all shrink-0"
                   title="Export to PDF"
                 >
                   <FileDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  <span className="hidden xs:inline sm:inline">PDF</span>
+                  <span className="hidden sm:inline">PDF</span>
                 </button>
                 <button
                   onClick={exportToWord}
-                  className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
+                  className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all shrink-0"
                   title="Export to Word"
                 >
                   <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  <span className="hidden xs:inline sm:inline">Word</span>
+                  <span className="hidden sm:inline">Word</span>
                 </button>
               </>
             )}
             {messages.length > 0 && (
               <button
                 onClick={clearChat}
-                className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all"
+                className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all shrink-0"
               >
                 <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span className="hidden sm:inline">Clear</span>
               </button>
             )}
             {isSignedIn ? (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 <span className="text-[10px] sm:text-[11px] text-primary font-semibold truncate max-w-[60px] sm:max-w-[80px]">{authUser.name}</span>
                 <button
                   onClick={handleSignOut}
@@ -1710,7 +1710,7 @@ const streamFromAI = async (
             ) : (
               <button
                 onClick={handleGoogleSignIn}
-                className="google-signin-btn-small flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-white transition-all relative"
+                className="google-signin-btn-small flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-white transition-all relative shrink-0"
                 style={{
                   background: 'linear-gradient(135deg, hsl(28 100% 55%), hsl(280 70% 50%))',
                   boxShadow: '0 3px 0 hsl(28 80% 40%), 0 4px 8px hsl(28 100% 55% / 0.3)',
@@ -1721,7 +1721,7 @@ const streamFromAI = async (
               </button>
             )}
             {!isSignedIn && (
-              <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 px-0.5 sm:px-1">
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 px-0.5 sm:px-1 shrink-0">
                 {remainingFreePrompts}/{FREE_PROMPT_LIMIT}
               </span>
             )}
