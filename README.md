@@ -64,6 +64,15 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/61f4fb60-7359-48d9-92b9-a25e3186b72d) and click on Share -> Publish.
 
+### Maintenance & quick-find tips
+
+- Set `VITE_MAINTENANCE_ENABLED=true` and optionally `VITE_MAINTENANCE_MESSAGE` in your environment to surface the built-in maintenance popup for users. Dismissal persists via localStorage until cleared.
+- The location picker now highlights important global places for one-tap forecasts even when search is empty.
+
+### Autodeploy
+
+GitHub Actions will build and deploy automatically on pushes to `main`, pull requests targeting `main`, or when triggered manually via **Actions → Deploy → Run workflow**.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
