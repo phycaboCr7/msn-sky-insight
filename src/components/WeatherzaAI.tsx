@@ -534,35 +534,10 @@ await micropip.install('\${pkgMatch[1]}')
   );
 };
 
-const useTypingEffect = (text: string, isTyping: boolean, chunkSize: number = 5, speed: number = 10) => {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    if (!isTyping) {
-      setDisplayedText(text);
-      setIsComplete(true);
-      return;
-    }
-
-    setDisplayedText("");
-    setIsComplete(false);
-    let index = 0;
-
-    const interval = setInterval(() => {
-      if (index < text.length) {
-        index = Math.min(index + chunkSize, text.length);
-        setDisplayedText(text.slice(0, index));
-      } else {
-        setIsComplete(true);
-        clearInterval(interval);
-      }
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [text, isTyping, chunkSize, speed]);
-
-  return { displayedText, isComplete };
+const useTypingEffect = (text: string, isTyping: boolean, _chunkSize: number = 5, _speed: number = 10) => {
+  // During streaming, content updates already provide the progressive reveal effect.
+  // Just show the latest content directly to avoid resetting the animation on every chunk.
+  return { displayedText: text, isComplete: !isTyping };
 };
 
 const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont, isPro }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void; chatFont?: string; isPro?: boolean }) => {

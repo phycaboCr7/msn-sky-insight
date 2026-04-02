@@ -1,6 +1,8 @@
 import { WeatherData } from "@/lib/weather";
 import { WeatherCard } from "./WeatherCard";
-import { Umbrella, Shirt, Coffee, Moon, Sun, Droplets } from "lucide-react";
+import { 
+  Umbrella, Shirt, UtensilsCrossed, Moon, Dumbbell, Droplets,
+} from "lucide-react";
 
 interface WeatherAdviceProps {
   weather: WeatherData;
@@ -66,43 +68,43 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
   const adviceItems = [
     {
       icon: <Shirt className="w-5 h-5" />,
-      iconColor: "from-blue-500/20 to-blue-600/5",
-      iconText: "text-blue-400",
+      gradient: "from-sky-500 to-blue-600",
+      glowColor: "hsl(200 80% 55% / 0.25)",
       title: "What to Wear",
       advice: getClothingAdvice(),
     },
     {
-      icon: <Coffee className="w-5 h-5" />,
-      iconColor: "from-orange-500/20 to-orange-600/5",
-      iconText: "text-orange-400",
+      icon: <UtensilsCrossed className="w-5 h-5" />,
+      gradient: "from-orange-500 to-amber-600",
+      glowColor: "hsl(28 100% 55% / 0.25)",
       title: "What to Eat",
       advice: getFoodAdvice(),
     },
     {
       icon: <Moon className="w-5 h-5" />,
-      iconColor: "from-purple-500/20 to-purple-600/5",
-      iconText: "text-purple-400",
+      gradient: "from-violet-500 to-purple-600",
+      glowColor: "hsl(270 70% 55% / 0.25)",
       title: "Sleep Advice",
       advice: getSleepAdvice(),
     },
     {
       icon: <Umbrella className="w-5 h-5" />,
-      iconColor: rainChance > 30 ? "from-blue-500/20 to-blue-600/5" : "from-green-500/20 to-green-600/5",
-      iconText: rainChance > 30 ? "text-blue-400" : "text-green-400",
+      gradient: rainChance > 30 ? "from-blue-500 to-indigo-600" : "from-emerald-500 to-green-600",
+      glowColor: rainChance > 30 ? "hsl(220 80% 55% / 0.25)" : "hsl(150 70% 45% / 0.25)",
       title: "Umbrella",
       advice: getUmbrellaAdvice(),
     },
     {
-      icon: <Sun className="w-5 h-5" />,
-      iconColor: "from-yellow-500/20 to-yellow-600/5",
-      iconText: "text-yellow-400",
+      icon: <Dumbbell className="w-5 h-5" />,
+      gradient: "from-yellow-500 to-orange-500",
+      glowColor: "hsl(40 95% 55% / 0.25)",
       title: "Activity",
       advice: getActivityAdvice(),
     },
     {
       icon: <Droplets className="w-5 h-5" />,
-      iconColor: "from-cyan-500/20 to-cyan-600/5",
-      iconText: "text-cyan-400",
+      gradient: "from-cyan-400 to-teal-500",
+      glowColor: "hsl(185 70% 50% / 0.25)",
       title: "Hydration",
       advice: getHydrationAdvice(),
     },
@@ -111,14 +113,29 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
   return (
     <>
       {adviceItems.map((item, index) => (
-        <WeatherCard key={index} className="animate-fade-in group hover:scale-[1.02] transition-transform duration-300">
-          <div className="p-4 sm:p-5">
-            <div className="flex items-center gap-3">
-              <div className={`flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br ${item.iconColor} border border-white/10 ${item.iconText} shadow-lg`}>
+        <WeatherCard 
+          key={index} 
+          className="animate-fade-in group hover:scale-[1.03] transition-all duration-300"
+        >
+          <div className="p-4 sm:p-5 relative overflow-hidden">
+            {/* Subtle glow behind icon */}
+            <div 
+              className="absolute -top-4 -left-4 w-24 h-24 rounded-full blur-2xl opacity-60 transition-opacity duration-500 group-hover:opacity-90"
+              style={{ background: item.glowColor }}
+            />
+            
+            <div className="flex items-center gap-3.5 relative z-10">
+              {/* Icon with vibrant gradient background */}
+              <div 
+                className={`flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} text-white shadow-lg shadow-black/20 ring-1 ring-white/10`}
+              >
                 {item.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-foreground tracking-wide" style={{ fontFamily: "'Playfair Display', serif" }}>
+                <h3 
+                  className="text-sm font-bold text-foreground tracking-wide"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
                   {item.title}
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">
