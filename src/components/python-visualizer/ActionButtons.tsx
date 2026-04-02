@@ -26,17 +26,24 @@ export const ActionButtons = ({
   onCreateVideo,
 }: ActionButtonsProps) => {
   return (
-    <div className="flex flex-wrap gap-2 p-3 bg-black/20 rounded-xl border border-white/10">
-      {/* Run button - always shown */}
+    <div className="flex flex-wrap gap-2 p-3 rounded-xl" style={{
+      background: 'rgba(139, 92, 246, 0.04)',
+      border: '1px solid rgba(139, 92, 246, 0.1)',
+    }}>
+      {/* Run button */}
       <Button 
         onClick={onRun} 
         disabled={!pyodideReady || running} 
-        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg shadow-green-500/20"
+        className="shadow-lg font-semibold"
+        style={{
+          background: 'linear-gradient(135deg, #059669, #10b981)',
+          boxShadow: '0 4px 15px rgba(16, 185, 129, 0.25)',
+        }}
       >
         {running ? (
-          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Running...</>
+          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Running…</>
         ) : (
-          <><Play className="w-4 h-4 mr-2" />▶ Run</>
+          <><Play className="w-4 h-4 mr-2" />Run</>
         )}
       </Button>
       
@@ -47,21 +54,31 @@ export const ActionButtons = ({
             onClick={onRunAnimation} 
             disabled={!pyodideReady || running} 
             variant="outline" 
-            className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/50"
+            className="font-medium"
+            style={{
+              borderColor: 'rgba(139, 92, 246, 0.3)',
+              color: '#a78bfa',
+              background: 'rgba(139, 92, 246, 0.06)',
+            }}
           >
             <Film className="w-4 h-4 mr-2" />
-            🎞 Run Animation
+            Run Animation
           </Button>
           <Button 
             onClick={onCreateVideo} 
             disabled={!hasAnimationFrames || recordingAnimation} 
             variant="outline" 
-            className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10 hover:border-orange-500/50"
+            className="font-medium"
+            style={{
+              borderColor: 'rgba(249, 115, 22, 0.3)',
+              color: '#fb923c',
+              background: 'rgba(249, 115, 22, 0.06)',
+            }}
           >
             {recordingAnimation ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{animationProgress}%</>
             ) : (
-              <><Video className="w-4 h-4 mr-2" />🎬 Create Video</>
+              <><Video className="w-4 h-4 mr-2" />Create Video</>
             )}
           </Button>
         </>
@@ -73,7 +90,12 @@ export const ActionButtons = ({
           onClick={onRun} 
           disabled={!pyodideReady || running} 
           variant="outline" 
-          className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/50"
+          className="font-medium"
+          style={{
+            borderColor: 'rgba(56, 189, 248, 0.3)',
+            color: '#38bdf8',
+            background: 'rgba(56, 189, 248, 0.06)',
+          }}
         >
           📈 Generate Graph
         </Button>
@@ -85,10 +107,15 @@ export const ActionButtons = ({
           onClick={onRun} 
           disabled={!pyodideReady || running} 
           variant="outline" 
-          className="border-green-500/30 text-green-400 hover:bg-green-500/10 hover:border-green-500/50"
+          className="font-medium"
+          style={{
+            borderColor: 'rgba(52, 211, 153, 0.3)',
+            color: '#34d399',
+            background: 'rgba(52, 211, 153, 0.06)',
+          }}
         >
           <Turtle className="w-4 h-4 mr-2" />
-          🐢 Draw Turtle
+          Draw Turtle
         </Button>
       )}
     </div>

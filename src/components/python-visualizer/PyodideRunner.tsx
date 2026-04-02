@@ -428,22 +428,36 @@ _stdout_capture.getvalue()
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-lg animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className={`bg-[#0d0d1a] border border-white/10 shadow-2xl rounded-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+      <div className={`border shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
         isFullscreen 
           ? 'w-full h-full max-w-none max-h-none rounded-none' 
-          : 'w-full max-w-5xl max-h-[95vh] m-4'
-      }`}>
+          : 'w-full max-w-5xl max-h-[95vh] m-4 rounded-2xl'
+      }`} style={{
+        background: 'linear-gradient(180deg, #0a0a1e 0%, #06060f 100%)',
+        borderColor: 'rgba(139, 92, 246, 0.15)',
+        boxShadow: '0 0 80px rgba(139, 92, 246, 0.08), 0 0 40px rgba(249, 115, 22, 0.05), 0 25px 60px rgba(0,0,0,0.6)',
+      }}>
+        {/* Animated top accent line */}
+        <div className="h-[2px] w-full" style={{
+          background: 'linear-gradient(90deg, transparent 0%, #8b5cf6 20%, #f97316 50%, #06b6d4 80%, transparent 100%)',
+        }} />
+
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/10 bg-gradient-to-r from-purple-900/30 to-orange-900/20 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 shrink-0" style={{
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(249, 115, 22, 0.04))',
+          borderBottom: '1px solid rgba(139, 92, 246, 0.1)',
+        }}>
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <span className="text-2xl">🐍</span>
-            <h2 className="text-base sm:text-lg font-bold text-white">Python Visualizer</h2>
-            <span className={`px-2 py-0.5 text-xs rounded-full flex items-center gap-1 ${badge.color}`}>
+            <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(249, 115, 22, 0.2))', boxShadow: '0 0 12px rgba(139, 92, 246, 0.2)' }}>
+              <span className="text-lg">🐍</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-bold tracking-wide" style={{ color: '#e8e0ff' }}>Python Visualizer</h2>
+            <span className={`px-2.5 py-0.5 text-xs rounded-full flex items-center gap-1 font-medium ${badge.color}`} style={{ boxShadow: '0 0 8px rgba(139, 92, 246, 0.15)' }}>
               <span>{badge.icon}</span>
               <span className="hidden sm:inline">{badge.label}</span>
             </span>
             {hasExplicitMetadata && (
-              <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full hidden sm:inline">
+              <span className="px-2 py-0.5 text-xs rounded-full hidden sm:inline font-mono" style={{ background: 'rgba(249, 115, 22, 0.15)', color: '#fb923c', border: '1px solid rgba(249, 115, 22, 0.25)' }}>
                 @output_type
               </span>
             )}
@@ -454,7 +468,7 @@ _stdout_capture.getvalue()
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setShowSliders(!showSliders)} 
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="text-white/60 hover:text-white hover:bg-white/10"
               >
                 <Settings className="w-4 h-4 sm:mr-1" />
                 <span className="hidden sm:inline">Sliders</span>
@@ -464,7 +478,7 @@ _stdout_capture.getvalue()
               variant="ghost" 
               size="icon" 
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="text-white/70 hover:text-white hover:bg-white/10"
+              className="text-white/60 hover:text-white hover:bg-white/10"
             >
               {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
             </Button>
@@ -472,7 +486,7 @@ _stdout_capture.getvalue()
               variant="ghost" 
               size="icon" 
               onClick={onClose} 
-              className="text-white/70 hover:text-white hover:bg-red-500/20 rounded-full ml-2"
+              className="text-white/60 hover:text-white hover:bg-red-500/20 rounded-full ml-2"
             >
               <X className="w-6 h-6" />
             </Button>
@@ -483,9 +497,9 @@ _stdout_capture.getvalue()
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {/* Loading */}
           {loading && (
-            <div className="flex items-center justify-center gap-3 p-8 bg-black/30 rounded-xl">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="text-muted-foreground">Loading Python environment...</span>
+            <div className="flex items-center justify-center gap-3 p-8 rounded-xl" style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
+              <Loader2 className="w-6 h-6 animate-spin" style={{ color: '#8b5cf6' }} />
+              <span style={{ color: '#a78bfa' }}>Initializing Python environment...</span>
             </div>
           )}
           
@@ -513,16 +527,20 @@ _stdout_capture.getvalue()
           
           {/* Frame/Video Progress */}
           {running && executionType === "ANIMATION" && (
-            <div className="px-3 py-2 bg-purple-500/10 border border-purple-500/20 rounded-xl text-sm text-purple-300 flex items-center gap-2">
+            <div className="px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{
+              background: 'rgba(139, 92, 246, 0.08)',
+              border: '1px solid rgba(139, 92, 246, 0.15)',
+              color: '#c4b5fd',
+            }}>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Rendering frames... This may take a moment for 240+ frames.
+              Rendering frames… This may take a moment for 240+ frames.
             </div>
           )}
           {recordingAnimation && (
-            <div className="px-3 py-2 bg-orange-500/10 border border-orange-500/20 rounded-xl">
-              <div className="text-sm text-orange-300 mb-1">Encoding Video... {animationProgress}%</div>
-              <div className="w-full h-2 bg-black/30 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all" style={{ width: `${animationProgress}%` }} />
+            <div className="px-4 py-3 rounded-xl" style={{ background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.15)' }}>
+              <div className="text-sm mb-1.5" style={{ color: '#fdba74' }}>Encoding Video… {animationProgress}%</div>
+              <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                <div className="h-full rounded-full transition-all" style={{ width: `${animationProgress}%`, background: 'linear-gradient(90deg, #f97316, #ef4444)' }} />
               </div>
             </div>
           )}
@@ -540,20 +558,23 @@ _stdout_capture.getvalue()
           />
           
           {/* Code preview */}
-          <div className="relative">
-            <div className="absolute top-2 right-2 flex gap-1">
-              <span className="px-2 py-0.5 text-xs bg-orange-500/20 text-orange-400 rounded font-mono">python</span>
+          <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(139, 92, 246, 0.1)' }}>
+            <div className="absolute top-2 right-2 flex gap-1 z-10">
+              <span className="px-2 py-0.5 text-xs rounded font-mono" style={{ background: 'rgba(249, 115, 22, 0.2)', color: '#fb923c' }}>python</span>
             </div>
-            <pre className="bg-black/40 p-4 rounded-xl overflow-x-auto text-sm font-mono text-green-400 max-h-[180px] overflow-y-auto border border-white/10">
+            <pre className="p-4 overflow-x-auto text-sm font-mono max-h-[180px] overflow-y-auto" style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              color: '#a5f3fc',
+            }}>
               <code>{code}</code>
             </pre>
           </div>
           
-          {/* Live Canvas Animation with MediaRecorder */}
+          {/* Live Canvas Animation */}
           {animationFrames.length > 1 && (
-            <div className="bg-black/30 p-4 rounded-xl border border-purple-500/20">
-            <h4 className="text-sm font-medium text-purple-400 mb-3 flex items-center gap-2">
-                🎞️ Live Animation Canvas ({animationFrames.length} frames — {(animationFrames.length / 24).toFixed(1)}s at 24fps):
+            <div className="p-4 rounded-xl" style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.12)' }}>
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2" style={{ color: '#c4b5fd' }}>
+                🎞️ Live Animation Canvas ({animationFrames.length} frames — {(animationFrames.length / 24).toFixed(1)}s at 24fps)
               </h4>
               <LiveCanvas 
                 frames={animationFrames} 
@@ -564,7 +585,7 @@ _stdout_capture.getvalue()
             </div>
           )}
           
-          {/* Output Panel - for static images and text */}
+          {/* Output Panel */}
           {animationFrames.length <= 1 && (
             <OutputPanel
               output={output}
@@ -577,18 +598,17 @@ _stdout_capture.getvalue()
             />
           )}
           
-          {/* Text output always shown */}
           {output && animationFrames.length > 1 && (
-            <div className="bg-black/30 p-4 rounded-xl border border-white/10">
-              <h4 className="text-sm font-medium text-muted-foreground mb-2">📤 Output:</h4>
-              <pre className="text-sm text-foreground/90 whitespace-pre-wrap font-mono">{output}</pre>
+            <div className="p-4 rounded-xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <h4 className="text-sm font-medium mb-2" style={{ color: '#94a3b8' }}>📤 Output:</h4>
+              <pre className="text-sm whitespace-pre-wrap font-mono" style={{ color: '#a5f3fc' }}>{output}</pre>
             </div>
           )}
           
           {error && (
-            <div className="bg-red-500/10 p-4 rounded-xl border border-red-500/30">
-              <h4 className="text-sm font-medium text-red-400 mb-2">❌ Error:</h4>
-              <pre className="text-sm text-red-300 whitespace-pre-wrap font-mono">{error}</pre>
+            <div className="p-4 rounded-xl" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
+              <h4 className="text-sm font-medium mb-2" style={{ color: '#f87171' }}>❌ Error:</h4>
+              <pre className="text-sm whitespace-pre-wrap font-mono" style={{ color: '#fca5a5' }}>{error}</pre>
             </div>
           )}
         </div>

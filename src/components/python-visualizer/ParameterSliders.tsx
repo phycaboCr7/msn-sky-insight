@@ -13,13 +13,16 @@ export const ParameterSliders = ({ sliders, onSliderChange, onReset }: Parameter
   if (sliders.length === 0) return null;
   
   return (
-    <div className="p-4 bg-black/20 rounded-xl border border-white/10 space-y-4">
+    <div className="p-4 rounded-xl space-y-4" style={{
+      background: 'rgba(139, 92, 246, 0.04)',
+      border: '1px solid rgba(139, 92, 246, 0.12)',
+    }}>
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-          <Settings className="w-4 h-4 text-primary" />
+        <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: '#c4b5fd' }}>
+          <Settings className="w-4 h-4" style={{ color: '#8b5cf6' }} />
           Interactive Parameters
         </h3>
-        <Button variant="ghost" size="sm" onClick={onReset} className="text-xs hover:bg-white/10">
+        <Button variant="ghost" size="sm" onClick={onReset} className="text-xs hover:bg-white/10" style={{ color: '#94a3b8' }}>
           <RotateCcw className="w-3 h-3 mr-1" />
           Reset
         </Button>
@@ -29,8 +32,8 @@ export const ParameterSliders = ({ sliders, onSliderChange, onReset }: Parameter
         {sliders.map((slider, index) => (
           <div key={slider.name} className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{slider.label}</span>
-              <span className="text-primary font-mono font-semibold">{slider.value.toFixed(2)}</span>
+              <span style={{ color: '#94a3b8' }}>{slider.label}</span>
+              <span className="font-mono font-bold" style={{ color: '#8b5cf6' }}>{slider.value.toFixed(2)}</span>
             </div>
             <Slider 
               value={[slider.value]} 
