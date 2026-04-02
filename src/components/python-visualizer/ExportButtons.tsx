@@ -31,8 +31,9 @@ export const ExportButtons = ({
           <Button 
             onClick={onExportPNG} 
             variant="outline" 
-            size="sm" 
-            className="border-white/20 hover:bg-white/10"
+            size="sm"
+            className="font-medium"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: '#e2e8f0', background: 'rgba(255,255,255,0.04)' }}
           >
             <FileImage className="w-4 h-4 mr-2" />
             Export PNG
@@ -40,8 +41,9 @@ export const ExportButtons = ({
           <Button 
             onClick={onExportPDF} 
             variant="outline" 
-            size="sm" 
-            className="border-white/20 hover:bg-white/10"
+            size="sm"
+            className="font-medium"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: '#e2e8f0', background: 'rgba(255,255,255,0.04)' }}
           >
             <FileText className="w-4 h-4 mr-2" />
             Export PDF
@@ -53,8 +55,9 @@ export const ExportButtons = ({
         <Button 
           onClick={onToggleAnimation} 
           variant="outline" 
-          size="sm" 
-          className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+          size="sm"
+          className="font-medium"
+          style={{ borderColor: 'rgba(139, 92, 246, 0.25)', color: '#a78bfa', background: 'rgba(139, 92, 246, 0.06)' }}
         >
           {isAnimating ? (
             <><Pause className="w-4 h-4 mr-2" />Pause</>
@@ -68,8 +71,9 @@ export const ExportButtons = ({
         <Button 
           onClick={onDownloadVideo} 
           variant="outline" 
-          size="sm" 
-          className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+          size="sm"
+          className="font-medium"
+          style={{ borderColor: 'rgba(249, 115, 22, 0.25)', color: '#fb923c', background: 'rgba(249, 115, 22, 0.06)' }}
         >
           <Download className="w-4 h-4 mr-2" />
           Download Video
