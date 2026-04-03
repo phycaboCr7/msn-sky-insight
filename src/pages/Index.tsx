@@ -182,9 +182,12 @@ const Index = () => {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-20 max-w-7xl">
         <div className="mb-6 sm:mb-8 text-center animate-fade-in">
-          <h1 className="font-playfair text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground/90 to-primary/80 bg-clip-text text-transparent">
-            Weatherza
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img src={logoSrc} alt="Weatherza" className="w-12 h-12 sm:w-14 sm:h-14 object-contain" style={{ filter: 'drop-shadow(0 0 12px hsl(28 100% 55% / 0.4))' }} />
+            <h1 className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight bg-gradient-to-r from-primary/90 via-foreground/90 to-primary/80 bg-clip-text text-transparent">
+              Weatherza
+            </h1>
+          </div>
           {currentTime && (
             <div 
               className="text-2xl sm:text-3xl mb-2 text-foreground"
