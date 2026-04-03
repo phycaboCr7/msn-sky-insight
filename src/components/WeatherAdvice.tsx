@@ -124,10 +124,9 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
               <div className="flex items-start gap-4 relative z-10">
                 {/* Icon container - clean, minimal, cohesive */}
                 <div 
-                  className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ring-1 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+                  className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
                   style={{
                     background: `linear-gradient(135deg, hsl(${item.accentHsl} / 0.15), hsl(${item.accentHsl} / 0.08))`,
-                    ringColor: `hsl(${item.accentHsl} / 0.25)`,
                     boxShadow: `0 0 0 1px hsl(${item.accentHsl} / 0.2)`,
                   }}
                 >
