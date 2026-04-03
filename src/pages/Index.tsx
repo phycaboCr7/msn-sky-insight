@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
 
 // Lazy load non-critical components for faster initial load
-const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })));
+const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })).catch(e => { console.error("Failed to load HourlyForecast:", e); return { default: () => null }; }));
 const WeatherDetails = lazy(() => import("@/components/WeatherDetails").then(m => ({ default: m.WeatherDetails })));
 const DailyForecast = lazy(() => import("@/components/DailyForecast").then(m => ({ default: m.DailyForecast })));
 const TemperatureChart = lazy(() => import("@/components/charts/TemperatureChart").then(m => ({ default: m.TemperatureChart })));
