@@ -1,7 +1,8 @@
 import { WeatherData } from "@/lib/weather";
 import { WeatherCard } from "./WeatherCard";
 import { 
-  Umbrella, Shirt, UtensilsCrossed, Moon, Dumbbell, Droplets,
+  CloudRain, Shirt, UtensilsCrossed, Moon, Activity, Droplets,
+  Sun, Thermometer, Wind, Umbrella, Heart, Dumbbell,
 } from "lucide-react";
 
 interface WeatherAdviceProps {
@@ -67,44 +68,38 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
 
   const adviceItems = [
     {
-      icon: <Shirt className="w-5 h-5" />,
-      gradient: "from-sky-500 to-blue-600",
-      glowColor: "hsl(200 80% 55% / 0.25)",
+      icon: Shirt,
+      accentHsl: "200 80% 55%",
       title: "What to Wear",
       advice: getClothingAdvice(),
     },
     {
-      icon: <UtensilsCrossed className="w-5 h-5" />,
-      gradient: "from-orange-500 to-amber-600",
-      glowColor: "hsl(28 100% 55% / 0.25)",
+      icon: UtensilsCrossed,
+      accentHsl: "28 100% 55%",
       title: "What to Eat",
       advice: getFoodAdvice(),
     },
     {
-      icon: <Moon className="w-5 h-5" />,
-      gradient: "from-violet-500 to-purple-600",
-      glowColor: "hsl(270 70% 55% / 0.25)",
+      icon: Moon,
+      accentHsl: "270 70% 60%",
       title: "Sleep Advice",
       advice: getSleepAdvice(),
     },
     {
-      icon: <Umbrella className="w-5 h-5" />,
-      gradient: rainChance > 30 ? "from-blue-500 to-indigo-600" : "from-emerald-500 to-green-600",
-      glowColor: rainChance > 30 ? "hsl(220 80% 55% / 0.25)" : "hsl(150 70% 45% / 0.25)",
+      icon: Umbrella,
+      accentHsl: rainChance > 30 ? "220 80% 55%" : "150 70% 45%",
       title: "Umbrella",
       advice: getUmbrellaAdvice(),
     },
     {
-      icon: <Dumbbell className="w-5 h-5" />,
-      gradient: "from-yellow-500 to-orange-500",
-      glowColor: "hsl(40 95% 55% / 0.25)",
+      icon: Dumbbell,
+      accentHsl: "40 95% 55%",
       title: "Activity",
       advice: getActivityAdvice(),
     },
     {
-      icon: <Droplets className="w-5 h-5" />,
-      gradient: "from-cyan-400 to-teal-500",
-      glowColor: "hsl(185 70% 50% / 0.25)",
+      icon: Droplets,
+      accentHsl: "185 70% 50%",
       title: "Hydration",
       advice: getHydrationAdvice(),
     },
@@ -112,40 +107,61 @@ export const WeatherAdvice = ({ weather }: WeatherAdviceProps) => {
 
   return (
     <>
-      {adviceItems.map((item, index) => (
-        <WeatherCard 
-          key={index} 
-          className="animate-fade-in group hover:scale-[1.03] transition-all duration-300"
-        >
-          <div className="p-4 sm:p-5 relative overflow-hidden">
-            {/* Subtle glow behind icon */}
-            <div 
-              className="absolute -top-4 -left-4 w-24 h-24 rounded-full blur-2xl opacity-60 transition-opacity duration-500 group-hover:opacity-90"
-              style={{ background: item.glowColor }}
-            />
-            
-            <div className="flex items-center gap-3.5 relative z-10">
-              {/* Icon with vibrant gradient background */}
+      {adviceItems.map((item, index) => {
+        const Icon = item.icon;
+        return (
+          <WeatherCard 
+            key={index} 
+            className="animate-fade-in group"
+          >
+            <div className="p-4 sm:p-5 relative overflow-hidden">
+              {/* Ambient glow */}
               <div 
-                className={`flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} text-white shadow-lg shadow-black/20 ring-1 ring-white/10`}
-              >
-                {item.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 
-                  className="text-sm font-bold text-foreground tracking-wide"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                className="absolute -top-6 -left-6 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-50 transition-opacity duration-700"
+                style={{ background: `hsl(${item.accentHsl} / 0.3)` }}
+              />
+              
+              <div className="flex items-start gap-4 relative z-10">
+                {/* Icon container - clean, minimal, cohesive */}
+                <div 
+                  className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ring-1 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+                  style={{
+                    background: `linear-gradient(135deg, hsl(${item.accentHsl} / 0.15), hsl(${item.accentHsl} / 0.08))`,
+                    ringColor: `hsl(${item.accentHsl} / 0.25)`,
+                    boxShadow: `0 0 0 1px hsl(${item.accentHsl} / 0.2)`,
+                  }}
                 >
-                  {item.title}
-                </h3>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">
-                  {item.advice}
-                </p>
+                  <Icon 
+                    className="w-5 h-5 transition-colors duration-300" 
+                    style={{ color: `hsl(${item.accentHsl})` }}
+                    strokeWidth={1.8}
+                  />
+                </div>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h3 
+                    className="text-sm font-bold text-foreground tracking-wide mb-1"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {item.title}
+                  </h3>
+                  <p 
+                    className="text-xs leading-relaxed text-muted-foreground"
+                    style={{ fontFamily: "'Quicksand', sans-serif" }}
+                  >
+                    {item.advice}
+                  </p>
+                </div>
               </div>
+
+              {/* Bottom accent line */}
+              <div 
+                className="absolute bottom-0 left-4 right-4 h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{ background: `linear-gradient(90deg, transparent, hsl(${item.accentHsl} / 0.4), transparent)` }}
+              />
             </div>
-          </div>
-        </WeatherCard>
-      ))}
+          </WeatherCard>
+        );
+      })}
     </>
   );
 };
