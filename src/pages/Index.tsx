@@ -40,7 +40,9 @@ const Index = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const { toast } = useToast();
+  const handleSplashComplete = useCallback(() => setShowSplash(false), []);
 
   const fetchWeather = async (location: string) => {
     setLoading(true);
