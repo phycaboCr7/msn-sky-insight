@@ -7,21 +7,21 @@ import { Loader2, Search } from "lucide-react";
 
 // Lazy load non-critical components for faster initial load
 const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })).catch(e => { console.error("Failed to load HourlyForecast:", e); return { default: () => null }; }));
-const WeatherDetails = lazy(() => import("@/components/WeatherDetails").then(m => ({ default: m.WeatherDetails })));
-const DailyForecast = lazy(() => import("@/components/DailyForecast").then(m => ({ default: m.DailyForecast })));
-const TemperatureChart = lazy(() => import("@/components/charts/TemperatureChart").then(m => ({ default: m.TemperatureChart })));
-const HumidityChart = lazy(() => import("@/components/charts/HumidityChart").then(m => ({ default: m.HumidityChart })));
-const UVIndexChart = lazy(() => import("@/components/charts/UVIndexChart").then(m => ({ default: m.UVIndexChart })));
-const WindChart = lazy(() => import("@/components/charts/WindChart").then(m => ({ default: m.WindChart })));
-const MonthlyChart = lazy(() => import("@/components/charts/MonthlyChart").then(m => ({ default: m.MonthlyChart })));
-const WeatherAdvice = lazy(() => import("@/components/WeatherAdvice").then(m => ({ default: m.WeatherAdvice })));
-const AirQualityCard = lazy(() => import("@/components/AirQualityCard").then(m => ({ default: m.AirQualityCard })));
-const WeatherzaAI = lazy(() => import("@/components/WeatherzaAI").then(m => ({ default: m.WeatherzaAI })));
-const DynamicBackground = lazy(() => import("@/components/DynamicBackground").then(m => ({ default: m.DynamicBackground })));
-const MoonPhaseCard = lazy(() => import("@/components/MoonPhaseCard").then(m => ({ default: m.MoonPhaseCard })));
-const SunPhaseCard = lazy(() => import("@/components/SunPhaseCard").then(m => ({ default: m.SunPhaseCard })));
-const WorldMap = lazy(() => import("@/components/WorldMap").then(m => ({ default: m.WorldMap })));
-const StockWidget = lazy(() => import("@/components/StockWidget").then(m => ({ default: m.StockWidget })));
+const WeatherDetails = lazy(() => import("@/components/WeatherDetails").then(m => ({ default: m.WeatherDetails })).catch(() => ({ default: () => null })));
+const DailyForecast = lazy(() => import("@/components/DailyForecast").then(m => ({ default: m.DailyForecast })).catch(() => ({ default: () => null })));
+const TemperatureChart = lazy(() => import("@/components/charts/TemperatureChart").then(m => ({ default: m.TemperatureChart })).catch(() => ({ default: () => null })));
+const HumidityChart = lazy(() => import("@/components/charts/HumidityChart").then(m => ({ default: m.HumidityChart })).catch(() => ({ default: () => null })));
+const UVIndexChart = lazy(() => import("@/components/charts/UVIndexChart").then(m => ({ default: m.UVIndexChart })).catch(() => ({ default: () => null })));
+const WindChart = lazy(() => import("@/components/charts/WindChart").then(m => ({ default: m.WindChart })).catch(() => ({ default: () => null })));
+const MonthlyChart = lazy(() => import("@/components/charts/MonthlyChart").then(m => ({ default: m.MonthlyChart })).catch(() => ({ default: () => null })));
+const WeatherAdvice = lazy(() => import("@/components/WeatherAdvice").then(m => ({ default: m.WeatherAdvice })).catch(() => ({ default: () => null })));
+const AirQualityCard = lazy(() => import("@/components/AirQualityCard").then(m => ({ default: m.AirQualityCard })).catch(() => ({ default: () => null })));
+const WeatherzaAI = lazy(() => import("@/components/WeatherzaAI").then(m => ({ default: m.WeatherzaAI })).catch(() => ({ default: () => null })));
+const DynamicBackground = lazy(() => import("@/components/DynamicBackground").then(m => ({ default: m.DynamicBackground })).catch(() => ({ default: () => null })));
+const MoonPhaseCard = lazy(() => import("@/components/MoonPhaseCard").then(m => ({ default: m.MoonPhaseCard })).catch(() => ({ default: () => null })));
+const SunPhaseCard = lazy(() => import("@/components/SunPhaseCard").then(m => ({ default: m.SunPhaseCard })).catch(() => ({ default: () => null })));
+const WorldMap = lazy(() => import("@/components/WorldMap").then(m => ({ default: m.WorldMap })).catch(() => ({ default: () => null })));
+const StockWidget = lazy(() => import("@/components/StockWidget").then(m => ({ default: m.StockWidget })).catch(() => ({ default: () => null })));
 
 // Simple loading skeleton
 const CardSkeleton = ({ className = "" }: { className?: string }) => (
