@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, lazy, Suspense, useCallback } from "react";
 import { WeatherData, getForecastWeather, getLocationFromCoords } from "@/lib/weather";
 import { CurrentWeather } from "@/components/CurrentWeather";
 import { SearchLocation } from "@/components/SearchLocation";
+import { SplashScreen } from "@/components/SplashScreen";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
+import logoSrc from "@/assets/logo.png";
 
 // Lazy load non-critical components for faster initial load
 const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })).catch(e => { console.error("Failed to load HourlyForecast:", e); return { default: () => null }; }));
