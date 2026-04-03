@@ -145,13 +145,16 @@ const Index = () => {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gradient-weather flex items-center justify-center px-4">
-        <div className="text-center">
-          <Loader2 className="mx-auto mb-4 animate-spin text-primary" size={40} />
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Loading Weather</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">Getting your location...</p>
+      <>
+        {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+        <div className="min-h-screen bg-gradient-weather flex items-center justify-center px-4">
+          <div className="text-center">
+            <Loader2 className="mx-auto mb-4 animate-spin text-primary" size={40} />
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Loading Weather</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">Getting your location...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
