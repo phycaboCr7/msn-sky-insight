@@ -168,6 +168,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden">
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+      
       {/* Dynamic weather-based background */}
       <Suspense fallback={null}>
         <DynamicBackground weather={weather} />
