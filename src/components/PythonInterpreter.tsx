@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Loader2, X, ExternalLink, Terminal, Trash2, Copy, Check, Image, Cpu, Zap } from "lucide-react";
+import { Loader2, X, ExternalLink, Terminal, Trash2, Copy, Check, Image, Cpu, Zap, Play, RotateCcw } from "lucide-react";
 
 interface PythonInterpreterProps {
   initialCode?: string;
@@ -47,8 +47,8 @@ export const PythonInterpreter = ({ initialCode, language, onClose }: PythonInte
     const loadPyodideEngine = async () => {
       setLoadingPyodide(true);
       setHistory([
-        { type: 'info', content: '⚡ PYTHON RUNTIME • Powered by Pyodide WebAssembly' },
-        { type: 'info', content: '🔄 Initializing Python engine...' },
+        { type: 'info', content: 'Python Runtime • Powered by Pyodide WebAssembly' },
+        { type: 'info', content: 'Initializing Python engine...' },
       ]);
 
       try {
@@ -77,7 +77,7 @@ import io, base64
 def get_plot_as_base64():
     buf = io.BytesIO()
     plt.savefig(buf, format='png', dpi=150, bbox_inches='tight', 
-                facecolor='#0a0a1a', edgecolor='none', pad_inches=0.1)
+                facecolor='#0f0f1e', edgecolor='none', pad_inches=0.1)
     buf.seek(0)
     img_str = base64.b64encode(buf.read()).decode()
     plt.close('all')
@@ -88,8 +88,8 @@ def get_plot_as_base64():
         setPyodideReady(true);
         setHistory(prev => [
           ...prev,
-          { type: 'info', content: '✅ Engine ready • NumPy • Matplotlib • SciPy • SymPy' },
-          { type: 'info', content: '⌨️  Type code → Enter to execute • ↑↓ history • Shift+Enter multiline' },
+          { type: 'info', content: '✓ Engine ready • NumPy • Matplotlib • SciPy • SymPy' },
+          { type: 'info', content: 'Type code → Enter to execute • ↑↓ history • Shift+Enter multiline' },
         ]);
 
         if (initialCode) {
@@ -103,7 +103,7 @@ def get_plot_as_base64():
       } catch (e: any) {
         setHistory(prev => [
           ...prev,
-          { type: 'error', content: `❌ Engine load failed: ${e.message}` },
+          { type: 'error', content: `Engine load failed: ${e.message}` },
         ]);
       } finally {
         setLoadingPyodide(false);
@@ -147,7 +147,7 @@ _stdout_capture.getvalue()
         if (imgData) {
           setHistory(prev => [
             ...prev,
-            { type: 'image', content: '📊 Generated visualization', imageUrl: `data:image/png;base64,${imgData}` },
+            { type: 'image', content: 'Generated visualization', imageUrl: `data:image/png;base64,${imgData}` },
           ]);
         }
       }
@@ -221,7 +221,7 @@ _last
 
   const clearHistory = () => {
     setHistory([
-      { type: 'info', content: '⚡ Console cleared • Ready for new commands' },
+      { type: 'info', content: 'Console cleared • Ready for new commands' },
     ]);
   };
 
@@ -253,12 +253,12 @@ _last
 
     const htmlContent = `<!DOCTYPE html><html><head><title>Python Shell Output</title>
       <style>
-        body{font-family:'JetBrains Mono','Monaco','Menlo',monospace;background:#0a0a1a;color:#e0e0ff;padding:24px;line-height:1.7}
+        body{font-family:'SF Mono','Menlo','Monaco',monospace;background:#0f0f1e;color:#e0e0f0;padding:24px;line-height:1.7}
         pre{white-space:pre-wrap;margin:0}
-        .prompt{color:#00e5ff}
-        .error{color:#ff5252}
-        .info{color:#666;font-style:italic}
-        .output{color:#69f0ae}
+        .prompt{color:hsl(28 100% 60%)}
+        .error{color:#ff6b6b}
+        .info{color:#555;font-style:italic}
+        .output{color:#7bed9f}
       </style>
       </head><body><pre>${fullContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>${imageHtml}</body></html>`;
     const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -266,67 +266,49 @@ _last
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-fade-in" style={{ backgroundColor: 'rgba(0, 0, 10, 0.85)', backdropFilter: 'blur(20px)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in" style={{ backgroundColor: 'hsl(220 30% 4% / 0.9)', backdropFilter: 'blur(24px)' }}>
       <div className="w-full max-w-5xl h-[90vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col relative" style={{
-        background: 'linear-gradient(180deg, #0d0d2b 0%, #080818 100%)',
-        border: '1px solid rgba(0, 229, 255, 0.15)',
-        boxShadow: '0 0 60px rgba(0, 229, 255, 0.08), 0 25px 50px rgba(0, 0, 0, 0.5)',
+        background: 'hsl(225 30% 7%)',
+        border: '1px solid hsl(220 20% 20% / 0.6)',
+        boxShadow: '0 0 80px hsl(28 100% 55% / 0.06), 0 25px 60px hsl(0 0% 0% / 0.5)',
       }}>
-        {/* Animated top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px]" style={{
-          background: 'linear-gradient(90deg, transparent, #00e5ff, #7c4dff, #00e5ff, transparent)',
-        }} />
 
-        {/* Header */}
+        {/* macOS-style title bar */}
         <div className="flex items-center justify-between px-4 sm:px-5 py-3" style={{
-          background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.08), rgba(124, 77, 255, 0.06))',
-          borderBottom: '1px solid rgba(0, 229, 255, 0.1)',
+          background: 'hsl(225 25% 10%)',
+          borderBottom: '1px solid hsl(220 20% 18%)',
         }}>
           <div className="flex items-center gap-3">
-            <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(124, 77, 255, 0.2))' }}>
-              <Cpu className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#00e5ff' }} />
+            {/* Traffic lights */}
+            <div className="flex items-center gap-2">
+              <button onClick={onClose} className="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-110 transition-all" title="Close" />
+              <button onClick={clearHistory} className="w-3 h-3 rounded-full bg-[#febc2e] hover:brightness-110 transition-all" title="Clear" />
+              <button onClick={openInNewTab} className="w-3 h-3 rounded-full bg-[#28c840] hover:brightness-110 transition-all" title="Open in new tab" />
             </div>
-            <div>
-              <span className="font-bold text-sm sm:text-base tracking-wide" style={{ color: '#e0e0ff' }}>
+            <div className="flex items-center gap-2 ml-2">
+              <Terminal className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+              <span className="font-medium text-sm text-foreground tracking-wide" style={{ fontFamily: "'Quicksand', sans-serif" }}>
                 Python Runtime
               </span>
-              <span className="text-[10px] sm:text-xs ml-2 px-2 py-0.5 rounded-full" style={{
-                background: pyodideReady ? 'rgba(105, 240, 174, 0.15)' : 'rgba(255, 215, 0, 0.15)',
-                color: pyodideReady ? '#69f0ae' : '#ffd700',
-                border: `1px solid ${pyodideReady ? 'rgba(105, 240, 174, 0.3)' : 'rgba(255, 215, 0, 0.3)'}`,
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{
+                background: pyodideReady ? 'hsl(150 70% 40% / 0.15)' : 'hsl(40 90% 50% / 0.15)',
+                color: pyodideReady ? 'hsl(150 70% 55%)' : 'hsl(40 90% 60%)',
+                border: `1px solid ${pyodideReady ? 'hsl(150 70% 40% / 0.3)' : 'hsl(40 90% 50% / 0.3)'}`,
               }}>
-                {loadingPyodide ? '⏳ Loading...' : isExecuting ? '⚡ Running' : '● Ready'}
+                {loadingPyodide ? 'Loading...' : isExecuting ? 'Running' : 'Ready'}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button onClick={clearHistory} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg transition-all hover:scale-105" style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: 'rgba(255, 255, 255, 0.6)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}>
-              <Trash2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Clear</span>
+          <div className="flex items-center gap-1.5">
+            <button onClick={clearHistory} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all" title="Clear console">
+              <RotateCcw className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Clear</span>
             </button>
-            <button onClick={copyOutput} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg transition-all hover:scale-105" style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: 'rgba(255, 255, 255, 0.6)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}>
-              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            <button onClick={copyOutput} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all" title="Copy output">
+              {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy'}</span>
             </button>
-            <button onClick={openInNewTab} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg transition-all hover:scale-105" style={{
-              background: 'rgba(0, 229, 255, 0.1)',
-              color: '#00e5ff',
-              border: '1px solid rgba(0, 229, 255, 0.2)',
-            }}>
+            <button onClick={openInNewTab} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all" title="Open in new tab">
               <ExternalLink className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Pop Out</span>
-            </button>
-            <button onClick={onClose} className="p-1.5 rounded-lg transition-all hover:scale-110" style={{
-              background: 'rgba(255, 82, 82, 0.1)',
-              color: '#ff5252',
-            }}>
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
@@ -335,29 +317,24 @@ _last
         <div
           ref={outputRef}
           className="flex-1 overflow-auto p-4 sm:p-5 space-y-1.5"
-          style={{ fontFamily: "'JetBrains Mono', 'Fira Code', 'Monaco', 'Menlo', monospace", fontSize: '13px' }}
+          style={{ fontFamily: "'SF Mono', 'Fira Code', 'Menlo', monospace", fontSize: '13px' }}
           onClick={() => inputRef.current?.focus()}
         >
           {history.map((entry, idx) => (
             <div key={idx}>
               {entry.type === 'image' && entry.imageUrl ? (
                 <div className="my-4 p-4 rounded-xl" style={{
-                  background: 'rgba(124, 77, 255, 0.06)',
-                  border: '1px solid rgba(124, 77, 255, 0.15)',
+                  background: 'hsl(225 25% 12%)',
+                  border: '1px solid hsl(220 20% 22%)',
                 }}>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2" style={{ color: '#b388ff' }}>
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Image className="w-4 h-4" />
                       <span className="text-sm font-medium">{entry.content}</span>
                     </div>
                     <button
                       onClick={() => window.open(entry.imageUrl!, '_blank')}
-                      className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg transition-all hover:scale-105"
-                      style={{
-                        background: 'rgba(124, 77, 255, 0.15)',
-                        color: '#b388ff',
-                        border: '1px solid rgba(124, 77, 255, 0.25)',
-                      }}
+                      className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all border border-border"
                     >
                       <ExternalLink className="w-3 h-3" /> Full Size
                     </button>
@@ -366,18 +343,18 @@ _last
                     src={entry.imageUrl}
                     alt="Generated visualization"
                     className="w-full max-w-2xl mx-auto rounded-xl"
-                    style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 77, 255, 0.1)' }}
+                    style={{ boxShadow: '0 8px 32px hsl(0 0% 0% / 0.4)' }}
                   />
                 </div>
               ) : (
                 <div className="leading-relaxed" style={{
-                  color: entry.type === 'input' ? '#00e5ff' :
-                         entry.type === 'error' ? '#ff5252' :
-                         entry.type === 'info' ? '#555577' :
-                         '#69f0ae',
+                  color: entry.type === 'input' ? 'hsl(28 100% 60%)' :
+                         entry.type === 'error' ? 'hsl(0 80% 65%)' :
+                         entry.type === 'info' ? 'hsl(220 15% 45%)' :
+                         'hsl(150 60% 65%)',
                 }}>
                   {entry.type === 'input' && (
-                    <span style={{ color: '#ffd740', marginRight: '4px' }}>❯</span>
+                    <span style={{ color: 'hsl(28 100% 55%)', marginRight: '6px', fontWeight: 600 }}>❯</span>
                   )}
                   <pre className="whitespace-pre-wrap inline">{entry.content}</pre>
                 </div>
@@ -387,7 +364,7 @@ _last
 
           {/* Input Line */}
           <form onSubmit={handleSubmit} className="flex items-start gap-0 pt-1">
-            <span style={{ color: '#ffd740' }}>❯ </span>
+            <span style={{ color: 'hsl(28 100% 55%)', fontWeight: 600 }}>❯ </span>
             <input
               ref={inputRef}
               type="text"
@@ -395,31 +372,29 @@ _last
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isExecuting || loadingPyodide}
-              className="flex-1 bg-transparent outline-none"
+              className="flex-1 bg-transparent outline-none text-foreground"
               style={{
-                color: '#00e5ff',
                 fontFamily: 'inherit',
-                caretColor: '#00e5ff',
+                caretColor: 'hsl(28 100% 55%)',
               }}
               placeholder={loadingPyodide ? "Initializing engine..." : isExecuting ? "Executing..." : "Enter Python code..."}
               autoFocus
             />
-            {isExecuting && <Loader2 className="w-4 h-4 animate-spin ml-2" style={{ color: '#00e5ff' }} />}
+            {isExecuting && <Loader2 className="w-4 h-4 animate-spin ml-2 text-primary" />}
           </form>
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-5 py-2.5 flex items-center justify-between text-[10px] sm:text-[11px]" style={{
-          background: 'rgba(0, 0, 0, 0.3)',
-          borderTop: '1px solid rgba(0, 229, 255, 0.08)',
-          color: '#444466',
+        <div className="px-4 sm:px-5 py-2.5 flex items-center justify-between text-[10px] sm:text-[11px] text-muted-foreground" style={{
+          background: 'hsl(225 25% 8%)',
+          borderTop: '1px solid hsl(220 20% 16%)',
         }}>
           <div className="flex items-center gap-3">
             <span>Enter → Execute</span>
             <span>↑↓ → History</span>
-            <span>📊 Plots render inline</span>
+            <span>Plots render inline</span>
           </div>
-          <div className="flex items-center gap-1.5" style={{ color: 'rgba(0, 229, 255, 0.5)' }}>
+          <div className="flex items-center gap-1.5 text-primary/50">
             <Zap className="w-3 h-3" />
             <span>Pyodide WASM Engine</span>
           </div>

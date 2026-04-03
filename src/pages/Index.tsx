@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, lazy, Suspense, useCallback } from "react";
 import { WeatherData, getForecastWeather, getLocationFromCoords } from "@/lib/weather";
 import { CurrentWeather } from "@/components/CurrentWeather";
 import { SearchLocation } from "@/components/SearchLocation";
+import { SplashScreen } from "@/components/SplashScreen";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
+import logoSrc from "@/assets/logo.png";
 
 // Lazy load non-critical components for faster initial load
 const HourlyForecast = lazy(() => import("@/components/HourlyForecast").then(m => ({ default: m.HourlyForecast })).catch(e => { console.error("Failed to load HourlyForecast:", e); return { default: () => null }; }));
@@ -38,7 +40,9 @@ const Index = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const { toast } = useToast();
+  const handleSplashComplete = useCallback(() => setShowSplash(false), []);
 
   const fetchWeather = async (location: string) => {
     setLoading(true);
@@ -141,13 +145,16 @@ const Index = () => {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gradient-weather flex items-center justify-center px-4">
-        <div className="text-center">
-          <Loader2 className="mx-auto mb-4 animate-spin text-primary" size={40} />
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Loading Weather</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">Getting your location...</p>
+      <>
+        {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+        <div className="min-h-screen bg-gradient-weather flex items-center justify-center px-4">
+          <div className="text-center">
+            <Loader2 className="mx-auto mb-4 animate-spin text-primary" size={40} />
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Loading Weather</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">Getting your location...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -161,6 +168,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-weather relative overflow-x-hidden">
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+      
       {/* Dynamic weather-based background */}
       <Suspense fallback={null}>
         <DynamicBackground weather={weather} />
@@ -173,9 +182,12 @@ const Index = () => {
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative z-20 max-w-7xl">
         <div className="mb-6 sm:mb-8 text-center animate-fade-in">
-          <h1 className="font-playfair text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-2 sm:mb-3 bg-gradient-to-r from-primary/90 via-foreground/90 to-primary/80 bg-clip-text text-transparent">
-            Weatherza
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <img src={logoSrc} alt="Weatherza" className="w-12 h-12 sm:w-14 sm:h-14 object-contain" style={{ filter: 'drop-shadow(0 0 12px hsl(28 100% 55% / 0.4))' }} />
+            <h1 className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight bg-gradient-to-r from-primary/90 via-foreground/90 to-primary/80 bg-clip-text text-transparent">
+              Weatherza
+            </h1>
+          </div>
           {currentTime && (
             <div 
               className="text-2xl sm:text-3xl mb-2 text-foreground"
