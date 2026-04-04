@@ -550,55 +550,65 @@ const useTypingEffect = (text: string, isTyping: boolean, _chunkSize: number = 5
 const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont, isPro }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void; chatFont?: string; isPro?: boolean }) => {
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
+  // Parse widgets from content
+  const segments = parseAIResponse(displayedText);
+
   return (
     <div className="w-full overflow-visible">
-      <div className={`weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit ${isPro ? 'pro-equations' : ''}`} style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
-      <ReactMarkdown
-        remarkPlugins={[remarkMath, remarkGfm]}
-        rehypePlugins={[rehypeKatex]}
-        components={{
-          h1: ({ children }) => <h1 className="text-xl font-bold text-orange-400 mb-3 mt-2">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-lg font-semibold text-orange-400 mb-2 mt-3">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-base font-semibold text-orange-300 mb-2 mt-2">{children}</h3>,
-          p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
-          strong: ({ children }) => <strong className="font-bold text-orange-400">{children}</strong>,
-          em: ({ children }) => <em className="italic text-orange-300/80 bg-orange-500/10 px-1 rounded">{children}</em>,
-          ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
-          li: ({ children }) => <li className="text-foreground/90 marker:text-orange-400">{children}</li>,
-          code: ({ className, children, ...props }) => {
-            const match = /language-(\w+)/.exec(className || "");
-            const isInline = !className && !match;
-            const codeContent = String(children).replace(/\n$/, "");
-            
-            if (isInline) {
-              return (
-                <code className="bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-mono text-sm font-bold">{children}</code>
-              );
-            }
-            
-            return <CodeBlock language={match?.[1]} onOpenPyodide={onOpenPyodide}>{codeContent}</CodeBlock>;
-          },
-          pre: ({ children }) => <>{children}</>,
-          blockquote: ({ children }) => <blockquote className="border-l-2 border-orange-500/50 pl-3 italic text-orange-300/70 bg-orange-500/5 py-1">{children}</blockquote>,
-          table: ({ children }) => (
-            <div className="overflow-x-auto my-3 rounded-lg border border-white/20">
-              <table className="w-full border-collapse bg-black/20">{children}</table>
-            </div>
-          ),
-          thead: ({ children }) => <thead className="bg-primary/20">{children}</thead>,
-          tbody: ({ children }) => <tbody className="divide-y divide-white/10">{children}</tbody>,
-          tr: ({ children }) => <tr className="hover:bg-white/5 transition-colors">{children}</tr>,
-          th: ({ children }) => <th className="px-4 py-2 text-left text-sm font-semibold text-foreground border-b border-white/20">{children}</th>,
-          td: ({ children }) => <td className="px-4 py-2 text-sm text-foreground/80">{children}</td>,
-        }}
-      >
-        {displayedText}
-      </ReactMarkdown>
+      {segments.map((seg, i) => {
+        if (seg.type === 'widget') {
+          return <AIWidget key={seg.id} html={seg.content} id={seg.id} />;
+        }
+        return (
+          <div key={i} className={`weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit ${isPro ? 'pro-equations' : ''}`} style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
+            <ReactMarkdown
+              remarkPlugins={[remarkMath, remarkGfm]}
+              rehypePlugins={[rehypeKatex]}
+              components={{
+                h1: ({ children }) => <h1 className="text-xl font-bold text-orange-400 mb-3 mt-2">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-lg font-semibold text-orange-400 mb-2 mt-3">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-base font-semibold text-orange-300 mb-2 mt-2">{children}</h3>,
+                p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
+                strong: ({ children }) => <strong className="font-bold text-orange-400">{children}</strong>,
+                em: ({ children }) => <em className="italic text-orange-300/80 bg-orange-500/10 px-1 rounded">{children}</em>,
+                ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
+                li: ({ children }) => <li className="text-foreground/90 marker:text-orange-400">{children}</li>,
+                code: ({ className, children, ...props }) => {
+                  const match = /language-(\w+)/.exec(className || "");
+                  const isInline = !className && !match;
+                  const codeContent = String(children).replace(/\n$/, "");
+                  
+                  if (isInline) {
+                    return (
+                      <code className="bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-mono text-sm font-bold">{children}</code>
+                    );
+                  }
+                  
+                  return <CodeBlock language={match?.[1]} onOpenPyodide={onOpenPyodide}>{codeContent}</CodeBlock>;
+                },
+                pre: ({ children }) => <>{children}</>,
+                blockquote: ({ children }) => <blockquote className="border-l-2 border-orange-500/50 pl-3 italic text-orange-300/70 bg-orange-500/5 py-1">{children}</blockquote>,
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-3 rounded-lg border border-white/20">
+                    <table className="w-full border-collapse bg-black/20" style={{ tableLayout: 'fixed', wordBreak: 'break-word' }}>{children}</table>
+                  </div>
+                ),
+                thead: ({ children }) => <thead className="bg-primary/20">{children}</thead>,
+                tbody: ({ children }) => <tbody className="divide-y divide-white/10">{children}</tbody>,
+                tr: ({ children }) => <tr className="hover:bg-white/5 transition-colors">{children}</tr>,
+                th: ({ children }) => <th className="px-4 py-2 text-left text-sm font-semibold text-foreground border-b border-white/20">{children}</th>,
+                td: ({ children }) => <td className="px-4 py-2 text-sm text-foreground/80">{children}</td>,
+              }}
+            >
+              {seg.content}
+            </ReactMarkdown>
+          </div>
+        );
+      })}
       {isTyping && !isComplete && (
         <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5" />
       )}
-      </div>
     </div>
   );
 };
