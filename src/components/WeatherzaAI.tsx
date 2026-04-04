@@ -8,6 +8,12 @@ import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { FontPicker, FontOption, getStoredFont, loadGoogleFont } from "@/components/FontPicker";
 import { BackgroundPicker, CustomBg, getStoredBg } from "@/components/BackgroundPicker";
+import { ThinkingIndicator } from "@/components/ThinkingIndicator";
+import { AIWidget } from "@/components/AIWidget";
+import { parseAIResponse } from "@/utils/parseAIResponse";
+import { findMatchingSplats } from "@/utils/splatMatcher";
+import { SplatViewer } from "@/components/SplatViewer";
+import type { SplatEntry } from "@/data/splats";
 import { supabase } from "@/integrations/supabase/client";
 import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
 import ReactMarkdown from "react-markdown";
@@ -84,6 +90,7 @@ interface Message {
   image?: string;
   documentText?: string;
   documentName?: string;
+  splats?: SplatEntry[];
 }
 
 let msgIdCounter = 0;
@@ -543,55 +550,65 @@ const useTypingEffect = (text: string, isTyping: boolean, _chunkSize: number = 5
 const MessageContent = ({ content, isTyping, onOpenPyodide, chatFont, isPro }: { content: string; isTyping?: boolean; onOpenPyodide?: (code: string) => void; chatFont?: string; isPro?: boolean }) => {
   const { displayedText, isComplete } = useTypingEffect(content, isTyping || false);
 
+  // Parse widgets from content
+  const segments = parseAIResponse(displayedText);
+
   return (
     <div className="w-full overflow-visible">
-      <div className={`weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit ${isPro ? 'pro-equations' : ''}`} style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
-      <ReactMarkdown
-        remarkPlugins={[remarkMath, remarkGfm]}
-        rehypePlugins={[rehypeKatex]}
-        components={{
-          h1: ({ children }) => <h1 className="text-xl font-bold text-orange-400 mb-3 mt-2">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-lg font-semibold text-orange-400 mb-2 mt-3">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-base font-semibold text-orange-300 mb-2 mt-2">{children}</h3>,
-          p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
-          strong: ({ children }) => <strong className="font-bold text-orange-400">{children}</strong>,
-          em: ({ children }) => <em className="italic text-orange-300/80 bg-orange-500/10 px-1 rounded">{children}</em>,
-          ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
-          li: ({ children }) => <li className="text-foreground/90 marker:text-orange-400">{children}</li>,
-          code: ({ className, children, ...props }) => {
-            const match = /language-(\w+)/.exec(className || "");
-            const isInline = !className && !match;
-            const codeContent = String(children).replace(/\n$/, "");
-            
-            if (isInline) {
-              return (
-                <code className="bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-mono text-sm font-bold">{children}</code>
-              );
-            }
-            
-            return <CodeBlock language={match?.[1]} onOpenPyodide={onOpenPyodide}>{codeContent}</CodeBlock>;
-          },
-          pre: ({ children }) => <>{children}</>,
-          blockquote: ({ children }) => <blockquote className="border-l-2 border-orange-500/50 pl-3 italic text-orange-300/70 bg-orange-500/5 py-1">{children}</blockquote>,
-          table: ({ children }) => (
-            <div className="overflow-x-auto my-3 rounded-lg border border-white/20">
-              <table className="w-full border-collapse bg-black/20">{children}</table>
-            </div>
-          ),
-          thead: ({ children }) => <thead className="bg-primary/20">{children}</thead>,
-          tbody: ({ children }) => <tbody className="divide-y divide-white/10">{children}</tbody>,
-          tr: ({ children }) => <tr className="hover:bg-white/5 transition-colors">{children}</tr>,
-          th: ({ children }) => <th className="px-4 py-2 text-left text-sm font-semibold text-foreground border-b border-white/20">{children}</th>,
-          td: ({ children }) => <td className="px-4 py-2 text-sm text-foreground/80">{children}</td>,
-        }}
-      >
-        {displayedText}
-      </ReactMarkdown>
+      {segments.map((seg, i) => {
+        if (seg.type === 'widget') {
+          return <AIWidget key={seg.id} html={seg.content} id={seg.id} />;
+        }
+        return (
+          <div key={i} className={`weatherza-markdown break-words prose prose-invert prose-sm max-w-none text-foreground/90 leading-snug h-auto min-h-fit ${isPro ? 'pro-equations' : ''}`} style={{ fontFamily: chatFont || "'Quicksand', sans-serif" }}>
+            <ReactMarkdown
+              remarkPlugins={[remarkMath, remarkGfm]}
+              rehypePlugins={[rehypeKatex]}
+              components={{
+                h1: ({ children }) => <h1 className="text-xl font-bold text-orange-400 mb-3 mt-2">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-lg font-semibold text-orange-400 mb-2 mt-3">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-base font-semibold text-orange-300 mb-2 mt-2">{children}</h3>,
+                p: ({ children }) => <p className="mb-2 text-foreground/90 leading-relaxed">{children}</p>,
+                strong: ({ children }) => <strong className="font-bold text-orange-400">{children}</strong>,
+                em: ({ children }) => <em className="italic text-orange-300/80 bg-orange-500/10 px-1 rounded">{children}</em>,
+                ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-foreground/90">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-foreground/90">{children}</ol>,
+                li: ({ children }) => <li className="text-foreground/90 marker:text-orange-400">{children}</li>,
+                code: ({ className, children, ...props }) => {
+                  const match = /language-(\w+)/.exec(className || "");
+                  const isInline = !className && !match;
+                  const codeContent = String(children).replace(/\n$/, "");
+                  
+                  if (isInline) {
+                    return (
+                      <code className="bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-mono text-sm font-bold">{children}</code>
+                    );
+                  }
+                  
+                  return <CodeBlock language={match?.[1]} onOpenPyodide={onOpenPyodide}>{codeContent}</CodeBlock>;
+                },
+                pre: ({ children }) => <>{children}</>,
+                blockquote: ({ children }) => <blockquote className="border-l-2 border-orange-500/50 pl-3 italic text-orange-300/70 bg-orange-500/5 py-1">{children}</blockquote>,
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-3 rounded-lg border border-white/20">
+                    <table className="w-full border-collapse bg-black/20" style={{ tableLayout: 'fixed', wordBreak: 'break-word' }}>{children}</table>
+                  </div>
+                ),
+                thead: ({ children }) => <thead className="bg-primary/20">{children}</thead>,
+                tbody: ({ children }) => <tbody className="divide-y divide-white/10">{children}</tbody>,
+                tr: ({ children }) => <tr className="hover:bg-white/5 transition-colors">{children}</tr>,
+                th: ({ children }) => <th className="px-4 py-2 text-left text-sm font-semibold text-foreground border-b border-white/20">{children}</th>,
+                td: ({ children }) => <td className="px-4 py-2 text-sm text-foreground/80">{children}</td>,
+              }}
+            >
+              {seg.content}
+            </ReactMarkdown>
+          </div>
+        );
+      })}
       {isTyping && !isComplete && (
         <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-0.5" />
       )}
-      </div>
     </div>
   );
 };
@@ -966,6 +983,16 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const glowOuterRef = useRef<HTMLDivElement>(null);
   const glowInnerRef = useRef<HTMLDivElement>(null);
 
+  // ThinkingIndicator state
+  const [isThinking, setIsThinking] = useState(false);
+  const [thinkingStage, setThinkingStage] = useState<'thinking'|'searching'|'calculating'|'reading'|'writing'>('thinking');
+  const [thinkingDetail, setThinkingDetail] = useState('');
+
+  // Splat viewer state
+  const [activeSplat, setActiveSplat] = useState<SplatEntry | null>(null);
+  const [splatIndex, setSplatIndex] = useState(0);
+  const [currentSplatList, setCurrentSplatList] = useState<SplatEntry[]>([]);
+
   const [authUser, setAuthUser] = useState<{ id: string; name: string; email: string } | null>(null);
   const [promptCount, setPromptCount] = useState<number>(() => {
     return parseInt(localStorage.getItem(PROMPT_COUNT_KEY) || '0', 10);
@@ -1309,8 +1336,19 @@ const streamFromAI = async (
     if (contentType.includes("application/json")) {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
-      const answer = data.answer || "No response received.";
-      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: false }]);
+      let answer = data.answer || "No response received.";
+      // Parse STATUS line
+      const statusMatch = answer.match(/\[STATUS:\s*(\w+)(?:\s*\|\s*detail:\s*([^\]]+))?\]/);
+      if (statusMatch) {
+        setThinkingStage(statusMatch[1] as any);
+        setThinkingDetail(statusMatch[2]?.trim() || '');
+      }
+      answer = answer.replace(/\[STATUS:[^\]]+\]\n?/, '').trim();
+      // Run splat matcher
+      const userQ = updatedMessages.filter(m => m.role === 'user').pop()?.content || '';
+      const { splats } = findMatchingSplats(userQ, answer);
+      setIsThinking(false);
+      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: false, splats: splats.length > 0 ? splats : undefined }]);
       return;
     }
 
@@ -1348,8 +1386,21 @@ const streamFromAI = async (
           const text = data.choices?.[0]?.delta?.content || "";
           if (text) {
             assistantText += text;
+            // Parse STATUS line from first chunk
+            if (assistantText.length < 200) {
+              const statusMatch = assistantText.match(/\[STATUS:\s*(\w+)(?:\s*\|\s*detail:\s*([^\]]+))?\]/);
+              if (statusMatch) {
+                setThinkingStage(statusMatch[1] as any);
+                setThinkingDetail(statusMatch[2]?.trim() || '');
+              }
+            }
+            // Strip STATUS line for display
+            const cleanText = assistantText.replace(/\[STATUS:[^\]]+\]\n?/, '').trim();
+            if (cleanText) {
+              setThinkingStage('writing');
+            }
             setMessages(prev => prev.map((m, i) =>
-              i === prev.length - 1 ? { ...m, content: assistantText } : m
+              i === prev.length - 1 ? { ...m, content: cleanText } : m
             ));
           }
         } catch {
@@ -1497,6 +1548,11 @@ const streamFromAI = async (
   const askAI = async () => {
     if (!question.trim() && !uploadedImage && !extractedDocText) return;
     if (!canSendPrompt()) return;
+
+    // Set thinking state
+    setIsThinking(true);
+    setThinkingStage('thinking');
+    setThinkingDetail('');
 
     if (!isSignedIn) setPromptCount(prev => prev + 1);
 
@@ -1823,17 +1879,10 @@ const streamFromAI = async (
             {loading && (
               <div className="flex gap-3 justify-start animate-fade-in">
                 <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
-                  <Bot className="w-4 h-4 text-primary animate-pulse" />
+                  <Bot className="w-4 h-4 text-primary" />
                 </div>
                 <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
-                  <div className="flex items-center gap-3">
-                    <div className="writing-animation flex gap-1">
-                      <span className="writing-dot"></span>
-                      <span className="writing-dot"></span>
-                      <span className="writing-dot"></span>
-                    </div>
-                    <span className="text-muted-foreground text-sm blur-text">Rakshit's AI is thinking...</span>
-                  </div>
+                  <ThinkingIndicator visible={true} stage={thinkingStage} detail={thinkingDetail} />
                 </div>
               </div>
             )}
