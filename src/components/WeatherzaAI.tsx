@@ -1549,6 +1549,11 @@ const streamFromAI = async (
     if (!question.trim() && !uploadedImage && !extractedDocText) return;
     if (!canSendPrompt()) return;
 
+    // Set thinking state
+    setIsThinking(true);
+    setThinkingStage('thinking');
+    setThinkingDetail('');
+
     if (!isSignedIn) setPromptCount(prev => prev + 1);
 
     let messageContent = question.trim() || (uploadedImage ? "What's in this image?" : "Analyze this document");
