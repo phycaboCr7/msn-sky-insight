@@ -1874,17 +1874,10 @@ const streamFromAI = async (
             {loading && (
               <div className="flex gap-3 justify-start animate-fade-in">
                 <div className="p-1.5 rounded-full bg-gradient-to-br from-primary/30 to-purple-500/30 h-fit flex-shrink-0">
-                  <Bot className="w-4 h-4 text-primary animate-pulse" />
+                  <Bot className="w-4 h-4 text-primary" />
                 </div>
                 <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
-                  <div className="flex items-center gap-3">
-                    <div className="writing-animation flex gap-1">
-                      <span className="writing-dot"></span>
-                      <span className="writing-dot"></span>
-                      <span className="writing-dot"></span>
-                    </div>
-                    <span className="text-muted-foreground text-sm blur-text">Rakshit's AI is thinking...</span>
-                  </div>
+                  <ThinkingIndicator visible={true} stage={thinkingStage} detail={thinkingDetail} />
                 </div>
               </div>
             )}
