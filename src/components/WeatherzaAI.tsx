@@ -1336,8 +1336,19 @@ const streamFromAI = async (
     if (contentType.includes("application/json")) {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
-      const answer = data.answer || "No response received.";
-      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: false }]);
+      let answer = data.answer || "No response received.";
+      // Parse STATUS line
+      const statusMatch = answer.match(/\[STATUS:\s*(\w+)(?:\s*\|\s*detail:\s*([^\]]+))?\]/);
+      if (statusMatch) {
+        setThinkingStage(statusMatch[1] as any);
+        setThinkingDetail(statusMatch[2]?.trim() || '');
+      }
+      answer = answer.replace(/\[STATUS:[^\]]+\]\n?/, '').trim();
+      // Run splat matcher
+      const userQ = updatedMessages.filter(m => m.role === 'user').pop()?.content || '';
+      const { splats } = findMatchingSplats(userQ, answer);
+      setIsThinking(false);
+      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: false, splats: splats.length > 0 ? splats : undefined }]);
       return;
     }
 
@@ -1375,8 +1386,21 @@ const streamFromAI = async (
           const text = data.choices?.[0]?.delta?.content || "";
           if (text) {
             assistantText += text;
+            // Parse STATUS line from first chunk
+            if (assistantText.length < 200) {
+              const statusMatch = assistantText.match(/\[STATUS:\s*(\w+)(?:\s*\|\s*detail:\s*([^\]]+))?\]/);
+              if (statusMatch) {
+                setThinkingStage(statusMatch[1] as any);
+                setThinkingDetail(statusMatch[2]?.trim() || '');
+              }
+            }
+            // Strip STATUS line for display
+            const cleanText = assistantText.replace(/\[STATUS:[^\]]+\]\n?/, '').trim();
+            if (cleanText) {
+              setThinkingStage('writing');
+            }
             setMessages(prev => prev.map((m, i) =>
-              i === prev.length - 1 ? { ...m, content: assistantText } : m
+              i === prev.length - 1 ? { ...m, content: cleanText } : m
             ));
           }
         } catch {
