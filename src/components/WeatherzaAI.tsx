@@ -8,6 +8,12 @@ import { Loader2, Sparkles, Send, User, Bot, Trash2, Copy, Check, Play, Terminal
 import { VoiceOverlay } from "@/components/VoiceOverlay";
 import { FontPicker, FontOption, getStoredFont, loadGoogleFont } from "@/components/FontPicker";
 import { BackgroundPicker, CustomBg, getStoredBg } from "@/components/BackgroundPicker";
+import { ThinkingIndicator } from "@/components/ThinkingIndicator";
+import { AIWidget } from "@/components/AIWidget";
+import { parseAIResponse } from "@/utils/parseAIResponse";
+import { findMatchingSplats } from "@/utils/splatMatcher";
+import { SplatViewer } from "@/components/SplatViewer";
+import type { SplatEntry } from "@/data/splats";
 import { supabase } from "@/integrations/supabase/client";
 import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
 import ReactMarkdown from "react-markdown";
