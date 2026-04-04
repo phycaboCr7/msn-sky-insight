@@ -90,6 +90,7 @@ interface Message {
   image?: string;
   documentText?: string;
   documentName?: string;
+  splats?: SplatEntry[];
 }
 
 let msgIdCounter = 0;
