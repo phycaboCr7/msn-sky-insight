@@ -983,6 +983,16 @@ export const WeatherzaAI = ({ weather }: WeatherzaAIProps) => {
   const glowOuterRef = useRef<HTMLDivElement>(null);
   const glowInnerRef = useRef<HTMLDivElement>(null);
 
+  // ThinkingIndicator state
+  const [isThinking, setIsThinking] = useState(false);
+  const [thinkingStage, setThinkingStage] = useState<'thinking'|'searching'|'calculating'|'reading'|'writing'>('thinking');
+  const [thinkingDetail, setThinkingDetail] = useState('');
+
+  // Splat viewer state
+  const [activeSplat, setActiveSplat] = useState<SplatEntry | null>(null);
+  const [splatIndex, setSplatIndex] = useState(0);
+  const [currentSplatList, setCurrentSplatList] = useState<SplatEntry[]>([]);
+
   const [authUser, setAuthUser] = useState<{ id: string; name: string; email: string } | null>(null);
   const [promptCount, setPromptCount] = useState<number>(() => {
     return parseInt(localStorage.getItem(PROMPT_COUNT_KEY) || '0', 10);
