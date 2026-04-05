@@ -1,114 +1,73 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from 'react';
 
-type Stage = 'thinking' | 'searching' | 'calculating' | 'reading' | 'writing' | 'done';
+export type ThinkingStage = 'thinking' | 'searching' | 'calculating' | 'reading' | 'writing';
 
-interface ThinkingIndicatorProps {
-  stage: Stage;
-  detail?: string;
+interface Props {
   visible: boolean;
+  stage: ThinkingStage;
+  detail?: string;
 }
 
-const STAGE_MESSAGES: Record<Stage, string[]> = {
-  thinking: ["Thinking…", "Processing your question…", "Considering the context…", "Forming a response…"],
-  searching: ["Searching the web…", "Finding latest data…", "Reading results…", "Cross-referencing sources…"],
-  calculating: ["Running calculations…", "Applying weather models…", "Crunching the numbers…", "Almost there…"],
-  reading: ["Reading weather data…", "Checking current conditions…", "Scanning sensor data…", "Interpreting readings…"],
-  writing: ["Writing response…", "Putting it together…", "Formatting output…"],
-  done: ["Done"],
+const MESSAGES: Record<ThinkingStage, string[]> = {
+  thinking:    ['Thinking…', 'Processing your question…', 'Considering the context…', 'Forming a response…'],
+  searching:   ['Searching the web…', 'Looking up latest data…', 'Reading results…', 'Cross-referencing sources…'],
+  calculating: ['Running calculations…', 'Applying weather models…', 'Crunching the numbers…', 'Almost there…'],
+  reading:     ['Reading weather data…', 'Checking current conditions…', 'Scanning sensor data…', 'Interpreting readings…'],
+  writing:     ['Writing response…', 'Putting it together…', 'Formatting output…', 'Almost done…'],
 };
 
-const STAGE_COLORS: Record<Stage, { dot: string; shimmerStart: string; shimmerMid: string }> = {
-  thinking:    { dot: "hsl(220 70% 65%)",  shimmerStart: "hsl(220 70% 65%)",  shimmerMid: "hsl(220 100% 90%)" },
-  searching:   { dot: "hsl(35 90% 60%)",   shimmerStart: "hsl(35 90% 60%)",   shimmerMid: "hsl(45 100% 90%)" },
-  calculating: { dot: "hsl(150 60% 50%)",  shimmerStart: "hsl(150 60% 50%)",  shimmerMid: "hsl(150 100% 85%)" },
-  reading:     { dot: "hsl(185 70% 50%)",  shimmerStart: "hsl(185 70% 50%)",  shimmerMid: "hsl(185 100% 88%)" },
-  writing:     { dot: "hsl(0 0% 75%)",     shimmerStart: "hsl(0 0% 75%)",     shimmerMid: "hsl(0 0% 98%)" },
-  done:        { dot: "hsl(150 60% 50%)",  shimmerStart: "hsl(150 60% 50%)",  shimmerMid: "hsl(150 100% 85%)" },
+const COLORS: Record<ThinkingStage, string> = {
+  thinking:    '#3b82f6',
+  searching:   '#f59e0b',
+  calculating: '#22c55e',
+  reading:     '#06b6d4',
+  writing:     '#a855f7',
 };
 
-export const ThinkingIndicator = ({ stage, detail, visible }: ThinkingIndicatorProps) => {
-  const [msgIndex, setMsgIndex] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+export function ThinkingIndicator({ visible, stage, detail }: Props) {
+  const [msgIdx, setMsgIdx] = useState(0);
+  const [fade, setFade] = useState(true);
 
-  // Get messages with detail injection for searching/reading
-  const getMessages = () => {
-    const msgs = [...STAGE_MESSAGES[stage]];
-    if (stage === 'searching' && detail) {
-      msgs[1] = `Looking up "${detail}"…`;
-    }
-    if (stage === 'reading' && detail) {
-      msgs[2] = `Analysing ${detail}…`;
-    }
-    return msgs;
-  };
+  useEffect(() => { setMsgIdx(0); }, [stage]);
 
   useEffect(() => {
-    setMsgIndex(0);
-    setTransitioning(false);
-    if (intervalRef.current) clearInterval(intervalRef.current);
-
-    const messages = getMessages();
-    if (messages.length <= 1) return;
-
-    intervalRef.current = setInterval(() => {
-      setTransitioning(true);
+    if (!visible) return;
+    const interval = setInterval(() => {
+      setFade(false);
       setTimeout(() => {
-        setMsgIndex(prev => (prev + 1) % messages.length);
-        setTransitioning(false);
-      }, 300);
-    }, 2000);
+        setMsgIdx(i => (i + 1) % MESSAGES[stage].length);
+        setFade(true);
+      }, 280);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [visible, stage]);
 
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [stage, detail]);
+  if (!visible) return null;
 
-  const messages = getMessages();
-  const colors = STAGE_COLORS[stage];
-  const currentMessage = messages[msgIndex % messages.length];
+  const color = COLORS[stage];
+  let msg = MESSAGES[stage][msgIdx];
+  if (detail && stage === 'searching' && msgIdx === 1) msg = `Looking up "${detail}"…`;
+  if (detail && stage === 'reading'   && msgIdx === 2) msg = `Analysing ${detail}…`;
 
   return (
-    <div
-      className="transition-all duration-200"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(8px)',
-        pointerEvents: visible ? 'auto' : 'none',
-      }}
-    >
+    <div className="think-wrap" style={{ animation: 'thinkIn .2s ease' }}>
       <div
-        className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-full"
+        className="think-dot"
         style={{
-          background: 'hsl(220 20% 10%)',
-          border: '1px solid hsl(220 15% 20%)',
+          background: color,
+          boxShadow: `0 0 0 3px ${color}22`,
+        }}
+      />
+      <span
+        className="think-text"
+        style={{
+          opacity: fade ? 1 : 0,
+          transform: fade ? 'translateY(0)' : 'translateY(-4px)',
+          backgroundImage: `linear-gradient(90deg, ${color} 0%, #ffffff99 50%, ${color} 100%)`,
         }}
       >
-        {/* Pulsing dot */}
-        <div
-          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-          style={{
-            backgroundColor: colors.dot,
-            animation: 'breathe 1.2s ease-in-out infinite',
-          }}
-        />
-
-        {/* Shimmer text */}
-        <span
-          className={`text-xs font-medium transition-all duration-300 ${
-            transitioning ? 'opacity-0 -translate-y-1' : 'opacity-100 translate-y-0'
-          }`}
-          style={{
-            background: `linear-gradient(90deg, ${colors.shimmerStart} 0%, ${colors.shimmerMid} 50%, ${colors.shimmerStart} 100%)`,
-            backgroundSize: '200% 100%',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-            animation: 'shimmer-thinking 2.5s linear infinite',
-            fontFamily: "'Quicksand', sans-serif",
-          }}
-        >
-          {currentMessage}
-        </span>
-      </div>
+        {msg}
+      </span>
     </div>
   );
-};
+}

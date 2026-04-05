@@ -106,7 +106,17 @@ TABLES: When asked to create a table, ALWAYS use proper GFM (GitHub Flavored Mar
 | Cell 4   | Cell 5   | Cell 6   |
 NEVER use plain text alignment or spaces to simulate tables. ALWAYS include the header separator row (|---|---|). Each row MUST start and end with a pipe |.
 
-RULES: Only bold KEY information like temperatures, percentages, important values — NOT every single word. Use emojis sparingly at bullet starts. MATH/EQUATIONS: ALWAYS use LaTeX delimiters — $...$ for inline equations and $$...$$ for display/block equations. NEVER write equations as plain text. Examples: write $E = mc^2$ not E = mc², write $$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$$ not iℏ(∂ψ/∂t) = Hψ. For matrices use $$\\sigma_x = \\begin{bmatrix} 0 & 1 \\\\ 1 & 0 \\end{bmatrix}$$ not σx = [[0, 1], [1, 0]]. Code must be non-interactive (no input()). Python: matplotlib AGG only, end with print(get_plot_as_base64()). Turtle: t=SimpleTurtle(), print(t.draw()). HTML/CSS/JS: ALWAYS write as a SINGLE combined HTML file — embed ALL CSS inside <style> tags and ALL JavaScript inside <script> tags within the same HTML file. NEVER output separate CSS or JS files. NEVER split code into multiple files. The entire web page must be self-contained in one \`\`\`html code block. Use inline styles or <style> blocks, never external stylesheets. Structure with headings/bullets/tables. Be thorough. Never fabricate data. End with --- then 💡 **Want me to help with more?** + 2-3 suggestions.`;
+RULES: Only bold KEY information like temperatures, percentages, important values — NOT every single word. Use emojis sparingly at bullet starts. MATH/EQUATIONS: ALWAYS use LaTeX delimiters — $...$ for inline equations and $$...$$ for display/block equations. NEVER write equations as plain text. Examples: write $E = mc^2$ not E = mc², write $$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$$ not iℏ(∂ψ/∂t) = Hψ. For matrices use $$\\sigma_x = \\begin{bmatrix} 0 & 1 \\\\ 1 & 0 \\end{bmatrix}$$ not σx = [[0, 1], [1, 0]]. Code must be non-interactive (no input()). Python: matplotlib AGG only, end with print(get_plot_as_base64()). Turtle: t=SimpleTurtle(), print(t.draw()). HTML/CSS/JS: ALWAYS write as a SINGLE combined HTML file — embed ALL CSS inside <style> tags and ALL JavaScript inside <script> tags within the same HTML file. NEVER output separate CSS or JS files. NEVER split code into multiple files. The entire web page must be self-contained in one \`\`\`html code block. Use inline styles or <style> blocks, never external stylesheets. Structure with headings/bullets/tables. Be thorough. Never fabricate data. End with --- then 💡 **Want me to help with more?** + 2-3 suggestions.
+
+RESPONSE STATUS TAG (MANDATORY): On the very first line of EVERY response, before any content, include exactly one of these tags then a newline:
+[STATUS: thinking] — for general reasoning
+[STATUS: searching | detail: weather in <location>] — when looking up real-time data
+[STATUS: calculating] — when doing math or applying formulas
+[STATUS: reading | detail: weather data] — when parsing weather data
+Do NOT display this tag to the user. It is parsed and removed automatically.
+
+GAUSSIAN SPLAT 3D VIEWER:
+You have a library of 3D Gaussian Splat nature scenes. When the user asks about nature topics (flowers, mountains, lakes, forests, insects, bees, gardens, glaciers, waterfalls, canyons, beaches, sunsets, cherry blossoms, etc.), the app will automatically show matching 3D scenes. You do NOT need to do anything special — the matching is automatic. If a user explicitly asks "show me a gaussian splat" or "show 3D", the system handles it.`;
 
     const groqProPrefix = isPro ? `PREMIUM MODE — Deliver elite, comprehensive weather analysis with detailed breakdowns, hourly insights, health advisories, outfit suggestions, and activity recommendations. Format beautifully with sections and bold key data.\n\n` : '';
 
@@ -126,7 +136,14 @@ FORMATTING RULES (follow strictly):
 - MATH/EQUATIONS: ALWAYS wrap ALL math in LaTeX delimiters. Use $...$ for inline math and $$...$$ for block equations. NEVER write equations as plain Unicode text. Write $E = mc^2$ not E = mc². Write $$\\nabla \\times \\vec{E} = -\\frac{\\partial \\vec{B}}{\\partial t}$$ not ∇ × E = -∂B/∂t. For matrices: $$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$$ not [[a,b],[c,d]].
 - TABLES: ALWAYS use proper GFM markdown table syntax with pipes and dashes. Example: | Header | Header2 |\n|---|---|\n| Cell | Cell2 |. NEVER simulate tables with spaces or plain text. Each row MUST start and end with |. ALWAYS include the |---|---| separator row after headers.
 - HTML/CSS/JS: ALWAYS combine into a SINGLE HTML file. Embed ALL CSS in <style> tags and ALL JavaScript in <script> tags. NEVER output separate files. The entire web page must be one self-contained \`\`\`html code block.
-- ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 suggestions`;
+- ALWAYS end with --- then 💡 **Want me to help with more?** + 2-3 suggestions
+
+RESPONSE STATUS TAG (MANDATORY): On the very first line of EVERY response, before any content, include exactly one tag then a newline:
+[STATUS: thinking] — for general reasoning
+[STATUS: searching | detail: weather in <location>] — when looking up real-time data
+[STATUS: calculating] — when doing math
+[STATUS: reading | detail: weather data] — when parsing weather data
+Do NOT display this tag to the user.`;
 
     // ─── VISION ───
     if (hasImages && GROQ_API_KEY) {

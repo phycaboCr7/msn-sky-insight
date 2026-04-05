@@ -1430,9 +1430,13 @@ const streamFromAI = async (
       }
     }
 
-    // Mark typing done
+    // Mark typing done and attach splats
+    const userQ = updatedMessages.filter(m => m.role === 'user').pop()?.content || '';
+    const cleanedFinal = assistantText.replace(/\[STATUS:[^\]]+\]\n?/, '').replace(/\[SHOW_SPLAT:[^\]]+\]/g, '').trim();
+    const { splats: matchedSplats } = findMatchingSplats(userQ, cleanedFinal);
+    setIsThinking(false);
     setMessages(prev => prev.map((m, i) =>
-      i === prev.length - 1 ? { ...m, isTyping: false } : m
+      i === prev.length - 1 ? { ...m, isTyping: false, content: cleanedFinal, splats: matchedSplats.length > 0 ? matchedSplats : undefined } : m
     ));
 
     // Check truncation
@@ -1849,6 +1853,20 @@ const streamFromAI = async (
                   {msg.role === "assistant" ? (
                     <div ref={msg === messages[messages.length - 1] ? lastMessageRef : undefined}>
                       <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} chatFont={chatFont.family} isPro={proMode} />
+                      {msg.splats && msg.splats.length > 0 && (
+                        <div className="splat-suggest-row">
+                          <div className="splat-suggest-label">◈ Related 3D scenes</div>
+                          <div className="splat-suggest-cards">
+                            {msg.splats.map((s, idx) => (
+                              <button key={s.id} className="splat-suggest-card" onClick={() => { setCurrentSplatList(msg.splats!); setSplatIndex(idx); setActiveSplat(s); }}>
+                                {s.thumbnail && <img src={s.thumbnail} alt={s.title} className="splat-suggest-thumb" />}
+                                <span className="splat-suggest-name">{s.title}</span>
+                                <span className="splat-suggest-cta">View 3D ↗</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div>
@@ -2075,6 +2093,14 @@ const streamFromAI = async (
           currentBg={customBg}
           onSelectBg={(bg) => { setCustomBg(bg); setBgPickerOpen(false); }}
         />
+        {activeSplat && (
+          <SplatViewer
+            splat={activeSplat}
+            onClose={() => setActiveSplat(null)}
+            onNext={currentSplatList.length > 1 ? () => { const next = (splatIndex + 1) % currentSplatList.length; setSplatIndex(next); setActiveSplat(currentSplatList[next]); } : undefined}
+            onPrev={currentSplatList.length > 1 ? () => { const prev = (splatIndex - 1 + currentSplatList.length) % currentSplatList.length; setSplatIndex(prev); setActiveSplat(currentSplatList[prev]); } : undefined}
+          />
+        )}
       </CardContent>
     </Card>
   );
