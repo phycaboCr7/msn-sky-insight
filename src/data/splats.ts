@@ -9,8 +9,14 @@ export interface SplatEntry {
   category: string;
 }
 
+function normalizeSupersplatEmbedUrl(embedUrl: string): string {
+  const match = embedUrl.match(/^https?:\/\/superspl\.at\/embed\/([^/?#]+)/i);
+  if (!match?.[1]) return embedUrl;
+  return `https://superspl.at/s?id=${match[1]}`;
+}
+
 // Nature-focused splats only
-export const SPLATS: SplatEntry[] = [
+const RAW_SPLATS: SplatEntry[] = [
   { id: '7a475d38', title: 'Winter Garden Jastrzębia Góra Poland', embedUrl: 'https://superspl.at/embed/7a475d38', sceneUrl: 'https://superspl.at/scene/7a475d38', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/7a475d38/v1/xl.webp', tags: ['garden','winter','poland','nature','outdoor','greenhouse'], keywords: ['greenhouse','botanical','snow','cold','europe'], category: 'nature' },
   { id: '6ba8df00', title: 'Ghost Cicada', embedUrl: 'https://superspl.at/embed/6ba8df00', sceneUrl: 'https://superspl.at/scene/6ba8df00', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/6ba8df00/v1/xl.webp', tags: ['insect','biology','nature','macro','science','cicada'], keywords: ['ghost','transparent','entomology','arthropod','wings'], category: 'nature' },
   { id: '85dd3c91', title: 'Honeybee Macroscan High Quality', embedUrl: 'https://superspl.at/embed/85dd3c91', sceneUrl: 'https://superspl.at/scene/85dd3c91', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/85dd3c91/v1/xl.webp', tags: ['insect','biology','bee','nature','science','macro','pollinator'], keywords: ['honeybee','apis','mellifera','scan','close-up'], category: 'nature' },
@@ -36,5 +42,10 @@ export const SPLATS: SplatEntry[] = [
   { id: 'df38a05c', title: 'Crego Park Lansing', embedUrl: 'https://superspl.at/embed/df38a05c', sceneUrl: 'https://superspl.at/scene/df38a05c', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/df38a05c/v1/xl.webp', tags: ['park','nature','trees','outdoor','green'], keywords: ['crego','park','lansing','michigan','garden'], category: 'nature' },
   { id: '6e7334bc', title: 'Quarantine Bay - 6 Caves', embedUrl: 'https://superspl.at/embed/6e7334bc', sceneUrl: 'https://superspl.at/scene/6e7334bc', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/6e7334bc/v1/xl.webp', tags: ['cave','bay','nature','coastal','ocean'], keywords: ['quarantine','bay','caves','rock','sea'], category: 'nature' },
 ];
+
+export const SPLATS: SplatEntry[] = RAW_SPLATS.map((splat) => ({
+  ...splat,
+  embedUrl: normalizeSupersplatEmbedUrl(splat.embedUrl),
+}));
 
 export const SPLAT_MAP = new Map(SPLATS.map(s => [s.id, s]));
