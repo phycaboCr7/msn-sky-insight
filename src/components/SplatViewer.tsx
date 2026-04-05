@@ -1,5 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import type { SplatEntry } from '@/data/splats';
+
+const SUPER_SPLAT_EMBED_REGEX = /https?:\/\/superspl\.at\/embed\/([^/?#]+)/i;
+
+function normalizeSuperSplatUrl(url: string): string {
+  const match = url.match(SUPER_SPLAT_EMBED_REGEX);
+  if (!match) return url;
+  return `https://superspl.at/s?id=${match[1]}`;
+}
 
 interface Props {
   splat: SplatEntry;
@@ -13,9 +21,7 @@ export function SplatViewer({ splat, onClose, onNext, onPrev }: Props) {
   const [copied, setCopied] = useState(false);
   const [isFs, setIsFs] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const iframeUrl = splat.embedUrl.includes('/embed/')
-    ? splat.embedUrl.replace('/embed/', '/s?id=')
-    : splat.embedUrl;
+  const iframeUrl = useMemo(() => normalizeSuperSplatUrl(splat.embedUrl), [splat.embedUrl]);
 
   useEffect(() => { setLoaded(false); }, [splat.id]);
 
