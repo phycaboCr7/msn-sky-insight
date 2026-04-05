@@ -1430,9 +1430,13 @@ const streamFromAI = async (
       }
     }
 
-    // Mark typing done
+    // Mark typing done and attach splats
+    const userQ = updatedMessages.filter(m => m.role === 'user').pop()?.content || '';
+    const cleanedFinal = assistantText.replace(/\[STATUS:[^\]]+\]\n?/, '').replace(/\[SHOW_SPLAT:[^\]]+\]/g, '').trim();
+    const { splats: matchedSplats } = findMatchingSplats(userQ, cleanedFinal);
+    setIsThinking(false);
     setMessages(prev => prev.map((m, i) =>
-      i === prev.length - 1 ? { ...m, isTyping: false } : m
+      i === prev.length - 1 ? { ...m, isTyping: false, content: cleanedFinal, splats: matchedSplats.length > 0 ? matchedSplats : undefined } : m
     ));
 
     // Check truncation
@@ -2089,6 +2093,14 @@ const streamFromAI = async (
           currentBg={customBg}
           onSelectBg={(bg) => { setCustomBg(bg); setBgPickerOpen(false); }}
         />
+        {activeSplat && (
+          <SplatViewer
+            splat={activeSplat}
+            onClose={() => setActiveSplat(null)}
+            onNext={currentSplatList.length > 1 ? () => { const next = (splatIndex + 1) % currentSplatList.length; setSplatIndex(next); setActiveSplat(currentSplatList[next]); } : undefined}
+            onPrev={currentSplatList.length > 1 ? () => { const prev = (splatIndex - 1 + currentSplatList.length) % currentSplatList.length; setSplatIndex(prev); setActiveSplat(currentSplatList[prev]); } : undefined}
+          />
+        )}
       </CardContent>
     </Card>
   );
