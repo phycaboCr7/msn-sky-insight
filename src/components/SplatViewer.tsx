@@ -13,6 +13,9 @@ export function SplatViewer({ splat, onClose, onNext, onPrev }: Props) {
   const [copied, setCopied] = useState(false);
   const [isFs, setIsFs] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const iframeUrl = splat.embedUrl.includes('/embed/')
+    ? splat.embedUrl.replace('/embed/', '/s?id=')
+    : splat.embedUrl;
 
   useEffect(() => { setLoaded(false); }, [splat.id]);
 
@@ -32,7 +35,7 @@ export function SplatViewer({ splat, onClose, onNext, onPrev }: Props) {
   };
 
   const copy = () => {
-    navigator.clipboard.writeText(splat.embedUrl);
+    navigator.clipboard.writeText(iframeUrl);
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   };
 
@@ -56,7 +59,7 @@ export function SplatViewer({ splat, onClose, onNext, onPrev }: Props) {
         <div className="splat-body">
           {!loaded && <div className="splat-spin"><div className="splat-ring"/><p>Loading 3D scene…</p></div>}
           <iframe
-            src={splat.embedUrl}
+            src={iframeUrl}
             title={splat.title}
             allow="fullscreen; xr-spatial-tracking"
             allowFullScreen
