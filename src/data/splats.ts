@@ -9,6 +9,14 @@ export interface SplatEntry {
   category: string;
 }
 
+const SUPER_SPLAT_EMBED_REGEX = /https?:\/\/superspl\.at\/embed\/([^/?#]+)/i;
+
+const normalizeSuperSplatEmbedUrl = (url: string, id: string): string => {
+  const match = url.match(SUPER_SPLAT_EMBED_REGEX);
+  if (match) return `https://superspl.at/s?id=${match[1] || id}`;
+  return url;
+};
+
 // Nature-focused splats only
 export const SPLATS: SplatEntry[] = [
   { id: '7a475d38', title: 'Winter Garden Jastrzębia Góra Poland', embedUrl: 'https://superspl.at/embed/7a475d38', sceneUrl: 'https://superspl.at/scene/7a475d38', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/7a475d38/v1/xl.webp', tags: ['garden','winter','poland','nature','outdoor','greenhouse'], keywords: ['greenhouse','botanical','snow','cold','europe'], category: 'nature' },
@@ -35,6 +43,9 @@ export const SPLATS: SplatEntry[] = [
   { id: '6150b18c', title: 'Udaipur Sunset', embedUrl: 'https://superspl.at/embed/6150b18c', sceneUrl: 'https://superspl.at/scene/6150b18c', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/6150b18c/v1/xl.webp', tags: ['sunset','nature','india','landscape','city'], keywords: ['udaipur','sunset','lake','rajasthan','golden'], category: 'nature' },
   { id: 'df38a05c', title: 'Crego Park Lansing', embedUrl: 'https://superspl.at/embed/df38a05c', sceneUrl: 'https://superspl.at/scene/df38a05c', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/df38a05c/v1/xl.webp', tags: ['park','nature','trees','outdoor','green'], keywords: ['crego','park','lansing','michigan','garden'], category: 'nature' },
   { id: '6e7334bc', title: 'Quarantine Bay - 6 Caves', embedUrl: 'https://superspl.at/embed/6e7334bc', sceneUrl: 'https://superspl.at/scene/6e7334bc', thumbnail: 'https://s3-eu-west-1.amazonaws.com/images.playcanvas.com/splat/6e7334bc/v1/xl.webp', tags: ['cave','bay','nature','coastal','ocean'], keywords: ['quarantine','bay','caves','rock','sea'], category: 'nature' },
-];
+].map((splat) => ({
+  ...splat,
+  embedUrl: normalizeSuperSplatEmbedUrl(splat.embedUrl, splat.id),
+}));
 
 export const SPLAT_MAP = new Map(SPLATS.map(s => [s.id, s]));
