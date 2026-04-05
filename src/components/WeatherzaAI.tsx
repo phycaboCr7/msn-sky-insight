@@ -1849,6 +1849,20 @@ const streamFromAI = async (
                   {msg.role === "assistant" ? (
                     <div ref={msg === messages[messages.length - 1] ? lastMessageRef : undefined}>
                       <MessageContent content={msg.content} isTyping={msg.isTyping} onOpenPyodide={openPyodideGraph} chatFont={chatFont.family} isPro={proMode} />
+                      {msg.splats && msg.splats.length > 0 && (
+                        <div className="splat-suggest-row">
+                          <div className="splat-suggest-label">◈ Related 3D scenes</div>
+                          <div className="splat-suggest-cards">
+                            {msg.splats.map((s, idx) => (
+                              <button key={s.id} className="splat-suggest-card" onClick={() => { setCurrentSplatList(msg.splats!); setSplatIndex(idx); setActiveSplat(s); }}>
+                                {s.thumbnail && <img src={s.thumbnail} alt={s.title} className="splat-suggest-thumb" />}
+                                <span className="splat-suggest-name">{s.title}</span>
+                                <span className="splat-suggest-cta">View 3D ↗</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div>
