@@ -1028,3 +1028,160 @@ pre::-webkit-scrollbar-track, code::-webkit-scrollbar-track {
 .maplibregl-ctrl-attrib a {
   color: hsl(28 100% 60% / 0.7) !important;
 }
+
+/* ─── Math Renderer ─── */
+.math-block-wrap {
+  background: hsl(220 20% 12%);
+  border: 1px solid hsl(220 15% 22%);
+  border-left: 3px solid hsl(220 80% 60%);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 20px 18px;
+  margin: 12px 0;
+  overflow-x: auto;
+  page-break-inside: avoid;
+}
+.math-label {
+  font-size: 10px;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: hsl(220 40% 60%);
+  display: block;
+  margin-bottom: 8px;
+}
+.math-inline-wrap {
+  display: inline-block;
+  background: hsl(220 20% 14%);
+  border: 1px solid hsl(220 15% 22%);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin: 0 2px;
+}
+
+/* ─── Print / PDF fixes ─── */
+@media print {
+  .katex { font-size: 1em !important; }
+  .katex .frac-line { border-bottom-width: 0.08em !important; display: block !important; }
+  .katex .mfrac { display: inline-table !important; vertical-align: middle !important; }
+  .katex .mfrac > span { display: table-row !important; text-align: center !important; }
+  .katex-display { overflow: visible !important; page-break-inside: avoid; }
+  .math-block-wrap { page-break-inside: avoid; overflow: visible; }
+  table { table-layout: fixed; width: 100%; }
+  td:nth-child(3) { min-width: 180px; overflow: visible; white-space: normal; }
+}
+
+/* ─── Thinking Indicator ─── */
+.think-wrap {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: hsl(220 20% 9%); border: 1px solid hsl(220 15% 18%);
+  border-radius: 999px; padding: 8px 16px;
+  margin: 8px 0;
+}
+@keyframes thinkIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
+.think-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  animation: thinkBreathe 1.3s ease-in-out infinite;
+}
+@keyframes thinkBreathe { 0%,100%{ opacity:1; transform:scale(1) } 50%{ opacity:.3; transform:scale(.8) } }
+.think-text {
+  font-size: 13px; font-family: monospace;
+  background-clip: text; -webkit-background-clip: text;
+  color: transparent; background-size: 200% 100%;
+  animation: thinkShimmer 2.5s linear infinite;
+  transition: opacity .28s ease, transform .28s ease;
+  white-space: nowrap;
+}
+@keyframes thinkShimmer { from { background-position: 200% center } to { background-position: -200% center } }
+
+/* ─── Splat Viewer ─── */
+.splat-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; animation: splatFadeIn .2s ease;
+}
+@keyframes splatFadeIn { from { opacity: 0 } to { opacity: 1 } }
+.splat-panel {
+  background: hsl(220 20% 9%); border: 1px solid hsl(220 15% 20%);
+  border-radius: 14px; overflow: hidden;
+  display: flex; flex-direction: column;
+  width: 100%; max-width: 900px; max-height: 90vh;
+  box-shadow: 0 40px 100px rgba(0,0,0,.7);
+  animation: splatSlideUp .28s cubic-bezier(.16,1,.3,1);
+}
+@keyframes splatSlideUp {
+  from { transform: translateY(24px) scale(.96); opacity: 0 }
+  to   { transform: translateY(0) scale(1); opacity: 1 }
+}
+.splat-fs { max-width: 100vw; max-height: 100vh; border-radius: 0; }
+.splat-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 14px; background: hsl(220 20% 7%);
+  border-bottom: 1px solid hsl(220 15% 15%); gap: 10px;
+}
+.splat-head-left { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+.splat-badge {
+  font-size: 10px; font-family: monospace; text-transform: uppercase;
+  letter-spacing: 1.5px; padding: 2px 8px; border-radius: 20px;
+  background: hsl(200 80% 18%); color: hsl(200 80% 70%);
+  border: 1px solid hsl(200 60% 28%); flex-shrink: 0;
+}
+.splat-title {
+  font-size: 13px; font-weight: 600; color: hsl(210 40% 98%);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.splat-btns { display: flex; gap: 5px; flex-shrink: 0; }
+.splat-btns button, .splat-btns a {
+  width: 30px; height: 30px; border-radius: 6px; cursor: pointer;
+  background: hsl(220 15% 15%); border: 1px solid hsl(220 15% 22%);
+  color: hsl(220 10% 65%); font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: .15s; text-decoration: none;
+}
+.splat-btns button:hover, .splat-btns a:hover {
+  background: hsl(220 15% 22%); color: hsl(210 40% 98%);
+  border-color: hsl(200 70% 50%);
+}
+.splat-body {
+  position: relative; flex: 1;
+  aspect-ratio: 16/9; min-height: 280px;
+  background: hsl(220 20% 6%);
+}
+.splat-spin {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+  color: hsl(220 10% 50%); font-size: 13px;
+}
+.splat-ring {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid hsl(220 15% 20%);
+  border-top-color: hsl(210 80% 60%);
+  animation: splatSpin 1s linear infinite;
+}
+@keyframes splatSpin { to { transform: rotate(360deg) } }
+.splat-hint {
+  padding: 7px 14px; font-size: 11px; color: hsl(220 10% 42%);
+  background: hsl(220 20% 7%); border-top: 1px solid hsl(220 15% 13%);
+}
+.splat-hint-mob { display: none; }
+@media (pointer: coarse) { .splat-hint-desk { display: none; } .splat-hint-mob { display: inline; } }
+@media (max-width: 600px) {
+  .splat-overlay { align-items: flex-end; padding: 0; }
+  .splat-panel { border-radius: 14px 14px 0 0; max-height: 92vh; }
+}
+.splat-suggest-row { margin-top: 12px; }
+.splat-suggest-label {
+  font-size: 11px; font-family: monospace; text-transform: uppercase;
+  letter-spacing: 1.5px; color: hsl(200 60% 55%); margin-bottom: 8px;
+}
+.splat-suggest-cards { display: flex; gap: 9px; flex-wrap: wrap; }
+.splat-suggest-card {
+  background: hsl(220 20% 10%); border: 1px solid hsl(220 15% 18%);
+  border-radius: 8px; overflow: hidden; cursor: pointer;
+  width: 150px; display: flex; flex-direction: column;
+  transition: .18s; padding: 0; text-align: left;
+}
+.splat-suggest-card:hover { border-color: hsl(200 70% 50%); transform: translateY(-2px); }
+.splat-suggest-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: hsl(220 20% 8%); }
+.splat-suggest-name { font-size: 11px; font-weight: 600; color: hsl(210 40% 98%); padding: 7px 9px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.splat-suggest-cta  { font-size: 10px; color: hsl(200 60% 55%); padding: 2px 9px 8px; font-family: monospace; }
