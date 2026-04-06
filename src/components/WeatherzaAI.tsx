@@ -1867,7 +1867,7 @@ const streamFromAI = async (
             </div>
           </div>
         )}
-        <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh' }}>
+        <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '82vh', minHeight: '640px', maxHeight: '82vh' }}>
         <div className="flex gap-1 px-1 pb-3">
           {([
             { key: 'weather', label: 'Weather', icon: CloudSun },
