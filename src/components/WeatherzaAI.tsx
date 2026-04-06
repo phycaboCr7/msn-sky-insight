@@ -1384,10 +1384,7 @@ const streamFromAI = async (
       // Parse SHOW_SPLAT tags
       const splatTagMatches = [...answer.matchAll(/\[SHOW_SPLAT:\s*([^\]]+)\]/g)];
       const taggedSplats = splatTagMatches
-        .map(m => {
-          const { SPLATS } = require('@/data/splats');
-          return SPLATS.find((s: any) => s.title.toLowerCase().includes(m[1].trim().toLowerCase()));
-        })
+        .map(m => SPLATS.find(s => s.title.toLowerCase().includes(m[1].trim().toLowerCase())))
         .filter(Boolean) as SplatEntry[];
       const cleanAnswer = answer.replace(/\[SHOW_SPLAT:[^\]]+\]/g, '').trim();
       // Run splat matcher
@@ -1485,10 +1482,7 @@ const streamFromAI = async (
     // Parse SHOW_SPLAT tags from streamed response
     const streamSplatMatches = [...assistantText.matchAll(/\[SHOW_SPLAT:\s*([^\]]+)\]/g)];
     const streamTaggedSplats = streamSplatMatches
-      .map(m => {
-        const { SPLATS } = require('@/data/splats');
-        return SPLATS.find((s: any) => s.title.toLowerCase().includes(m[1].trim().toLowerCase()));
-      })
+      .map(m => SPLATS.find(s => s.title.toLowerCase().includes(m[1].trim().toLowerCase())))
       .filter(Boolean) as SplatEntry[];
     const { splats: matchedSplats } = findMatchingSplats(userQ, cleanedFinal, mode);
     const allFinalSplats = [...streamTaggedSplats, ...matchedSplats]
