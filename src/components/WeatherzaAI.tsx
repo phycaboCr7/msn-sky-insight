@@ -65,6 +65,22 @@ const PROMPT_COUNT_KEY = 'weatherza-prompt-count';
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY = 1000;
 
+function detectModeFromMessage(text: string): 'weather' | 'code' | 'math' | 'conversation' {
+  const lower = text.toLowerCase();
+  const codeKw = ['code','script','function','python','javascript','typescript','algorithm','debug','error','compile','class','loop','array','api','sql','html','css','react','node','npm','git','bash','terminal','programming','syntax','variable','import','library','framework'];
+  const mathKw = ['equation','formula','calculate','solve','integral','derivative','matrix','vector','probability','statistics','theorem','proof','algebra','calculus','trigonometry','sine','cosine','tangent','logarithm','exponential','polynomial','graph','plot','parabola','coefficient'];
+  const weatherKw = ['weather','temperature','rain','humidity','wind','forecast','uv','aqi','pressure','celsius','fahrenheit','storm','cloud','sunny','snow','fog','mist'];
+
+  const codeScore = codeKw.filter(k => lower.includes(k)).length;
+  const mathScore = mathKw.filter(k => lower.includes(k)).length;
+  const weatherScore = weatherKw.filter(k => lower.includes(k)).length;
+
+  if (weatherScore > 0 && weatherScore >= codeScore && weatherScore >= mathScore) return 'weather';
+  if (codeScore > mathScore && codeScore > 0) return 'code';
+  if (mathScore > 0) return 'math';
+  return 'conversation';
+}
+
 // Lazy load PyodideRunner for graph visualization
 const PyodideRunner = lazy(() => import("@/components/python-visualizer"));
 
