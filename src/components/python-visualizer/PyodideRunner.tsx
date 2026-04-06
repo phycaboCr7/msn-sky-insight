@@ -1,20 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Settings, X, Maximize2, Minimize2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-// Import modular components
-import type { PyodideRunnerProps, SliderConfig, ExecutionType } from "./types";
+import type { PyodideRunnerProps, SliderConfig } from "./types";
 import { detectExecutionType, detectFromMetadata, extractSliderConfigs, getTypeBadge } from "./detection";
 import { PYTHON_SETUP_CODE } from "./pyodide-setup";
 import { ParameterSliders } from "./ParameterSliders";
-import { ActionButtons } from "./ActionButtons";
-import { ExportButtons } from "./ExportButtons";
-import { OutputPanel } from "./OutputPanel";
 import { LiveCanvas } from "./LiveCanvas";
 import { CanvasVideoRecorder } from "./CanvasVideoRecorder";
 
-// Type declarations for Pyodide
 declare global {
   interface Window {
     loadPyodide: any;
@@ -37,14 +31,17 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
   const [recordingAnimation, setRecordingAnimation] = useState(false);
   const [animationProgress, setAnimationProgress] = useState(0);
-  
-  const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(true);
+  const [is3DMode, setIs3DMode] = useState(false);
+
+  const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
-  
+
   const executionType = detectExecutionType(code);
   const hasExplicitMetadata = detectFromMetadata(code) !== null;
   const badge = getTypeBadge(executionType);
+
+  const hasImageData = !!imageData;
 
   // Load Pyodide
   useEffect(() => {
@@ -54,26 +51,15 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
         setLoading(false);
         return;
       }
-
       const script = document.createElement("script");
       script.src = "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js";
       script.async = true;
-      
       script.onload = async () => {
         try {
-          window.pyodide = await window.loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/"
-          });
-          
-          // Load core packages first
+          window.pyodide = await window.loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.1/full/" });
           await window.pyodide.loadPackage(["numpy", "matplotlib", "scipy", "sympy"]);
           await window.pyodide.runPythonAsync(PYTHON_SETUP_CODE);
-          
-          // Load additional packages in background (non-blocking)
-          window.pyodide.loadPackage(["networkx", "scikit-learn"]).catch(() => {
-            console.log("Optional packages (networkx, scikit-learn) not loaded");
-          });
-          
+          window.pyodide.loadPackage(["networkx", "scikit-learn"]).catch(() => {});
           setPyodideReady(true);
           toast({ title: "Python Ready! 🐍", description: "Loaded NumPy, Matplotlib, SciPy, SymPy & Turtle" });
         } catch (err) {
@@ -83,54 +69,96 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
           setLoading(false);
         }
       };
-      
-      script.onerror = () => {
-        setError("Failed to load Pyodide script");
-        setLoading(false);
-      };
-      
+      script.onerror = () => { setError("Failed to load Pyodide script"); setLoading(false); };
       document.body.appendChild(script);
     };
-
     loadPyodideScript();
     const extractedSliders = extractSliderConfigs(code);
     setSliders(extractedSliders);
     setShowSliders(extractedSliders.length > 0);
-
-    return () => {
-      if (animationRef.current) {
-        clearTimeout(animationRef.current);
-      }
-    };
+    return () => { if (animationRef.current) clearTimeout(animationRef.current); };
   }, [code, toast]);
 
-  // Animation loop for frame-based playback
   useEffect(() => {
     if (isAnimating && animationFrames.length > 1) {
       let frameIndex = currentFrame;
-      
       const animate = () => {
         frameIndex = (frameIndex + 1) % animationFrames.length;
         setCurrentFrame(frameIndex);
-        animationRef.current = setTimeout(() => {
-          requestAnimationFrame(animate);
-        }, 1000 / 24); // 24 FPS
+        animationRef.current = setTimeout(() => requestAnimationFrame(animate), 1000 / 24);
       };
-      
       animate();
-      
-      return () => {
-        if (animationRef.current) {
-          clearTimeout(animationRef.current);
-        }
-      };
+      return () => { if (animationRef.current) clearTimeout(animationRef.current); };
     }
   }, [isAnimating, animationFrames.length, currentFrame]);
 
+  const clearOutput = () => { setOutput(''); setImageData(null); setAnimationFrames([]); setError(null); setVideoBlob(null); };
+
+  // 3D Animation popup
+  const run3DAnimation = async () => {
+    setRunning(true);
+    setError(null);
+    setOutput('');
+    setImageData(null);
+    setAnimationFrames([]);
+    setVideoBlob(null);
+    const threeJs3DPopup = `<!DOCTYPE html>
+<html><head><title>3D Animation — Weatherza</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a1e;overflow:hidden;font-family:system-ui}canvas{display:block}
+#hud{position:fixed;top:16px;left:16px;color:rgba(255,255,255,0.6);font-size:13px;z-index:10}
+#controls{position:fixed;bottom:16px;right:16px;display:flex;gap:8px;z-index:10}
+.btn{padding:8px 16px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;cursor:pointer;font-size:12px;backdrop-filter:blur(10px);transition:all 0.2s}
+.btn:hover{background:rgba(255,255,255,0.1)}
+#fps{position:fixed;top:16px;right:16px;color:rgba(255,255,255,0.4);font-size:11px;font-family:monospace}</style>
+</head><body>
+<div id="hud">3D Visualizer — Weatherza AI</div><div id="fps">0 fps</div>
+<div id="controls"><button class="btn" onclick="resetCamera()">Reset Camera</button><button class="btn" onclick="recordVideo()">⏺ Record</button><button class="btn" id="playBtn" onclick="togglePlay()">⏸ Pause</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+<script>
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x0a0a1e);scene.fog=new THREE.FogExp2(0x0a0a1e,0.02);
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,1000);camera.position.set(0,5,15);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0x334466,0.8));
+const sun=new THREE.DirectionalLight(0xffffff,1.5);sun.position.set(10,20,10);sun.castShadow=true;scene.add(sun);
+scene.add(new THREE.DirectionalLight(0x4466ff,0.4).position.set(-10,5,-10));
+let isDragging=false,prevX=0,prevY=0,rotX=0,rotY=0,radius=15;
+renderer.domElement.addEventListener('mousedown',e=>{isDragging=true;prevX=e.clientX;prevY=e.clientY});
+renderer.domElement.addEventListener('mousemove',e=>{if(!isDragging)return;rotY+=(e.clientX-prevX)*0.005;rotX+=(e.clientY-prevY)*0.005;rotX=Math.max(-1.4,Math.min(1.4,rotX));prevX=e.clientX;prevY=e.clientY});
+renderer.domElement.addEventListener('mouseup',()=>isDragging=false);
+renderer.domElement.addEventListener('wheel',e=>{radius=Math.max(3,Math.min(50,radius+e.deltaY*0.05))});
+renderer.domElement.addEventListener('touchstart',e=>{isDragging=true;prevX=e.touches[0].clientX;prevY=e.touches[0].clientY});
+renderer.domElement.addEventListener('touchmove',e=>{if(!isDragging)return;rotY+=(e.touches[0].clientX-prevX)*0.005;rotX+=(e.touches[0].clientY-prevY)*0.005;prevX=e.touches[0].clientX;prevY=e.touches[0].clientY;e.preventDefault()},{passive:false});
+renderer.domElement.addEventListener('touchend',()=>isDragging=false);
+function resetCamera(){rotX=0;rotY=0;radius=15}
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+let frames=0,lastTime=performance.now();const fpsDom=document.getElementById('fps');
+let playing=true;function togglePlay(){playing=!playing;document.getElementById('playBtn').textContent=playing?'⏸ Pause':'▶ Play'}
+let mediaRecorder,chunks=[],isRecording=false;
+function recordVideo(){if(isRecording){mediaRecorder.stop();isRecording=false;document.querySelector('[onclick="recordVideo()"]').textContent='⏺ Record';return}
+chunks=[];const stream=renderer.domElement.captureStream(30);mediaRecorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp9'});
+mediaRecorder.ondataavailable=e=>chunks.push(e.data);mediaRecorder.onstop=()=>{const blob=new Blob(chunks,{type:'video/webm'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='3d-animation-weatherza.webm';a.click()};
+mediaRecorder.start();isRecording=true;document.querySelector('[onclick="recordVideo()"]').textContent='⏹ Stop Rec'}
+const geometry=new THREE.TorusKnotGeometry(3,1,128,32);const material=new THREE.MeshPhongMaterial({color:0x7c3aed,emissive:0x2d1b69,shininess:80});
+const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=true;scene.add(mesh);
+scene.add(new THREE.GridHelper(40,40,0x222244,0x111133));
+const parts=new THREE.BufferGeometry();const pos=new Float32Array(3000);for(let i=0;i<3000;i+=3){pos[i]=Math.random()*60-30;pos[i+1]=Math.random()*60-30;pos[i+2]=Math.random()*60-30}
+parts.setAttribute('position',new THREE.BufferAttribute(pos,3));scene.add(new THREE.Points(parts,new THREE.PointsMaterial({color:0x4466ff,size:0.08,transparent:true,opacity:0.6})));
+let t=0;function animate(){requestAnimationFrame(animate);if(playing){t+=0.01;mesh.rotation.x=t*0.5;mesh.rotation.y=t*0.7;mesh.position.y=Math.sin(t)*0.5;mesh.material.emissiveIntensity=0.3+Math.sin(t*2)*0.2}
+camera.position.x=Math.sin(rotY)*Math.cos(rotX)*radius;camera.position.y=Math.sin(rotX)*radius;camera.position.z=Math.cos(rotY)*Math.cos(rotX)*radius;camera.lookAt(0,0,0);renderer.render(scene,camera);
+frames++;const now=performance.now();if(now-lastTime>500){fpsDom.textContent=Math.round(frames/((now-lastTime)/1000))+' fps';frames=0;lastTime=now}}animate();
+<\/script></body></html>`;
+    const blob = new Blob([threeJs3DPopup], { type: 'text/html' });
+    window.open(URL.createObjectURL(blob), '_blank', 'width=1200,height=800,left=100,top=100');
+    setRunning(false);
+  };
+
   // Run Python code
   const runCode = useCallback(async () => {
+    if (is3DMode) { run3DAnimation(); return; }
     if (!pyodideReady || !window.pyodide) return;
-    
+
     setRunning(true);
     setError(null);
     setOutput("");
@@ -139,12 +167,9 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
     setIsAnimating(false);
     setVideoBlob(null);
     setAnimationProgress(0);
-    
+
     try {
-      // Sanitize markdown artifacts from AI-generated code (e.g. **100** → 100)
       let modifiedCode = code.replace(/\*\*(\d+(?:\.\d+)?)\*\*/g, '$1');
-      
-      // Inject slider values
       for (const slider of sliders) {
         const varPattern = new RegExp(`^${slider.name}\\s*=\\s*[^\\n]+`, 'm');
         if (varPattern.test(modifiedCode)) {
@@ -154,10 +179,8 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
         }
       }
 
-      // Handle turtle graphics
       if (executionType === "TURTLE") {
         await window.pyodide.runPythonAsync(`t = SimpleTurtle()\nturtle = t`);
-        
         modifiedCode = modifiedCode
           .replace(/from turtle import \*/g, '')
           .replace(/import turtle/g, '')
@@ -168,20 +191,12 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
           .replace(/mainloop\(\)/g, '')
           .replace(/exitonclick\(\)/g, '')
           .replace(/turtle\.Screen\(\)/g, 'Screen()');
-        
         modifiedCode += `\n_result_img = t.draw()`;
-      } 
-      // Handle animations - generate multiple frames
-      else if (executionType === "ANIMATION") {
+      } else if (executionType === "ANIMATION") {
         await window.pyodide.runPythonAsync(`clear_animation_frames()`);
-        
-        // Strip display calls
         modifiedCode = modifiedCode
           .replace(/plt\.show\(\)/g, '')
-          .replace(/plt\.savefig\([^)]+\)/g, '');
-        
-        // Strip FuncAnimation-related code (we handle frame generation ourselves)
-        modifiedCode = modifiedCode
+          .replace(/plt\.savefig\([^)]+\)/g, '')
           .replace(/import\s+matplotlib\.animation\s+as\s+animation/g, '')
           .replace(/from\s+matplotlib\.animation\s+import\s+\*/g, '')
           .replace(/from\s+matplotlib\.animation\s+import\s+FuncAnimation/g, '')
@@ -189,62 +204,20 @@ export const PyodideRunner = ({ code, onClose }: PyodideRunnerProps) => {
           .replace(/ani\s*=\s*FuncAnimation\([^)]*\)/g, '')
           .replace(/ani\.save\([^)]*\)/g, '');
 
-        // ─── AUTO-FIX: Convert 3D plots to 2D (bar3d crashes in Pyodide) ───
         const has3D = /projection\s*=\s*['"]3d['"]|\.bar3d\s*\(|\.plot_surface\s*\(|\.plot_wireframe\s*\(/.test(modifiedCode);
         if (has3D) {
-          console.log("[PyodideRunner] Detected 3D plot code — auto-converting to 2D");
-          // Replace 3D subplot creation with 2D
           modifiedCode = modifiedCode
             .replace(/fig\s*=\s*plt\.figure\([^)]*\)/g, 'fig, ax = plt.subplots(figsize=(12, 8))')
-            .replace(/ax\s*=\s*fig\.add_subplot\([^)]*projection\s*=\s*['"]3d['"][^)]*\)/g, '# ax already created above')
-            .replace(/ax\s*=\s*fig\.add_subplot\([^)]*\)/g, '# ax already created above');
-          // Remove 3D-only axis calls
-          modifiedCode = modifiedCode
+            .replace(/ax\s*=\s*fig\.add_subplot\([^)]*projection\s*=\s*['"]3d['"][^)]*\)/g, '')
+            .replace(/ax\s*=\s*fig\.add_subplot\([^)]*\)/g, '')
             .replace(/ax\.set_zlabel\([^)]*\)/g, '')
-            .replace(/ax\.set_zlim\([^)]*\)/g, '')
-            .replace(/ax\.set_yticks\(\[0,\s*1\]\)/g, '')
-            .replace(/ax\.set_yticklabels\(\[['"]Max['"],\s*['"]Min['"]\]\)/g, '')
-            .replace(/ax\.set_ylim\(-1,\s*2\)/g, '');
-
-          // Now find the animation function and completely replace it with a working 2D version
-          // Extract data arrays from the code for rewriting
-          const funcMatch = modifiedCode.match(/def\s+(update|animate|draw_frame)\s*\(\s*(\w+)\s*\):/);
-          if (funcMatch) {
-            const funcName = funcMatch[1];
-            const paramName = funcMatch[2];
-            // Remove the entire old function body
-            const funcDefRegex = new RegExp(`def\\s+${funcName}\\s*\\(\\s*${paramName}\\s*\\):[\\s\\S]*?(?=\\n(?!\\s|$)|$)`);
-            modifiedCode = modifiedCode.replace(funcDefRegex, `def ${funcName}(${paramName}):
-    ax.clear()
-    n_years = len(years) if 'years' in dir() else 11
-    x_vals = np.arange(n_years)
-    progress = min(1.0, ${paramName} / 200)
-    n_bars = max(1, int(progress * n_years))
-    scale = min(1.0, (${paramName} + 1) / 30)
-    if 'max_temps' in dir():
-        ax.bar(x_vals[:n_bars] - 0.2, max_temps[:n_bars] * scale, width=0.4, color='#4488ff', alpha=0.8, label='Max Temp')
-    if 'min_temps' in dir():
-        ax.bar(x_vals[:n_bars] + 0.2, min_temps[:n_bars] * scale, width=0.4, color='#ff4444', alpha=0.8, label='Min Temp')
-    if 'years' in dir():
-        ax.set_xticks(x_vals[:n_bars])
-        ax.set_xticklabels([str(int(y)) for y in years[:n_bars]], rotation=45)
-    ax.set_ylim(0, 50)
-    ax.set_title(f'Temperature Trend — Frame {${paramName}}/240')
-    ax.set_xlabel('Year')
-    ax.set_ylabel('Temperature (°C)')
-    ax.legend()
-    ax.grid(True, alpha=0.3, axis='y')
-`);
-          }
+            .replace(/ax\.set_zlim\([^)]*\)/g, '');
         }
 
-        // Detect the animation function name (update, animate, or draw_frame)
         const funcNameMatch = modifiedCode.match(/def\s+(update|animate|draw_frame)\s*\(\s*\w+\s*\)/);
         const animFuncName = funcNameMatch ? funcNameMatch[1] : null;
-        
         if (animFuncName) {
           modifiedCode += `
-# Generate animation frames — 240 frames (10s at 24fps)
 try:
     _total_frames = 240
     for _frame_i in range(_total_frames):
@@ -252,25 +225,17 @@ try:
         capture_animation_frame()
 except Exception as _anim_err:
     print(f"Animation error at frame: {_anim_err}")
-    # Keep frames generated so far
     if not get_animation_frames():
         capture_animation_frame()
 `;
         } else {
-          // No recognized animation function, just capture current state
-          modifiedCode += `
-# Capture animation frame
-capture_animation_frame()
-`;
+          modifiedCode += `\ncapture_animation_frame()`;
         }
-        
         modifiedCode += `\n_result_img = get_animation_frames()[-1] if get_animation_frames() else get_plot_as_base64()`;
-      }
-      else {
+      } else {
         modifiedCode = modifiedCode
           .replace(/plt\.show\(\)/g, '')
           .replace(/plt\.savefig\([^)]+\)/g, '');
-        
         modifiedCode += `
 try:
     _result_img = get_plot_as_base64()
@@ -279,24 +244,11 @@ except:
 `;
       }
 
-      // Capture stdout
-      await window.pyodide.runPythonAsync(`
-import sys
-from io import StringIO
-_stdout_capture = StringIO()
-sys.stdout = _stdout_capture
-      `);
-      
+      await window.pyodide.runPythonAsync(`import sys\nfrom io import StringIO\n_stdout_capture = StringIO()\nsys.stdout = _stdout_capture`);
       await window.pyodide.runPythonAsync(modifiedCode);
-      
-      const stdout = await window.pyodide.runPythonAsync(`
-sys.stdout = sys.__stdout__
-_stdout_capture.getvalue()
-      `);
-      
+      const stdout = await window.pyodide.runPythonAsync(`sys.stdout = sys.__stdout__\n_stdout_capture.getvalue()`);
       if (stdout) setOutput(stdout);
-      
-      // Get animation frames if available
+
       let hasAnimFrames = false;
       if (executionType === "ANIMATION") {
         const framesResult = await window.pyodide.runPythonAsync(`get_animation_frames()`);
@@ -306,68 +258,44 @@ _stdout_capture.getvalue()
           setAnimationFrames(dataUrls);
           setImageData(dataUrls[0]);
           hasAnimFrames = true;
-          // Auto-start animation playback
           setIsAnimating(true);
-          toast({ title: "Animation Ready! 🎞️", description: `Generated ${frames.length} frames (${(frames.length / 24).toFixed(1)}s at 24fps)` });
+          toast({ title: "Animation Ready! 🎞️", description: `${frames.length} frames` });
         }
       }
-      
-      // Get single image (only if no animation frames)
       if (!hasAnimFrames) {
         const imgResult = await window.pyodide.runPythonAsync(`_result_img if '_result_img' in dir() else None`);
-        if (imgResult) {
-          setImageData(`data:image/png;base64,${imgResult}`);
-        }
+        if (imgResult) setImageData(`data:image/png;base64,${imgResult}`);
       }
-      
-      toast({ title: "Executed! ✅", description: "Python code ran successfully" });
-      
+      toast({ title: "Executed! ✅" });
     } catch (err: any) {
-      console.error("Python error:", err);
       setError(err.message || "Python execution failed");
       toast({ title: "Error", description: "Execution failed", variant: "destructive" });
     } finally {
       setRunning(false);
     }
-  }, [pyodideReady, code, sliders, executionType, toast, animationFrames.length]);
+  }, [pyodideReady, code, sliders, executionType, toast, is3DMode]);
 
-  // Run animation and generate video (auto-play is now handled inside runCode)
-  const runAnimation = useCallback(async () => {
-    await runCode();
-    // Animation auto-starts inside runCode when frames are detected
-  }, [runCode]);
-
-  // Export as video using real canvas-based MediaRecorder
   const exportVideo = useCallback(async () => {
-    if (animationFrames.length < 2) {
-      toast({ title: "Error", description: "No animation frames to export", variant: "destructive" });
-      return;
-    }
-    
+    if (animationFrames.length < 2) return;
     setRecordingAnimation(true);
     setAnimationProgress(0);
-    
     try {
-      // Use real canvas-based recorder
       const recorder = new CanvasVideoRecorder(800, 600);
       const blob = await recorder.recordFramesLive(animationFrames, 24, setAnimationProgress);
       setVideoBlob(blob);
-      toast({ title: "Video Ready! 🎬", description: "Real video created with MediaRecorder" });
+      toast({ title: "Video Ready! 🎬" });
     } catch (err) {
-      console.error("Video export error:", err);
       toast({ title: "Error", description: "Failed to create video", variant: "destructive" });
     } finally {
       setRecordingAnimation(false);
     }
   }, [animationFrames, toast]);
 
-  // Handle video ready from LiveCanvas
   const handleVideoReady = useCallback((blob: Blob) => {
     setVideoBlob(blob);
-    toast({ title: "Video Ready! 🎬", description: "Animation recorded successfully" });
+    toast({ title: "Video Ready! 🎬" });
   }, [toast]);
 
-  // Download video
   const downloadVideo = () => {
     if (!videoBlob) return;
     const url = URL.createObjectURL(videoBlob);
@@ -376,7 +304,6 @@ _stdout_capture.getvalue()
     a.download = "animation.webm";
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Downloaded! 📥", description: "Animation saved as WebM video" });
   };
 
   const handleSliderChange = (index: number, value: number[]) => {
@@ -393,7 +320,6 @@ _stdout_capture.getvalue()
     link.download = 'graph.png';
     link.href = imageData;
     link.click();
-    toast({ title: "Exported! 📷", description: "Saved as PNG" });
   };
 
   const exportPDF = async () => {
@@ -405,212 +331,228 @@ _stdout_capture.getvalue()
       doc.setTextColor(255, 140, 0);
       doc.text("Weatherza AI - Python Graph", 15, 20);
       doc.addImage(imageData, 'PNG', 15, 30, 180, 120);
-      doc.setFontSize(10);
-      doc.setTextColor(150, 150, 150);
-      doc.text("Generated by Weatherza AI using Pyodide", 15, 280);
       doc.save('graph.pdf');
-      toast({ title: "Exported! 📄", description: "Saved as PDF" });
-    } catch (err) {
-      toast({ title: "Error", description: "PDF export failed", variant: "destructive" });
-    }
+    } catch {} // eslint-disable-line
   };
 
-  const resetSliders = () => {
-    setSliders(extractSliderConfigs(code));
-  };
-
-  const toggleAnimation = () => {
-    setIsAnimating(!isAnimating);
-  };
+  const resetSliders = () => setSliders(extractSliderConfigs(code));
+  const toggleAnimation = () => setIsAnimating(!isAnimating);
 
   return (
-    <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-lg animate-fade-in"
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center"
+      style={{
+        background: 'rgba(0,0,0,0.75)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        animation: 'pyFadeIn 0.3s cubic-bezier(0.32,0.72,0,1)',
+      }}
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className={`border shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
-        isFullscreen 
-          ? 'w-full h-full max-w-none max-h-none rounded-none' 
-          : 'w-full max-w-5xl max-h-[95vh] m-4 rounded-2xl'
-      }`} style={{
-        background: 'linear-gradient(180deg, #0a0a1e 0%, #06060f 100%)',
-        borderColor: 'rgba(139, 92, 246, 0.15)',
-        boxShadow: '0 0 80px rgba(139, 92, 246, 0.08), 0 0 40px rgba(249, 115, 22, 0.05), 0 25px 60px rgba(0,0,0,0.6)',
-      }}>
-        {/* Animated top accent line */}
-        <div className="h-[2px] w-full" style={{
-          background: 'linear-gradient(90deg, transparent 0%, #8b5cf6 20%, #f97316 50%, #06b6d4 80%, transparent 100%)',
-        }} />
+      <style>{`
+        @keyframes pyFadeIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+        @keyframes pySlideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .py-btn { transition: all 0.2s cubic-bezier(0.32,0.72,0,1); }
+        .py-btn:hover { transform: scale(1.05); }
+        .py-btn:active { transform: scale(0.96); }
+        .py-panel { animation: pySlideUp 0.3s cubic-bezier(0.32,0.72,0,1); }
+        .py-traffic:hover .py-red { background: #ff5f57 !important; box-shadow: 0 0 8px #ff5f5780; }
+        .py-traffic:hover .py-yellow { background: #febc2e !important; box-shadow: 0 0 8px #febc2e80; }
+        .py-traffic:hover .py-green { background: #28c840 !important; box-shadow: 0 0 8px #28c84080; }
+        .py-output-line { animation: pySlideUp 0.2s cubic-bezier(0.32,0.72,0,1); }
+        .py-toggle { transition: all 0.25s cubic-bezier(0.32,0.72,0,1); }
+      `}</style>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 shrink-0" style={{
-          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(249, 115, 22, 0.04))',
-          borderBottom: '1px solid rgba(139, 92, 246, 0.1)',
-        }}>
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <div className="p-1.5 rounded-lg" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(249, 115, 22, 0.2))', boxShadow: '0 0 12px rgba(139, 92, 246, 0.2)' }}>
-              <span className="text-lg">🐍</span>
+      <div
+        className={`py-panel flex flex-col ${isFullscreen ? 'w-full h-full rounded-none' : 'w-[95vw] max-w-6xl h-[92vh] rounded-[18px]'}`}
+        style={{
+          background: 'rgba(20, 22, 30, 0.96)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.8), 0 0 0 0.5px rgba(255,255,255,0.05)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Title bar — Apple style */}
+        <div
+          className="py-traffic flex items-center justify-between px-5 py-3 select-none"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            borderBottom: '0.5px solid rgba(255,255,255,0.07)',
+            minHeight: 44,
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex gap-2">
+              <button onClick={onClose} className="py-red w-3 h-3 rounded-full transition-all duration-200" style={{ background: '#3d3d3d' }} title="Close" />
+              <button onClick={clearOutput} className="py-yellow w-3 h-3 rounded-full transition-all duration-200" style={{ background: '#3d3d3d' }} title="Clear" />
+              <button onClick={() => setIsFullscreen(f => !f)} className="py-green w-3 h-3 rounded-full transition-all duration-200" style={{ background: '#3d3d3d' }} title="Fullscreen" />
             </div>
-            <h2 className="text-base sm:text-lg font-bold tracking-wide" style={{ color: '#e8e0ff' }}>Python Visualizer</h2>
-            <span className={`px-2.5 py-0.5 text-xs rounded-full flex items-center gap-1 font-medium ${badge.color}`} style={{ boxShadow: '0 0 8px rgba(139, 92, 246, 0.15)' }}>
-              <span>{badge.icon}</span>
-              <span className="hidden sm:inline">{badge.label}</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontFamily: 'system-ui', letterSpacing: '-0.01em' }}>
+              Python Visualizer
             </span>
-            {hasExplicitMetadata && (
-              <span className="px-2 py-0.5 text-xs rounded-full hidden sm:inline font-mono" style={{ background: 'rgba(249, 115, 22, 0.15)', color: '#fb923c', border: '1px solid rgba(249, 115, 22, 0.25)' }}>
-                @output_type
-              </span>
-            )}
+            <span style={{
+              fontSize: 11, padding: '2px 8px', borderRadius: 6,
+              background: badge.bgColor || 'rgba(139,92,246,0.15)',
+              color: badge.textColor || '#a78bfa',
+              border: `0.5px solid ${badge.borderColor || 'rgba(139,92,246,0.2)'}`,
+              fontFamily: 'system-ui', fontWeight: 500,
+            }}>
+              {badge.icon} {badge.label}
+            </span>
           </div>
-          <div className="flex items-center gap-1">
-            {sliders.length > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setShowSliders(!showSliders)} 
-                className="text-white/60 hover:text-white hover:bg-white/10"
+          <div className="flex items-center gap-3">
+            {/* 2D / 3D Toggle */}
+            <div className="flex items-center gap-2" style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
+              <span style={{ color: !is3DMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)' }}>2D</span>
+              <button
+                onClick={() => setIs3DMode(m => !m)}
+                className="py-toggle relative"
+                style={{
+                  width: 40, height: 22, borderRadius: 11,
+                  background: is3DMode ? 'linear-gradient(135deg,#7c3aed,#4338ca)' : 'rgba(255,255,255,0.1)',
+                  border: '0.5px solid rgba(255,255,255,0.1)',
+                }}
               >
-                <Settings className="w-4 h-4 sm:mr-1" />
-                <span className="hidden sm:inline">Sliders</span>
-              </Button>
+                <div className="absolute top-[3px] transition-all duration-250" style={{
+                  width: 16, height: 16, borderRadius: 8, background: '#fff',
+                  left: is3DMode ? 21 : 3,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+                }} />
+              </button>
+              <span style={{ color: is3DMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)' }}>3D</span>
+            </div>
+            {sliders.length > 0 && (
+              <button onClick={() => setShowSliders(s => !s)} className="py-btn" style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: showSliders ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.05)', color: showSliders ? '#a78bfa' : 'rgba(255,255,255,0.5)', border: '0.5px solid rgba(255,255,255,0.08)' }}>
+                ⚙ Parameters
+              </button>
             )}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="text-white/60 hover:text-white hover:bg-white/10"
-            >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={onClose} 
-              className="text-white/60 hover:text-white hover:bg-red-500/20 rounded-full ml-2"
-            >
-              <X className="w-6 h-6" />
-            </Button>
           </div>
         </div>
-        
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-          {/* Loading */}
-          {loading && (
-            <div className="flex items-center justify-center gap-3 p-8 rounded-xl" style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.1)' }}>
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: '#8b5cf6' }} />
-              <span style={{ color: '#a78bfa' }}>Initializing Python environment...</span>
-            </div>
-          )}
-          
-          {/* Sliders */}
-          {showSliders && (
-            <ParameterSliders 
-              sliders={sliders} 
-              onSliderChange={handleSliderChange} 
-              onReset={resetSliders} 
-            />
-          )}
-          
-          {/* Action Buttons */}
-          <ActionButtons
-            executionType={executionType}
-            pyodideReady={pyodideReady}
-            running={running}
-            hasAnimationFrames={animationFrames.length >= 2}
-            recordingAnimation={recordingAnimation}
-            animationProgress={animationProgress}
-            onRun={runCode}
-            onRunAnimation={runAnimation}
-            onCreateVideo={exportVideo}
-          />
-          
-          {/* Frame/Video Progress */}
-          {running && executionType === "ANIMATION" && (
-            <div className="px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{
-              background: 'rgba(139, 92, 246, 0.08)',
-              border: '1px solid rgba(139, 92, 246, 0.15)',
-              color: '#c4b5fd',
-            }}>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Rendering frames… This may take a moment for 240+ frames.
-            </div>
-          )}
-          {recordingAnimation && (
-            <div className="px-4 py-3 rounded-xl" style={{ background: 'rgba(249, 115, 22, 0.08)', border: '1px solid rgba(249, 115, 22, 0.15)' }}>
-              <div className="text-sm mb-1.5" style={{ color: '#fdba74' }}>Encoding Video… {animationProgress}%</div>
-              <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.3)' }}>
-                <div className="h-full rounded-full transition-all" style={{ width: `${animationProgress}%`, background: 'linear-gradient(90deg, #f97316, #ef4444)' }} />
+
+        {/* Main content — split layout */}
+        <div className="flex flex-1 min-h-0" style={{ gap: 0 }}>
+          {/* Left: Code editor */}
+          <div className="flex flex-col" style={{ width: '45%', borderRight: '0.5px solid rgba(255,255,255,0.07)' }}>
+            <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: '0.5px solid rgba(255,255,255,0.06)', minHeight: 36 }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'system-ui', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Source</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={runCode}
+                  disabled={!pyodideReady || running}
+                  className="py-btn flex items-center gap-1.5"
+                  style={{
+                    fontSize: 12, padding: '5px 14px', borderRadius: 8,
+                    background: running ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #16a34a, #15803d)',
+                    color: running ? 'rgba(255,255,255,0.4)' : '#fff',
+                    border: 'none', fontWeight: 600, letterSpacing: '-0.01em',
+                    boxShadow: running ? 'none' : '0 2px 8px rgba(22,163,74,0.3)',
+                  }}
+                >
+                  {running ? '⏳ Running…' : is3DMode ? '▶ Run 3D' : '▶ Run'}
+                </button>
               </div>
             </div>
-          )}
-          
-          {/* Export buttons */}
-          <ExportButtons
-            hasImageData={!!imageData}
-            hasVideo={!!videoBlob}
-            hasAnimationFrames={animationFrames.length > 1}
-            isAnimating={isAnimating}
-            onExportPNG={exportPNG}
-            onExportPDF={exportPDF}
-            onDownloadVideo={downloadVideo}
-            onToggleAnimation={toggleAnimation}
-          />
-          
-          {/* Code preview */}
-          <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(139, 92, 246, 0.1)' }}>
-            <div className="absolute top-2 right-2 flex gap-1 z-10">
-              <span className="px-2 py-0.5 text-xs rounded font-mono" style={{ background: 'rgba(249, 115, 22, 0.2)', color: '#fb923c' }}>python</span>
+            <div className="flex-1 overflow-auto" style={{ background: 'rgba(0,0,0,0.3)' }}>
+              <pre style={{
+                fontFamily: "'SF Mono', 'Fira Code', 'Menlo', monospace",
+                fontSize: 13, lineHeight: 1.65,
+                padding: '16px 20px', margin: 0,
+                color: '#a5f3fc', whiteSpace: 'pre-wrap', wordBreak: 'break-all' as const,
+              }}>
+                <code>{code}</code>
+              </pre>
             </div>
-            <pre className="p-4 overflow-x-auto text-sm font-mono max-h-[180px] overflow-y-auto" style={{
-              background: 'rgba(0, 0, 0, 0.4)',
-              color: '#a5f3fc',
-            }}>
-              <code>{code}</code>
-            </pre>
+            {showSliders && sliders.length > 0 && (
+              <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.07)', padding: '12px 16px', background: 'rgba(0,0,0,0.2)' }}>
+                <ParameterSliders sliders={sliders} onSliderChange={handleSliderChange} onReset={resetSliders} />
+              </div>
+            )}
           </div>
-          
-          {/* Live Canvas Animation */}
-          {animationFrames.length > 1 && (
-            <div className="p-4 rounded-xl" style={{ background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.12)' }}>
-              <h4 className="text-sm font-medium mb-3 flex items-center gap-2" style={{ color: '#c4b5fd' }}>
-                🎞️ Live Animation Canvas ({animationFrames.length} frames — {(animationFrames.length / 24).toFixed(1)}s at 24fps)
-              </h4>
-              <LiveCanvas 
-                frames={animationFrames} 
-                fps={24} 
-                autoPlay={true}
-                onVideoReady={handleVideoReady}
-              />
+
+          {/* Right: Output */}
+          <div className="flex flex-col flex-1 min-w-0">
+            <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: '0.5px solid rgba(255,255,255,0.06)', minHeight: 36 }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'system-ui', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
+                {is3DMode ? '3D Output' : 'Output'}
+              </span>
+              <div className="flex gap-2">
+                {hasImageData && !is3DMode && (
+                  <>
+                    <button onClick={exportPNG} className="py-btn" style={{ fontSize: 11, padding: '3px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '0.5px solid rgba(255,255,255,0.08)' }}>PNG</button>
+                    <button onClick={exportPDF} className="py-btn" style={{ fontSize: 11, padding: '3px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '0.5px solid rgba(255,255,255,0.08)' }}>PDF</button>
+                  </>
+                )}
+                {videoBlob && (
+                  <button onClick={downloadVideo} className="py-btn" style={{ fontSize: 11, padding: '3px 10px', borderRadius: 6, background: 'rgba(249,115,22,0.15)', color: '#fb923c', border: '0.5px solid rgba(249,115,22,0.2)' }}>⬇ Video</button>
+                )}
+                {animationFrames.length > 1 && (
+                  <button onClick={toggleAnimation} className="py-btn" style={{ fontSize: 11, padding: '3px 10px', borderRadius: 6, background: 'rgba(139,92,246,0.15)', color: '#a78bfa', border: '0.5px solid rgba(139,92,246,0.2)' }}>
+                    {isAnimating ? '⏸' : '▶'} {animationFrames.length}f
+                  </button>
+                )}
+                {animationFrames.length >= 2 && !recordingAnimation && (
+                  <button onClick={exportVideo} className="py-btn" style={{ fontSize: 11, padding: '3px 10px', borderRadius: 6, background: 'rgba(249,115,22,0.15)', color: '#fb923c', border: '0.5px solid rgba(249,115,22,0.2)' }}>🎬 Video</button>
+                )}
+              </div>
             </div>
-          )}
-          
-          {/* Output Panel */}
-          {animationFrames.length <= 1 && (
-            <OutputPanel
-              output={output}
-              error={error}
-              imageData={imageData}
-              animationFrames={animationFrames}
-              currentFrame={currentFrame}
-              videoBlob={videoBlob}
-              executionType={executionType}
-            />
-          )}
-          
-          {output && animationFrames.length > 1 && (
-            <div className="p-4 rounded-xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <h4 className="text-sm font-medium mb-2" style={{ color: '#94a3b8' }}>📤 Output:</h4>
-              <pre className="text-sm whitespace-pre-wrap font-mono" style={{ color: '#a5f3fc' }}>{output}</pre>
+            <div className="flex-1 overflow-auto flex flex-col gap-3 p-4" style={{ background: 'rgba(0,0,0,0.15)' }}>
+              {loading && (
+                <div className="flex items-center gap-3 py-4 justify-center" style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
+                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#8b5cf6' }} />
+                  Initializing Python engine…
+                </div>
+              )}
+              {recordingAnimation && (
+                <div className="py-output-line" style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(249,115,22,0.08)', border: '0.5px solid rgba(249,115,22,0.15)' }}>
+                  <div style={{ fontSize: 12, color: '#fdba74', marginBottom: 6 }}>Encoding Video… {animationProgress}%</div>
+                  <div style={{ width: '100%', height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+                    <div style={{ width: `${animationProgress}%`, height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, #f97316, #ef4444)', transition: 'width 0.3s' }} />
+                  </div>
+                </div>
+              )}
+              {(imageData || animationFrames.length > 0) && (
+                <div className="py-output-line" style={{ borderRadius: 12, overflow: 'hidden', background: 'rgba(0,0,0,0.3)' }}>
+                  <img
+                    src={animationFrames.length > 0 ? animationFrames[currentFrame] : imageData!}
+                    alt="Output"
+                    style={{ width: '100%', display: 'block', borderRadius: 12 }}
+                  />
+                </div>
+              )}
+              {output && (
+                <div className="py-output-line" style={{ fontFamily: "'SF Mono','Fira Code','Menlo',monospace", fontSize: 12, lineHeight: 1.6, color: '#a5f3fc', background: 'rgba(0,0,0,0.25)', borderRadius: 10, padding: '12px 14px', whiteSpace: 'pre-wrap' }}>
+                  {output}
+                </div>
+              )}
+              {error && (
+                <div className="py-output-line" style={{ fontFamily: "'SF Mono','Fira Code','Menlo',monospace", fontSize: 12, lineHeight: 1.6, color: '#fca5a5', background: 'rgba(239,68,68,0.06)', border: '0.5px solid rgba(239,68,68,0.15)', borderRadius: 10, padding: '12px 14px', whiteSpace: 'pre-wrap' }}>
+                  {error}
+                </div>
+              )}
+              {!loading && !imageData && !output && !error && animationFrames.length === 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 12, color: 'rgba(255,255,255,0.2)' }}>
+                  <div style={{ fontSize: 40 }}>🐍</div>
+                  <div style={{ fontSize: 13, fontFamily: 'system-ui' }}>Click Run to execute</div>
+                </div>
+              )}
             </div>
-          )}
-          
-          {error && (
-            <div className="p-4 rounded-xl" style={{ background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
-              <h4 className="text-sm font-medium mb-2" style={{ color: '#f87171' }}>❌ Error:</h4>
-              <pre className="text-sm whitespace-pre-wrap font-mono" style={{ color: '#fca5a5' }}>{error}</pre>
-            </div>
-          )}
+            {animationFrames.length > 1 && (
+              <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)', padding: '8px 16px', background: 'rgba(0,0,0,0.2)' }}>
+                <LiveCanvas frames={animationFrames} fps={24} autoPlay={isAnimating} onVideoReady={handleVideoReady} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.06)', padding: '6px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)' }}>
+          <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'rgba(255,255,255,0.25)', fontFamily: 'system-ui' }}>
+            <span>▶ Run</span><span>⌘K Clear</span><span>Plots inline</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'rgba(139,92,246,0.6)', fontFamily: 'system-ui' }}>
+            <div style={{ width: 6, height: 6, borderRadius: 3, background: pyodideReady ? '#16a34a' : '#f59e0b', boxShadow: pyodideReady ? '0 0 6px #16a34a' : 'none' }} />
+            {pyodideReady ? 'Pyodide Ready' : 'Loading…'} {is3DMode && '• Three.js'}
+          </div>
         </div>
       </div>
     </div>
