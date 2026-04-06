@@ -392,9 +392,9 @@ except:
             </span>
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 6,
-              background: badge.bgColor || 'rgba(139,92,246,0.15)',
-              color: badge.textColor || '#a78bfa',
-              border: `0.5px solid ${badge.borderColor || 'rgba(139,92,246,0.2)'}`,
+              background: 'rgba(139,92,246,0.15)',
+              color: '#a78bfa',
+              border: '0.5px solid rgba(139,92,246,0.2)',
               fontFamily: 'system-ui', fontWeight: 500,
             }}>
               {badge.icon} {badge.label}
