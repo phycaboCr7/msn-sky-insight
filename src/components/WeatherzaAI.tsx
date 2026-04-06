@@ -501,8 +501,14 @@ await micropip.install('\${pkgMatch[1]}')
 
   return (
     <div className="relative group my-3">
-      <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
-        <span className="text-xs text-orange-400 font-mono font-bold">{language || "code"}</span>
+      <div
+        className="flex items-center justify-between px-4 py-2 rounded-t-xl"
+        style={{
+          background: 'rgba(15,16,28,0.98)',
+          borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <span style={{ fontSize: 11, color: '#fb923c', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>{language || "code"}</span>
         <div className="flex gap-1">
           {isPythonGraph && onOpenPyodide && (
             <button
@@ -537,13 +543,27 @@ await micropip.install('\${pkgMatch[1]}')
           <textarea
             value={editableCode}
             onChange={(e) => setEditableCode(e.target.value)}
-            className="w-full bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 font-mono text-sm text-foreground/90 resize-y min-h-[60px] outline-none focus:border-orange-400 border border-transparent"
-            style={{ minHeight: `${Math.max(60, editableCode.split('\n').length * 20 + 16)}px` }}
+            className="w-full p-3 rounded-b-xl overflow-x-auto m-0 font-mono text-sm resize-y min-h-[60px] outline-none focus:border-primary/60 border border-transparent"
+            style={{
+              background: 'linear-gradient(180deg, rgba(15,16,28,0.95) 0%, rgba(10,11,20,0.98) 100%)',
+              borderLeft: '2px solid rgba(139,92,246,0.4)',
+              color: '#a5f3fc',
+              minHeight: `${Math.max(60, editableCode.split('\n').length * 20 + 16)}px`,
+            }}
             spellCheck={false}
           />
         ) : (
-          <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 cursor-text" onClick={() => setIsEditing(true)}>
-            <code className="font-mono text-sm text-foreground/90">{editableCode}</code>
+          <pre
+            className="rounded-b-xl overflow-x-auto m-0 cursor-text"
+            style={{
+              background: 'linear-gradient(180deg, rgba(15,16,28,0.95) 0%, rgba(10,11,20,0.98) 100%)',
+              padding: '18px 20px',
+              borderLeft: '2px solid rgba(139,92,246,0.4)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+            }}
+            onClick={() => setIsEditing(true)}
+          >
+            <code className="font-mono text-sm" style={{ color: '#a5f3fc', lineHeight: 1.65 }}>{editableCode}</code>
           </pre>
         )}
         <button
