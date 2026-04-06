@@ -1592,6 +1592,13 @@ const streamFromAI = async (
     if (!question.trim() && !uploadedImage && !extractedDocText) return;
     if (!canSendPrompt()) return;
 
+    // Auto-detect mode from message
+    const detectedMode = detectModeFromMessage(question.trim());
+    if (detectedMode !== aiMode) {
+      setAiMode(detectedMode);
+      toast({ title: `Switched to ${detectedMode} mode`, description: "Detected from your message" });
+    }
+
     // Set thinking state
     setIsThinking(true);
     setThinkingStage('thinking');
@@ -1632,7 +1639,7 @@ const streamFromAI = async (
         return { role: m.role, content, image: m.image };
       });
 
-      await streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode);
+      await streamFromAI(messagesForAI, weatherCtx, updatedMessages, detectedMode);
     } catch (error) {
       console.error("AI Error:", error);
       toast({
