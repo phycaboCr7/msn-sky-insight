@@ -13,6 +13,7 @@ import { AIWidget } from "@/components/AIWidget";
 import { parseAIResponse } from "@/utils/parseAIResponse";
 import { findMatchingSplats } from "@/utils/splatMatcher";
 import { SplatViewer } from "@/components/SplatViewer";
+import { SPLATS } from "@/data/splats";
 import type { SplatEntry } from "@/data/splats";
 import { supabase } from "@/integrations/supabase/client";
 import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
