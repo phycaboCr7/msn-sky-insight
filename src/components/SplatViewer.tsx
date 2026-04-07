@@ -13,6 +13,7 @@ export function SplatViewer({ splat, onClose, onNext, onPrev }: Props) {
   const [copied, setCopied] = useState(false);
   const [isFs, setIsFs] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => { setLoaded(false); }, [splat.id]);
 
@@ -58,10 +59,17 @@ export function SplatViewer({ splat, onClose, onNext, onPrev }: Props) {
           <iframe
             src={splat.embedUrl}
             title={splat.title}
-            allow="fullscreen; xr-spatial-tracking"
+            allow="fullscreen; xr-spatial-tracking; accelerometer; gyroscope"
             allowFullScreen
+            referrerPolicy="no-referrer"
             loading="lazy"
             onLoad={() => setLoaded(true)}
+            onError={() => {
+              if (iframeRef.current) {
+                iframeRef.current.src = splat.sceneUrl;
+              }
+            }}
+            ref={iframeRef}
             style={{ opacity: loaded ? 1 : 0, transition: 'opacity .4s', width: '100%', height: '100%', border: 'none', display: 'block' }}
           />
         </div>
