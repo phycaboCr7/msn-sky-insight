@@ -49,7 +49,6 @@ const Index = () => {
     try {
       const data = await getForecastWeather(location, 7);
       setWeather(data);
-      try { localStorage.setItem("weatherza-last-location", location); } catch {}
     } catch (error) {
       console.error("Error fetching weather:", error);
       toast({
