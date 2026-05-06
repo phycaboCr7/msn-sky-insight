@@ -13,6 +13,7 @@ import { AIWidget } from "@/components/AIWidget";
 import { parseAIResponse } from "@/utils/parseAIResponse";
 import { findMatchingSplats } from "@/utils/splatMatcher";
 import { SplatViewer } from "@/components/SplatViewer";
+import { SPLATS } from "@/data/splats";
 import type { SplatEntry } from "@/data/splats";
 import { supabase } from "@/integrations/supabase/client";
 import { loginWithGoogle, logoutUser, auth, onAuthStateChanged } from "@/services/authService";
@@ -64,6 +65,22 @@ const FREE_PROMPT_LIMIT = 4;
 const PROMPT_COUNT_KEY = 'weatherza-prompt-count';
 const MAX_RETRIES = 3;
 const INITIAL_RETRY_DELAY = 1000;
+
+function detectModeFromMessage(text: string): 'weather' | 'code' | 'math' | 'conversation' {
+  const lower = text.toLowerCase();
+  const codeKw = ['code','script','function','python','javascript','typescript','algorithm','debug','error','compile','class','loop','array','api','sql','html','css','react','node','npm','git','bash','terminal','programming','syntax','variable','import','library','framework'];
+  const mathKw = ['equation','formula','calculate','solve','integral','derivative','matrix','vector','probability','statistics','theorem','proof','algebra','calculus','trigonometry','sine','cosine','tangent','logarithm','exponential','polynomial','graph','plot','parabola','coefficient'];
+  const weatherKw = ['weather','temperature','rain','humidity','wind','forecast','uv','aqi','pressure','celsius','fahrenheit','storm','cloud','sunny','snow','fog','mist'];
+
+  const codeScore = codeKw.filter(k => lower.includes(k)).length;
+  const mathScore = mathKw.filter(k => lower.includes(k)).length;
+  const weatherScore = weatherKw.filter(k => lower.includes(k)).length;
+
+  if (weatherScore > 0 && weatherScore >= codeScore && weatherScore >= mathScore) return 'weather';
+  if (codeScore > mathScore && codeScore > 0) return 'code';
+  if (mathScore > 0) return 'math';
+  return 'conversation';
+}
 
 // Lazy load PyodideRunner for graph visualization
 const PyodideRunner = lazy(() => import("@/components/python-visualizer"));
@@ -485,8 +502,14 @@ await micropip.install('\${pkgMatch[1]}')
 
   return (
     <div className="relative group my-3">
-      <div className="flex items-center justify-between bg-black/50 px-3 py-1.5 rounded-t-lg border-b border-white/10">
-        <span className="text-xs text-orange-400 font-mono font-bold">{language || "code"}</span>
+      <div
+        className="flex items-center justify-between px-4 py-2 rounded-t-xl"
+        style={{
+          background: 'rgba(15,16,28,0.98)',
+          borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <span style={{ fontSize: 11, color: '#fb923c', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>{language || "code"}</span>
         <div className="flex gap-1">
           {isPythonGraph && onOpenPyodide && (
             <button
@@ -521,13 +544,27 @@ await micropip.install('\${pkgMatch[1]}')
           <textarea
             value={editableCode}
             onChange={(e) => setEditableCode(e.target.value)}
-            className="w-full bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 font-mono text-sm text-foreground/90 resize-y min-h-[60px] outline-none focus:border-orange-400 border border-transparent"
-            style={{ minHeight: `${Math.max(60, editableCode.split('\n').length * 20 + 16)}px` }}
+            className="w-full p-3 rounded-b-xl overflow-x-auto m-0 font-mono text-sm resize-y min-h-[60px] outline-none focus:border-primary/60 border border-transparent"
+            style={{
+              background: 'linear-gradient(180deg, rgba(15,16,28,0.95) 0%, rgba(10,11,20,0.98) 100%)',
+              borderLeft: '2px solid rgba(139,92,246,0.4)',
+              color: '#a5f3fc',
+              minHeight: `${Math.max(60, editableCode.split('\n').length * 20 + 16)}px`,
+            }}
             spellCheck={false}
           />
         ) : (
-          <pre className="bg-black/40 p-3 rounded-b-lg overflow-x-auto m-0 border-l-2 border-orange-500/50 cursor-text" onClick={() => setIsEditing(true)}>
-            <code className="font-mono text-sm text-foreground/90">{editableCode}</code>
+          <pre
+            className="rounded-b-xl overflow-x-auto m-0 cursor-text"
+            style={{
+              background: 'linear-gradient(180deg, rgba(15,16,28,0.95) 0%, rgba(10,11,20,0.98) 100%)',
+              padding: '18px 20px',
+              borderLeft: '2px solid rgba(139,92,246,0.4)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+            }}
+            onClick={() => setIsEditing(true)}
+          >
+            <code className="font-mono text-sm" style={{ color: '#a5f3fc', lineHeight: 1.65 }}>{editableCode}</code>
           </pre>
         )}
         <button
@@ -1344,11 +1381,20 @@ const streamFromAI = async (
         setThinkingDetail(statusMatch[2]?.trim() || '');
       }
       answer = answer.replace(/\[STATUS:[^\]]+\]\n?/, '').trim();
+      // Parse SHOW_SPLAT tags
+      const splatTagMatches = [...answer.matchAll(/\[SHOW_SPLAT:\s*([^\]]+)\]/g)];
+      const taggedSplats = splatTagMatches
+        .map(m => SPLATS.find(s => s.title.toLowerCase().includes(m[1].trim().toLowerCase())))
+        .filter(Boolean) as SplatEntry[];
+      const cleanAnswer = answer.replace(/\[SHOW_SPLAT:[^\]]+\]/g, '').trim();
       // Run splat matcher
       const userQ = updatedMessages.filter(m => m.role === 'user').pop()?.content || '';
-      const { splats } = findMatchingSplats(userQ, answer);
+      const { splats: semanticSplats } = findMatchingSplats(userQ, cleanAnswer, mode);
+      const allSplats = [...taggedSplats, ...semanticSplats]
+        .filter((s, i, arr) => arr.findIndex(x => x.id === s.id) === i)
+        .slice(0, 3);
       setIsThinking(false);
-      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: answer, isTyping: false, splats: splats.length > 0 ? splats : undefined }]);
+      setMessages([...updatedMessages, { id: genMsgId(), role: "assistant", content: cleanAnswer, isTyping: false, splats: allSplats.length > 0 ? allSplats : undefined }]);
       return;
     }
 
@@ -1433,10 +1479,18 @@ const streamFromAI = async (
     // Mark typing done and attach splats
     const userQ = updatedMessages.filter(m => m.role === 'user').pop()?.content || '';
     const cleanedFinal = assistantText.replace(/\[STATUS:[^\]]+\]\n?/, '').replace(/\[SHOW_SPLAT:[^\]]+\]/g, '').trim();
-    const { splats: matchedSplats } = findMatchingSplats(userQ, cleanedFinal);
+    // Parse SHOW_SPLAT tags from streamed response
+    const streamSplatMatches = [...assistantText.matchAll(/\[SHOW_SPLAT:\s*([^\]]+)\]/g)];
+    const streamTaggedSplats = streamSplatMatches
+      .map(m => SPLATS.find(s => s.title.toLowerCase().includes(m[1].trim().toLowerCase())))
+      .filter(Boolean) as SplatEntry[];
+    const { splats: matchedSplats } = findMatchingSplats(userQ, cleanedFinal, mode);
+    const allFinalSplats = [...streamTaggedSplats, ...matchedSplats]
+      .filter((s, i, arr) => arr.findIndex(x => x.id === s.id) === i)
+      .slice(0, 3);
     setIsThinking(false);
     setMessages(prev => prev.map((m, i) =>
-      i === prev.length - 1 ? { ...m, isTyping: false, content: cleanedFinal, splats: matchedSplats.length > 0 ? matchedSplats : undefined } : m
+      i === prev.length - 1 ? { ...m, isTyping: false, content: cleanedFinal, splats: allFinalSplats.length > 0 ? allFinalSplats : undefined } : m
     ));
 
     // Check truncation
@@ -1553,6 +1607,13 @@ const streamFromAI = async (
     if (!question.trim() && !uploadedImage && !extractedDocText) return;
     if (!canSendPrompt()) return;
 
+    // Auto-detect mode from message
+    const detectedMode = detectModeFromMessage(question.trim());
+    if (detectedMode !== aiMode) {
+      setAiMode(detectedMode);
+      toast({ title: `Switched to ${detectedMode} mode`, description: "Detected from your message" });
+    }
+
     // Set thinking state
     setIsThinking(true);
     setThinkingStage('thinking');
@@ -1593,7 +1654,7 @@ const streamFromAI = async (
         return { role: m.role, content, image: m.image };
       });
 
-      await streamFromAI(messagesForAI, weatherCtx, updatedMessages, aiMode);
+      await streamFromAI(messagesForAI, weatherCtx, updatedMessages, detectedMode);
     } catch (error) {
       console.error("AI Error:", error);
       toast({
@@ -1801,7 +1862,7 @@ const streamFromAI = async (
             </div>
           </div>
         )}
-        <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '72vh', minHeight: '520px', maxHeight: '72vh' }}>
+        <div className="weatherza-chat-viewport flex flex-col overflow-visible" style={{ height: '82vh', minHeight: '640px', maxHeight: '82vh' }}>
         <div className="flex gap-1 px-1 pb-3">
           {([
             { key: 'weather', label: 'Weather', icon: CloudSun },

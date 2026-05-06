@@ -20,11 +20,6 @@ const FORCE_TRIGGERS = [
   /splat\s+viewer/i,
 ];
 
-// Nature-related triggers — only show splats for nature topics
-const NATURE_TRIGGERS = [
-  /\b(nature|natural|forest|tree|flower|plant|garden|mountain|lake|river|ocean|sea|beach|waterfall|canyon|glacier|island|sunset|sunrise|landscape|outdoor|valley|cliff|rock|cave|desert|meadow|wildlife|insect|bee|butterfly|beetle|bird|animal|flora|fauna|botanical|park|cherry\s*blossom|sakura|lily|stump|coast|falls|camp)\b/i,
-];
-
 function tokenize(text: string): string[] {
   return text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
     .filter(w => w.length > 2 && !STOP_WORDS.has(w));
@@ -52,25 +47,19 @@ export interface MatchResult {
   forced: boolean;
 }
 
-export function findMatchingSplats(userQuery: string, aiResponse: string = ''): MatchResult {
-  const combined = `${userQuery} ${aiResponse}`;
-  
-  // Check if forced 3D trigger
-  const forced = FORCE_TRIGGERS.some(r => r.test(combined));
-  
-  // Only show splats if nature-related or forced
-  const isNatureRelated = NATURE_TRIGGERS.some(r => r.test(combined));
-  if (!forced && !isNatureRelated) {
-    return { forced: false, splats: [] };
-  }
+export function findMatchingSplats(userQuery: string, aiResponse: string = '', mode: string = 'conversation'): MatchResult {
+  // Never show splats in weather mode
+  if (mode === 'weather') return { forced: false, splats: [] };
 
+  const combined = `${userQuery} ${aiResponse}`;
+  const forced = FORCE_TRIGGERS.some(r => r.test(combined));
   const tokens = tokenize(combined);
   const scored = SPLATS
     .map(s => ({ splat: s, score: scoreEntry(s, tokens) }))
     .sort((a, b) => b.score - a.score);
-  
+
   if (forced) return { forced: true, splats: scored.slice(0, MAX_RESULTS).map(x => x.splat) };
-  
+
   const matches = scored.filter(x => x.score > THRESHOLD).slice(0, MAX_RESULTS);
   return { forced: false, splats: matches.map(x => x.splat) };
 }
