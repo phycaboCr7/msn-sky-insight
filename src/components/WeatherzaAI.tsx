@@ -1906,7 +1906,7 @@ const streamFromAI = async (
           ))}
         </div>
 
-        {isSignedIn && <PhotoGreeting userName={authUser?.name} />}
+        <PhotoGreeting userName={authUser?.name} />
         <div 
           ref={messagesContainerRef}
           className="weatherza-messages-scroll flex-1 overflow-y-auto overflow-x-hidden space-y-3 p-2 rounded-xl bg-black/20 border border-white/5"
