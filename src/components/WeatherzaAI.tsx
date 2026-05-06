@@ -1724,9 +1724,7 @@ const streamFromAI = async (
       <CardHeader className="pb-2 pt-3 sm:pt-4 px-3 sm:px-5 relative z-10">
         <div className="flex flex-wrap items-center justify-between gap-y-2">
           <CardTitle className="flex items-center gap-1.5 sm:gap-2.5 text-sm sm:text-lg shrink-0">
-            <div className="p-1.5 sm:p-2 rounded-xl bg-gradient-to-br from-primary/25 to-purple-500/20 shadow-lg shadow-primary/10">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            </div>
+            <img src={logoSrc} alt="Weatherza" className="w-6 h-6 sm:w-7 sm:h-7 drop-shadow-[0_0_10px_rgba(255,140,0,0.6)]" />
             <span 
               className="text-foreground font-semibold text-glow-sweep hidden sm:inline"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
@@ -1741,6 +1739,26 @@ const streamFromAI = async (
             </span>
           </CardTitle>
           <div className="flex items-center flex-wrap gap-0.5 sm:gap-1 max-w-full overflow-hidden">
+            <a
+              href="https://discord.gg/8zE7wZCptk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-[#5865F2] hover:bg-white/5 transition-all shrink-0"
+              title="Join our Discord"
+            >
+              <MessagesSquare className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden sm:inline">Discord</span>
+            </a>
+            {typeof window !== 'undefined' && window.location.pathname !== '/ai' && (
+              <button
+                onClick={() => window.open('/ai', '_blank', 'width=1280,height=860,noopener')}
+                className="flex items-center gap-1 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-[11px] font-medium text-muted-foreground hover:text-primary hover:bg-white/5 transition-all shrink-0"
+                title="Open in new window"
+              >
+                <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">Pop out</span>
+              </button>
+            )}
             <button
               onClick={toggleProMode}
               className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:bg-white/5 shrink-0"
