@@ -4,7 +4,8 @@ import { CurrentWeather } from "@/components/CurrentWeather";
 import { SearchLocation } from "@/components/SearchLocation";
 import { SplashScreen } from "@/components/SplashScreen";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Brain } from "lucide-react";
+import { Link } from "react-router-dom";
 import logoSrc from "@/assets/logo.png";
 
 // Lazy load non-critical components for faster initial load
@@ -198,6 +199,13 @@ const Index = () => {
           )}
           <p className="text-muted-foreground text-base sm:text-lg">A True Forecasting Experience</p>
           <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-primary to-blue-500 mx-auto mt-3 sm:mt-4 rounded-full" />
+          <Link
+            to="/agent"
+            className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-violet-600 text-white text-sm font-medium shadow-lg hover:shadow-orange-500/30 transition-all hover:-translate-y-0.5"
+            style={{ boxShadow: "0 0 24px hsl(28 100% 55% / 0.35)" }}
+          >
+            <Brain size={16} /> Launch Agent OS
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
