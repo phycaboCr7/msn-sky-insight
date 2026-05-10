@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logoutUser, type User } from "@/services/authService";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -40,7 +41,7 @@ const TOOL_COLOR: Record<string, string> = {
   make_report: "from-orange-500/20 to-orange-500/5 border-orange-400/30",
 };
 
-export function AgentShell({ session }: { session: any }) {
+export function AgentShell({ user }: { user: User }) {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [history, setHistory] = useState<Msg[]>([]);
@@ -53,14 +54,14 @@ export function AgentShell({ session }: { session: any }) {
   const eventsEndRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<HTMLDivElement>(null);
 
-  const userId = session.user.id;
+  const userId = user.uid;
 
   // Load threads
   const refreshThreads = useCallback(async () => {
-    const { data } = await supabase.from("agent_threads").select("*").order("updated_at", { ascending: false });
+    const { data } = await supabase.from("agent_threads").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
     setThreads(data ?? []);
     if (!activeId && data && data.length > 0) setActiveId(data[0].id);
-  }, [activeId]);
+  }, [activeId, userId]);
 
   useEffect(() => { refreshThreads(); }, [refreshThreads]);
 
@@ -76,16 +77,16 @@ export function AgentShell({ session }: { session: any }) {
         else seed.push({ kind: "text", text: m.parts?.[0]?.text ?? "" });
       });
       setEvents(seed);
-      const { data: fs } = await supabase.from("agent_files").select("*").order("updated_at", { ascending: false });
+      const { data: fs } = await supabase.from("agent_files").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
       setFiles(fs ?? []);
     })();
-  }, [activeId]);
+  }, [activeId, userId]);
 
   useEffect(() => { eventsEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [events]);
   useEffect(() => { termRef.current?.scrollTo({ top: termRef.current.scrollHeight }); }, [terminalLines]);
 
   const newThread = async () => {
-    const { data } = await supabase.from("agent_threads").insert({ user_id: userId, title: "New task" }).select().single();
+    const { data } = await supabase.from("agent_threads").insert({ user_id: userId, title: "New task" } as any).select().single();
     if (data) { setThreads(t => [data as any, ...t]); setActiveId(data.id); setEvents([]); setHistory([]); }
   };
 
@@ -96,7 +97,7 @@ export function AgentShell({ session }: { session: any }) {
   };
 
   const refreshFiles = async () => {
-    const { data } = await supabase.from("agent_files").select("*").order("updated_at", { ascending: false });
+    const { data } = await supabase.from("agent_files").select("*").eq("user_id", userId).order("updated_at", { ascending: false });
     setFiles(data ?? []);
   };
 
@@ -107,7 +108,7 @@ export function AgentShell({ session }: { session: any }) {
     if (!text || busy) return;
     let threadId = activeId;
     if (!threadId) {
-      const { data } = await supabase.from("agent_threads").insert({ user_id: userId, title: text.slice(0, 60) }).select().single();
+      const { data } = await supabase.from("agent_threads").insert({ user_id: userId, title: text.slice(0, 60) } as any).select().single();
       if (!data) return;
       threadId = data.id;
       setThreads(t => [data as any, ...t]);
@@ -123,17 +124,16 @@ export function AgentShell({ session }: { session: any }) {
     pushTerm(`$ user> ${text}`);
 
     // Persist user message
-    await supabase.from("agent_messages").insert({ thread_id: threadId, user_id: userId, role: "user", parts: [{ type: "text", text }] });
+    await supabase.from("agent_messages").insert({ thread_id: threadId, user_id: userId, role: "user", parts: [{ type: "text", text }] } as any);
 
     const fullHistory = [...history.map(m => ({ role: m.role, text: m.parts?.[0]?.text ?? "" })), { role: "user", text }];
 
     try {
-      const { data: { session: s } } = await supabase.auth.getSession();
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/agent-os`;
       const r = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${s?.access_token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-        body: JSON.stringify({ threadId, history: fullHistory }),
+        headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({ threadId, history: fullHistory, userId }),
       });
       if (!r.ok || !r.body) throw new Error(`HTTP ${r.status}`);
 
@@ -250,7 +250,7 @@ export function AgentShell({ session }: { session: any }) {
             <p className="text-[10px] text-white/40">Autonomous AI computer · {busy ? "● running" : "○ idle"}</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={async () => { await supabase.auth.signOut(); }} className="text-white/60 hover:text-white">
+        <Button variant="ghost" size="sm" onClick={async () => { await logoutUser(); }} className="text-white/60 hover:text-white">
           <LogOut size={14} className="mr-1" /> Sign out
         </Button>
       </header>
