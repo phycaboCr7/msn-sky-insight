@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.stock-proxy]
 verify_jwt = false
+
+[functions.agent-os]
+verify_jwt = false

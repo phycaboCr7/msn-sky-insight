@@ -12,7 +12,7 @@ const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const SERPER_KEY = Deno.env.get("SERPER_API_KEY") ?? "";
 const WEATHER_KEY = Deno.env.get("WEATHER_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SUPABASE_SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODEL = "gemini-2.0-flash";
 
 // ---------- Tool schema for Gemini function calling ----------
@@ -151,12 +151,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const auth = req.headers.get("Authorization") ?? "";
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON, { global: { headers: { Authorization: auth } } });
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-
-    const { threadId, history } = await req.json();
+    // Firebase-auth based: client passes its firebase uid as userId. Service role bypasses RLS.
+    const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE);
+    const { threadId, history, userId } = await req.json();
+    if (!userId) return new Response(JSON.stringify({ error: "missing userId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (!threadId) return new Response(JSON.stringify({ error: "missing threadId" }), { status: 400, headers: corsHeaders });
 
     // Build Gemini "contents" from full thread history (history = [{role, text}]).
@@ -171,7 +169,7 @@ Deno.serve(async (req) => {
           controller.enqueue(new TextEncoder().encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
         };
         try {
-          const ctx = { userId: user.id, threadId, sb };
+          const ctx = { userId, threadId, sb };
           let finalText = "";
           for (let step = 0; step < 12; step++) {
             const resp = await callGemini(contents);
@@ -201,7 +199,7 @@ Deno.serve(async (req) => {
 
           // Persist assistant message
           if (finalText) {
-            await sb.from("agent_messages").insert({ thread_id: threadId, user_id: user.id, role: "assistant", parts: [{ type: "text", text: finalText }] });
+            await sb.from("agent_messages").insert({ thread_id: threadId, user_id: userId, role: "assistant", parts: [{ type: "text", text: finalText }] });
           }
           send("done", { ok: true });
           controller.close();
