@@ -8,29 +8,34 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const CEREBRAS_KEY = Deno.env.get("CEREBRAS_API_KEY")!;
 const SERPER_KEY = Deno.env.get("SERPER_API_KEY") ?? "";
 const WEATHER_KEY = Deno.env.get("WEATHER_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const MODEL = "gemini-2.0-flash";
+// Cerebras free-tier models with strong tool-calling. Primary -> fallback on rate limit.
+// Free-tier models accessible with this key. Qwen 235B is the strongest tool-caller;
+// llama3.1-8b is the always-available fallback when qwen hits the per-minute quota.
+const MODELS = ["qwen-3-235b-a22b-instruct-2507", "llama3.1-8b"];
 
-// ---------- Tool schema for Gemini function calling ----------
-const tools = [{
-  functionDeclarations: [
-    { name: "think", description: "Record a short internal reasoning step the user can see. Use frequently to narrate your plan.", parameters: { type: "object", properties: { thought: { type: "string" } }, required: ["thought"] } },
-    { name: "plan", description: "Post or update a checklist of steps for the current task.", parameters: { type: "object", properties: { steps: { type: "array", items: { type: "string" } } }, required: ["steps"] } },
-    { name: "web_search", description: "Search the public web. Returns top result titles, links, snippets.", parameters: { type: "object", properties: { query: { type: "string" } }, required: ["query"] } },
-    { name: "web_scrape", description: "Fetch a URL and return readable text content.", parameters: { type: "object", properties: { url: { type: "string" } }, required: ["url"] } },
-    { name: "write_file", description: "Create or overwrite a virtual file in the user's workspace.", parameters: { type: "object", properties: { path: { type: "string" }, content: { type: "string" }, mime: { type: "string" } }, required: ["path", "content"] } },
-    { name: "read_file", description: "Read a virtual file by path.", parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] } },
-    { name: "list_files", description: "List all virtual files in the workspace.", parameters: { type: "object", properties: {} } },
-    { name: "remember", description: "Save a long-term memory (preferences, facts about the user).", parameters: { type: "object", properties: { content: { type: "string" } }, required: ["content"] } },
-    { name: "recall", description: "Search long-term memory by keyword.", parameters: { type: "object", properties: { query: { type: "string" } }, required: ["query"] } },
-    { name: "weather", description: "Get current weather + forecast for a location.", parameters: { type: "object", properties: { location: { type: "string" } }, required: ["location"] } },
-    { name: "make_report", description: "Generate a downloadable PDF report. Returns a file path the user can download.", parameters: { type: "object", properties: { title: { type: "string" }, markdown: { type: "string" } }, required: ["title", "markdown"] } },
-  ]
-}];
+// ---------- OpenAI-style tool schema (Cerebras is OpenAI-compatible) ----------
+const fn = (name: string, description: string, properties: any, required: string[] = []) => ({
+  type: "function",
+  function: { name, description, parameters: { type: "object", properties, required } },
+});
+const tools = [
+  fn("think", "Record a short internal reasoning step the user can see. Use frequently to narrate your plan.", { thought: { type: "string" } }, ["thought"]),
+  fn("plan", "Post or update a checklist of steps for the current task.", { steps: { type: "array", items: { type: "string" } } }, ["steps"]),
+  fn("web_search", "Search the public web. Returns top result titles, links, snippets.", { query: { type: "string" } }, ["query"]),
+  fn("web_scrape", "Fetch a URL and return readable text content.", { url: { type: "string" } }, ["url"]),
+  fn("write_file", "Create or overwrite a virtual file in the user's workspace.", { path: { type: "string" }, content: { type: "string" }, mime: { type: "string" } }, ["path", "content"]),
+  fn("read_file", "Read a virtual file by path.", { path: { type: "string" } }, ["path"]),
+  fn("list_files", "List all virtual files in the workspace.", {}),
+  fn("remember", "Save a long-term memory (preferences, facts about the user).", { content: { type: "string" } }, ["content"]),
+  fn("recall", "Search long-term memory by keyword.", { query: { type: "string" } }, ["query"]),
+  fn("weather", "Get current weather + forecast for a location.", { location: { type: "string" } }, ["location"]),
+  fn("make_report", "Generate a downloadable PDF report. Returns a file path the user can download.", { title: { type: "string" }, markdown: { type: "string" } }, ["title", "markdown"]),
+];
 
 const SYSTEM = `You are Weatherza Agent OS — an autonomous AI operating system.
 You can think step by step, plan tasks, and use tools to actually execute them.
@@ -132,18 +137,30 @@ async function runTool(name: string, args: any, ctx: { userId: string; threadId:
   }
 }
 
-// ---------- Gemini call ----------
-async function callGemini(contents: any[]) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_KEY}`;
-  const body = {
-    system_instruction: { parts: [{ text: SYSTEM }] },
-    contents,
-    tools,
-    generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
-  };
-  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (!r.ok) throw new Error(`Gemini ${r.status}: ${await r.text()}`);
-  return await r.json();
+// ---------- Cerebras call (OpenAI-compatible) with fallback on rate limit ----------
+async function callCerebras(messages: any[]) {
+  let lastErr = "";
+  for (const model of MODELS) {
+    const r = await fetch("https://api.cerebras.ai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${CEREBRAS_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages,
+        tools,
+        tool_choice: "auto",
+        max_completion_tokens: 2048,
+        temperature: 0.7,
+      }),
+    });
+    if (r.ok) return await r.json();
+    const txt = await r.text();
+    lastErr = `Cerebras ${model} ${r.status}: ${txt}`;
+    // Retry next model on rate limit / queue
+    // Fall through to next model on rate-limit, queue, or model-not-found.
+    if (r.status !== 429 && r.status !== 404 && !txt.includes("queue_exceeded")) throw new Error(lastErr);
+  }
+  throw new Error(lastErr || "Cerebras unavailable");
 }
 
 // ---------- HTTP entry ----------
@@ -157,11 +174,14 @@ Deno.serve(async (req) => {
     if (!userId) return new Response(JSON.stringify({ error: "missing userId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (!threadId) return new Response(JSON.stringify({ error: "missing threadId" }), { status: 400, headers: corsHeaders });
 
-    // Build Gemini "contents" from full thread history (history = [{role, text}]).
-    const contents: any[] = (history ?? []).map((m: any) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.text }],
-    }));
+    // Build OpenAI-style messages from full thread history.
+    const messages: any[] = [
+      { role: "system", content: SYSTEM },
+      ...(history ?? []).map((m: any) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.text,
+      })),
+    ];
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -172,29 +192,27 @@ Deno.serve(async (req) => {
           const ctx = { userId, threadId, sb };
           let finalText = "";
           for (let step = 0; step < 12; step++) {
-            const resp = await callGemini(contents);
-            const cand = resp.candidates?.[0];
-            const parts = cand?.content?.parts ?? [];
-            const fnCalls = parts.filter((p: any) => p.functionCall);
-            const texts = parts.filter((p: any) => p.text).map((p: any) => p.text).join("");
+            const resp = await callCerebras(messages);
+            const msg = resp.choices?.[0]?.message ?? {};
+            const toolCalls = msg.tool_calls ?? [];
+            const text = msg.content ?? "";
 
-            if (texts) { finalText += texts; send("text", { text: texts }); }
+            if (text) { finalText += text; send("text", { text }); }
 
-            if (fnCalls.length === 0) break;
+            if (!toolCalls.length) break;
 
-            // Echo model turn back to history
-            contents.push({ role: "model", parts });
+            // Echo assistant turn back
+            messages.push({ role: "assistant", content: text || "", tool_calls: toolCalls });
 
-            const responseParts: any[] = [];
-            for (const p of fnCalls) {
-              const name = p.functionCall.name;
-              const args = p.functionCall.args ?? {};
+            for (const tc of toolCalls) {
+              const name = tc.function?.name;
+              let args: any = {};
+              try { args = JSON.parse(tc.function?.arguments ?? "{}"); } catch {}
               send("tool_call", { name, args });
               const result = await runTool(name, args, ctx);
               send("tool_result", { name, result });
-              responseParts.push({ functionResponse: { name, response: result } });
+              messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
             }
-            contents.push({ role: "user", parts: responseParts });
           }
 
           // Persist assistant message
