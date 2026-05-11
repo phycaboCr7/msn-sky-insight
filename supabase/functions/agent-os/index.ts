@@ -13,10 +13,14 @@ const SERPER_KEY = Deno.env.get("SERPER_API_KEY") ?? "";
 const WEATHER_KEY = Deno.env.get("WEATHER_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-// Cerebras free-tier models with strong tool-calling. Primary -> fallback on rate limit.
-// Free-tier models accessible with this key. Qwen 235B is the strongest tool-caller;
-// llama3.1-8b is the always-available fallback when qwen hits the per-minute quota.
-const MODELS = ["qwen-3-235b-a22b-instruct-2507", "llama3.1-8b"];
+// Cerebras free-tier models with strong NATIVE tool-calling.
+// gpt-oss-120b is the most reliable tool-caller on free tier, qwen-3-235b is a strong
+// backup, llama-3.3-70b is the always-available last resort.
+const MODELS = [
+  "gpt-oss-120b",
+  "qwen-3-235b-a22b-instruct-2507",
+  "llama-3.3-70b",
+];
 
 // ---------- OpenAI-style tool schema (Cerebras is OpenAI-compatible) ----------
 const fn = (name: string, description: string, properties: any, required: string[] = []) => ({
@@ -40,10 +44,16 @@ const tools = [
 const SYSTEM = `You are Weatherza Agent OS — an autonomous AI operating system.
 You can think step by step, plan tasks, and use tools to actually execute them.
 
+CRITICAL OUTPUT FORMAT:
+- You MUST invoke tools using the native function-calling / tool_calls mechanism.
+- NEVER write tool calls as text or JSON inside your message content
+  (do NOT print things like {"type":"function","name":"think",...}).
+- Plain text content is reserved ONLY for the final human-readable answer to the user.
+
 RULES:
-- ALWAYS start hard tasks by calling \`plan\` with concrete steps.
-- Call \`think\` between actions to narrate what you are doing (1 short sentence).
-- Use \`web_search\` + \`web_scrape\` for fresh info. Cite URLs.
+- For non-trivial tasks, START by calling the \`plan\` tool with concrete steps.
+- Call \`think\` between actions to narrate what you are doing (one short sentence).
+- Use \`web_search\` + \`web_scrape\` for fresh info. Cite URLs in your final answer.
 - Use \`write_file\` to save outputs. Use \`make_report\` for PDFs.
 - Use \`remember\` / \`recall\` for facts about the user.
 - Use \`weather\` for any weather question.
@@ -194,8 +204,18 @@ Deno.serve(async (req) => {
           for (let step = 0; step < 12; step++) {
             const resp = await callCerebras(messages);
             const msg = resp.choices?.[0]?.message ?? {};
-            const toolCalls = msg.tool_calls ?? [];
-            const text = msg.content ?? "";
+            let toolCalls = msg.tool_calls ?? [];
+            let text = msg.content ?? "";
+
+            // Fallback: some Cerebras models emit tool calls as text JSON instead
+            // of native tool_calls. Parse those out so the agent still works.
+            if (!toolCalls.length && text) {
+              const parsed = extractTextToolCalls(text);
+              if (parsed.calls.length) {
+                toolCalls = parsed.calls;
+                text = parsed.cleaned;
+              }
+            }
 
             if (text) { finalText += text; send("text", { text }); }
 
