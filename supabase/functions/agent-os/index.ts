@@ -14,7 +14,7 @@ const WEATHER_KEY = Deno.env.get("WEATHER_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 // Cerebras free-tier models with strong tool-calling. Primary -> fallback on rate limit.
-const MODELS = ["llama-3.3-70b", "llama3.1-8b"];
+const MODELS = ["gpt-oss-120b", "qwen-3-235b-a22b-instruct-2507", "llama3.1-8b"];
 
 // ---------- OpenAI-style tool schema (Cerebras is OpenAI-compatible) ----------
 const fn = (name: string, description: string, properties: any, required: string[] = []) => ({
