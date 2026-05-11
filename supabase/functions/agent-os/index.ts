@@ -148,6 +148,55 @@ async function runTool(name: string, args: any, ctx: { userId: string; threadId:
 }
 
 // ---------- Cerebras call (OpenAI-compatible) with fallback on rate limit ----------
+// Parse text-format tool calls some models emit instead of native tool_calls.
+// Handles JSON like: {"type":"function","name":"think","parameters":{...}}
+// or {"name":"web_search","arguments":{...}} possibly inside ``` fences.
+function extractTextToolCalls(text: string): { calls: any[]; cleaned: string } {
+  const calls: any[] = [];
+  let cleaned = text;
+  const valid = new Set(tools.map((t: any) => t.function.name));
+
+  // Strip ```json ... ``` fences first
+  const stripped = cleaned.replace(/```(?:json)?\s*([\s\S]*?)```/g, (_m, inner) => inner);
+
+  // Find every top-level {...} JSON object
+  const candidates: { raw: string; obj: any }[] = [];
+  let depth = 0, start = -1;
+  for (let i = 0; i < stripped.length; i++) {
+    const ch = stripped[i];
+    if (ch === "{") { if (depth === 0) start = i; depth++; }
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0 && start >= 0) {
+        const raw = stripped.slice(start, i + 1);
+        try {
+          const obj = JSON.parse(raw);
+          candidates.push({ raw, obj });
+        } catch { /* ignore */ }
+        start = -1;
+      }
+    }
+  }
+
+  for (const { raw, obj } of candidates) {
+    const name = obj.name ?? obj.function?.name ?? obj.tool ?? obj.tool_name;
+    const args = obj.parameters ?? obj.arguments ?? obj.args ?? obj.input ?? obj.function?.arguments;
+    if (!name || !valid.has(name)) continue;
+    let parsedArgs = args;
+    if (typeof args === "string") { try { parsedArgs = JSON.parse(args); } catch { parsedArgs = {}; } }
+    calls.push({
+      id: `call_${Math.random().toString(36).slice(2, 10)}`,
+      type: "function",
+      function: { name, arguments: JSON.stringify(parsedArgs ?? {}) },
+    });
+    cleaned = cleaned.split(raw).join("");
+  }
+
+  // Also strip the original fenced blocks from the visible text
+  cleaned = cleaned.replace(/```(?:json)?\s*[\s\S]*?```/g, "").trim();
+  return { calls, cleaned };
+}
+
 async function callCerebras(messages: any[]) {
   let lastErr = "";
   for (const model of MODELS) {
