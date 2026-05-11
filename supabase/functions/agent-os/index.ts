@@ -19,7 +19,7 @@ const SUPABASE_SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODELS = [
   "gpt-oss-120b",
   "qwen-3-235b-a22b-instruct-2507",
-  "llama-3.3-70b",
+  "llama3.1-8b",
 ];
 
 // ---------- OpenAI-style tool schema (Cerebras is OpenAI-compatible) ----------
