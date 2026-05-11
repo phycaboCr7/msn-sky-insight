@@ -155,7 +155,8 @@ async function callCerebras(messages: any[]) {
     const txt = await r.text();
     lastErr = `Cerebras ${model} ${r.status}: ${txt}`;
     // Retry next model on rate limit / queue
-    if (r.status !== 429 && !txt.includes("queue_exceeded")) throw new Error(lastErr);
+    // Fall through to next model on rate-limit, queue, or model-not-found.
+    if (r.status !== 429 && r.status !== 404 && !txt.includes("queue_exceeded")) throw new Error(lastErr);
   }
   throw new Error(lastErr || "Cerebras unavailable");
 }
