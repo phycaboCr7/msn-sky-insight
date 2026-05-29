@@ -1,4591 +1,4498 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-<url>
-<loc>https://weatherza.vercel.app/weather/delhi</loc>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/mumbai</loc>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/london</loc>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/tokyo</loc>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-<loc>https://weatherza.vercel.app/weather/new-york</loc>
-<changefreq>hourly</changefreq>
-<priority>0.9</priority>
-</url>
-
-<url>
-    <loc>https://weatherza.vercel.app/weather/tokyo</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/jakarta</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/delhi</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/guangzhou</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/mumbai</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/manila</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/shanghai</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/sã£o-paulo</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/seoul</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/mexico-city</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/kolkäta</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://weatherza.vercel.app/weather/cairo</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/karachi</loc>
+    <loc>https://weatheza.me/weather/aba.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dhaka</loc>
+    <loc>https://weatheza.me/weather/abeokuta.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/new-york</loc>
+    <loc>https://weatheza.me/weather/abhepur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/beijing</loc>
+    <loc>https://weatheza.me/weather/abidjan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bangkok</loc>
+    <loc>https://weatheza.me/weather/abu-dhabi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shenzhen</loc>
+    <loc>https://weatheza.me/weather/abuja.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/moscow</loc>
+    <loc>https://weatheza.me/weather/ad-dammäm.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/buenos-aires</loc>
+    <loc>https://weatheza.me/weather/adana.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lagos</loc>
+    <loc>https://weatheza.me/weather/addis-ababa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bangalore</loc>
+    <loc>https://weatheza.me/weather/adelaide.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ho-chi-minh-city</loc>
+    <loc>https://weatheza.me/weather/aden.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/åœsaka</loc>
+    <loc>https://weatheza.me/weather/aguascalientes.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chengdu</loc>
+    <loc>https://weatheza.me/weather/ahmedabad.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/istanbul</loc>
+    <loc>https://weatheza.me/weather/ahväz.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tehran</loc>
+    <loc>https://weatheza.me/weather/akure.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kinshasa</loc>
+    <loc>https://weatheza.me/weather/al-baåÿrah.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rio-de-janeiro</loc>
+    <loc>https://weatheza.me/weather/aleppo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chennai</loc>
+    <loc>https://weatheza.me/weather/alexandria.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xiâ€™an</loc>
+    <loc>https://weatheza.me/weather/algiers.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lahore</loc>
+    <loc>https://weatheza.me/weather/almaty.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chongqing</loc>
+    <loc>https://weatheza.me/weather/alä«garh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/los-angeles</loc>
+    <loc>https://weatheza.me/weather/amman.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/london</loc>
+    <loc>https://weatheza.me/weather/amritsar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/paris</loc>
+    <loc>https://weatheza.me/weather/amsterdam.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/linyi</loc>
+    <loc>https://weatheza.me/weather/ankang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dongguan</loc>
+    <loc>https://weatheza.me/weather/ankara.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baoding</loc>
+    <loc>https://weatheza.me/weather/anqing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hyderäbäd</loc>
+    <loc>https://weatheza.me/weather/anqiu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tianjin</loc>
+    <loc>https://weatheza.me/weather/anshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lima</loc>
+    <loc>https://weatheza.me/weather/anshun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuhan</loc>
+    <loc>https://weatheza.me/weather/antalya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nanyang</loc>
+    <loc>https://weatheza.me/weather/antananarivo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hangzhou</loc>
+    <loc>https://weatheza.me/weather/antipolo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nagoya</loc>
+    <loc>https://weatheza.me/weather/ar-ramädä«.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/luanda</loc>
+    <loc>https://weatheza.me/weather/arequipa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/foshan</loc>
+    <loc>https://weatheza.me/weather/as-sulaymänä«yah.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kuala-lumpur</loc>
+    <loc>https://weatheza.me/weather/ashgabat.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhoukou</loc>
+    <loc>https://weatheza.me/weather/ashmå«n.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tongshan</loc>
+    <loc>https://weatheza.me/weather/asmara.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hanoi</loc>
+    <loc>https://weatheza.me/weather/astana.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chicago</loc>
+    <loc>https://weatheza.me/weather/athens.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nanjing</loc>
+    <loc>https://weatheza.me/weather/atlanta.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/heze</loc>
+    <loc>https://weatheza.me/weather/attadappa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pune</loc>
+    <loc>https://weatheza.me/weather/auckland.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jining</loc>
+    <loc>https://weatheza.me/weather/aurangäbäd.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bogotã¡</loc>
+    <loc>https://weatheza.me/weather/austin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ahmedabad</loc>
+    <loc>https://weatheza.me/weather/awka.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shenyang</loc>
+    <loc>https://weatheza.me/weather/bagam.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dar-es-salaam</loc>
+    <loc>https://weatheza.me/weather/baghdad.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/khartoum</loc>
+    <loc>https://weatheza.me/weather/baicheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/johannesburg</loc>
+    <loc>https://weatheza.me/weather/baidoa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fuyang</loc>
+    <loc>https://weatheza.me/weather/baishan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hong-kong</loc>
+    <loc>https://weatheza.me/weather/baiyin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ganzhou</loc>
+    <loc>https://weatheza.me/weather/baku.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shangqiu</loc>
+    <loc>https://weatheza.me/weather/baltimore.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cangzhou</loc>
+    <loc>https://weatheza.me/weather/bamako.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/riyadh</loc>
+    <loc>https://weatheza.me/weather/bandar-lampung.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/santiago</loc>
+    <loc>https://weatheza.me/weather/bangalore.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhumadian</loc>
+    <loc>https://weatheza.me/weather/bangkok.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhanjiang</loc>
+    <loc>https://weatheza.me/weather/bangui.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rangoon</loc>
+    <loc>https://weatheza.me/weather/baoding.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yancheng</loc>
+    <loc>https://weatheza.me/weather/baojishi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bijie</loc>
+    <loc>https://weatheza.me/weather/baoshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xingtai</loc>
+    <loc>https://weatheza.me/weather/baotou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hengyang</loc>
+    <loc>https://weatheza.me/weather/barcelona.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shaoyang</loc>
+    <loc>https://weatheza.me/weather/bareilly.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/surabaya</loc>
+    <loc>https://weatheza.me/weather/barmhän-kalän.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/så«rat</loc>
+    <loc>https://weatheza.me/weather/barquisimeto.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/quanzhou</loc>
+    <loc>https://weatheza.me/weather/barranquilla.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shangrao</loc>
+    <loc>https://weatheza.me/weather/batam-centre.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zunyi</loc>
+    <loc>https://weatheza.me/weather/bazhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/madrid</loc>
+    <loc>https://weatheza.me/weather/beihai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baghdad</loc>
+    <loc>https://weatheza.me/weather/beijing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/maoming</loc>
+    <loc>https://weatheza.me/weather/beirut.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/miami</loc>
+    <loc>https://weatheza.me/weather/bekasi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xinyang</loc>
+    <loc>https://weatheza.me/weather/belgrade.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/houston</loc>
+    <loc>https://weatheza.me/weather/belo-horizonte.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/singapore</loc>
+    <loc>https://weatheza.me/weather/belã©m.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/prayagraj</loc>
+    <loc>https://weatheza.me/weather/belähi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huanggang</loc>
+    <loc>https://weatheza.me/weather/bengbu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dalian</loc>
+    <loc>https://weatheza.me/weather/benin-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ankara</loc>
+    <loc>https://weatheza.me/weather/benxi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dallas</loc>
+    <loc>https://weatheza.me/weather/berlin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qingdao</loc>
+    <loc>https://weatheza.me/weather/bhayandar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yulin</loc>
+    <loc>https://weatheza.me/weather/bhopäl.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/liaocheng</loc>
+    <loc>https://weatheza.me/weather/bhubaneshwar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/douala</loc>
+    <loc>https://weatheza.me/weather/bijie.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qujing</loc>
+    <loc>https://weatheza.me/weather/biläspur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nangandao</loc>
+    <loc>https://weatheza.me/weather/binzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/addis-ababa</loc>
+    <loc>https://weatheza.me/weather/birmingham.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/philadelphia</loc>
+    <loc>https://weatheza.me/weather/bishkek.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/toronto</loc>
+    <loc>https://weatheza.me/weather/biãªn-hã²a.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhengzhou</loc>
+    <loc>https://weatheza.me/weather/boankra.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nanchong</loc>
+    <loc>https://weatheza.me/weather/bobo-dioulasso.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jinan</loc>
+    <loc>https://weatheza.me/weather/bogor.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/giza</loc>
+    <loc>https://weatheza.me/weather/bogotã¡.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/saint-petersburg</loc>
+    <loc>https://weatheza.me/weather/bordeaux.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jieyang</loc>
+    <loc>https://weatheza.me/weather/boston.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dezhou</loc>
+    <loc>https://weatheza.me/weather/bozhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nairobi</loc>
+    <loc>https://weatheza.me/weather/brazzaville.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guadalajara</loc>
+    <loc>https://weatheza.me/weather/bridgeport.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taiâ€™an</loc>
+    <loc>https://weatheza.me/weather/brisbane.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dazhou</loc>
+    <loc>https://weatheza.me/weather/bronx.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/belo-horizonte</loc>
+    <loc>https://weatheza.me/weather/brooklyn.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/suzhou</loc>
+    <loc>https://weatheza.me/weather/brussels.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/monterrey</loc>
+    <loc>https://weatheza.me/weather/bucaramanga.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yongzhou</loc>
+    <loc>https://weatheza.me/weather/bucharest.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/changde</loc>
+    <loc>https://weatheza.me/weather/budapest.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xiangyang</loc>
+    <loc>https://weatheza.me/weather/buenos-aires.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/atlanta</loc>
+    <loc>https://weatheza.me/weather/buffalo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pudong</loc>
+    <loc>https://weatheza.me/weather/bujumbura.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/washington</loc>
+    <loc>https://weatheza.me/weather/bukavu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhaotong</loc>
+    <loc>https://weatheza.me/weather/bunia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhangzhou</loc>
+    <loc>https://weatheza.me/weather/bursa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yueyang</loc>
+    <loc>https://weatheza.me/weather/busan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/melbourne</loc>
+    <loc>https://weatheza.me/weather/cacuaco.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yichun</loc>
+    <loc>https://weatheza.me/weather/cairo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/abidjan</loc>
+    <loc>https://weatheza.me/weather/calgary.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guilin</loc>
+    <loc>https://weatheza.me/weather/cali.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pingdingshan</loc>
+    <loc>https://weatheza.me/weather/caloocan-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/alexandria</loc>
+    <loc>https://weatheza.me/weather/campinas.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bozhou</loc>
+    <loc>https://weatheza.me/weather/canagatan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sydney</loc>
+    <loc>https://weatheza.me/weather/cancãºn.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/barcelona</loc>
+    <loc>https://weatheza.me/weather/cangzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yuncheng</loc>
+    <loc>https://weatheza.me/weather/cape-town.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cape-town</loc>
+    <loc>https://weatheza.me/weather/caracas.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/changsha</loc>
+    <loc>https://weatheza.me/weather/cartagena.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/suqian</loc>
+    <loc>https://weatheza.me/weather/casablanca.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jeddah</loc>
+    <loc>https://weatheza.me/weather/cazenga.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/weinan</loc>
+    <loc>https://weatheza.me/weather/cebu-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/berlin</loc>
+    <loc>https://weatheza.me/weather/chandä«garh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chenzhou</loc>
+    <loc>https://weatheza.me/weather/changchun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiangmen</loc>
+    <loc>https://weatheza.me/weather/changde.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mianyang</loc>
+    <loc>https://weatheza.me/weather/changsha.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiujiang</loc>
+    <loc>https://weatheza.me/weather/changshu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huaihua</loc>
+    <loc>https://weatheza.me/weather/changwon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huanglongsi</loc>
+    <loc>https://weatheza.me/weather/changzhi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taizhou</loc>
+    <loc>https://weatheza.me/weather/changzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/belähi</loc>
+    <loc>https://weatheza.me/weather/chaoyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yibin</loc>
+    <loc>https://weatheza.me/weather/chaozhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiâ€™an</loc>
+    <loc>https://weatheza.me/weather/charlotte.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yangzhou</loc>
+    <loc>https://weatheza.me/weather/chattogram.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kunming</loc>
+    <loc>https://weatheza.me/weather/chelyabinsk.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/changchun</loc>
+    <loc>https://weatheza.me/weather/chengdu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/luâ€™an</loc>
+    <loc>https://weatheza.me/weather/chengtangcun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xinpu</loc>
+    <loc>https://weatheza.me/weather/chennai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/langfang</loc>
+    <loc>https://weatheza.me/weather/chenzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/boston</loc>
+    <loc>https://weatheza.me/weather/cheongju.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ãœrã¼mqi</loc>
+    <loc>https://weatheza.me/weather/chiang-mai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/suzhou</loc>
+    <loc>https://weatheza.me/weather/chiba.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guigang</loc>
+    <loc>https://weatheza.me/weather/chicago.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shantou</loc>
+    <loc>https://weatheza.me/weather/chifeng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiangguanchi</loc>
+    <loc>https://weatheza.me/weather/chihuahua.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kabul</loc>
+    <loc>https://weatheza.me/weather/chizhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xiaoganzhan</loc>
+    <loc>https://weatheza.me/weather/chongqing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bamako</loc>
+    <loc>https://weatheza.me/weather/chongzuo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kano</loc>
+    <loc>https://weatheza.me/weather/chuzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/luzhou</loc>
+    <loc>https://weatheza.me/weather/cilacap.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hefei</loc>
+    <loc>https://weatheza.me/weather/cincinnati.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hengshui</loc>
+    <loc>https://weatheza.me/weather/ciudad-guayana.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fortaleza</loc>
+    <loc>https://weatheza.me/weather/ciudad-nezahualcã³yotl.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/anqing</loc>
+    <loc>https://weatheza.me/weather/cleveland.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhangjiakou</loc>
+    <loc>https://weatheza.me/weather/cochabamba.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhaoqing</loc>
+    <loc>https://weatheza.me/weather/coimbatore.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shijiazhuang</loc>
+    <loc>https://weatheza.me/weather/cologne.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ningbo</loc>
+    <loc>https://weatheza.me/weather/columbus.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qiqihar</loc>
+    <loc>https://weatheza.me/weather/comayagã¼ela.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/phoenix</loc>
+    <loc>https://weatheza.me/weather/conakry.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/liuzhou</loc>
+    <loc>https://weatheza.me/weather/copenhagen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chifeng</loc>
+    <loc>https://weatheza.me/weather/curitiba.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xiaoxita</loc>
+    <loc>https://weatheza.me/weather/cáº§n-thæ¡.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/amman</loc>
+    <loc>https://weatheza.me/weather/cã³rdoba.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/linfen</loc>
+    <loc>https://weatheza.me/weather/dadukou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xianyang</loc>
+    <loc>https://weatheza.me/weather/daegu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chuzhou</loc>
+    <loc>https://weatheza.me/weather/daejeon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kumasi</loc>
+    <loc>https://weatheza.me/weather/dakar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhuzhou</loc>
+    <loc>https://weatheza.me/weather/dalian.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taiyuan</loc>
+    <loc>https://weatheza.me/weather/dallas.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qingyuan</loc>
+    <loc>https://weatheza.me/weather/damascus.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/meizhou</loc>
+    <loc>https://weatheza.me/weather/dandong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yiyang</loc>
+    <loc>https://weatheza.me/weather/daqing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nanning</loc>
+    <loc>https://weatheza.me/weather/dar-es-salaam.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/harbin</loc>
+    <loc>https://weatheza.me/weather/davao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/loudi</loc>
+    <loc>https://weatheza.me/weather/dayan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/abuja</loc>
+    <loc>https://weatheza.me/weather/daye.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yokohama</loc>
+    <loc>https://weatheza.me/weather/dazhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/suihua</loc>
+    <loc>https://weatheza.me/weather/dehui.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/binzhou</loc>
+    <loc>https://weatheza.me/weather/delhi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zaozhuang</loc>
+    <loc>https://weatheza.me/weather/denver.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/detroit</loc>
+    <loc>https://weatheza.me/weather/depok.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xiamen</loc>
+    <loc>https://weatheza.me/weather/detroit.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mashhad</loc>
+    <loc>https://weatheza.me/weather/deyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/montrã©al</loc>
+    <loc>https://weatheza.me/weather/dezhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fuzhou</loc>
+    <loc>https://weatheza.me/weather/dhaka.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuhu</loc>
+    <loc>https://weatheza.me/weather/dhanbäd.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/medan</loc>
+    <loc>https://weatheza.me/weather/dingxi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yulinshi</loc>
+    <loc>https://weatheza.me/weather/dingzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fuzhou</loc>
+    <loc>https://weatheza.me/weather/diyarbakä±r.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wenzhou</loc>
+    <loc>https://weatheza.me/weather/dnipro.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/changzhou</loc>
+    <loc>https://weatheza.me/weather/doha.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/puyang</loc>
+    <loc>https://weatheza.me/weather/domaa-ahenkro.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nanchang</loc>
+    <loc>https://weatheza.me/weather/donetsk.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baicheng</loc>
+    <loc>https://weatheza.me/weather/dongguan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/seattle</loc>
+    <loc>https://weatheza.me/weather/dongtai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ibadan</loc>
+    <loc>https://weatheza.me/weather/douala.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiaozuo</loc>
+    <loc>https://weatheza.me/weather/dubai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nädampälaiyam</loc>
+    <loc>https://weatheza.me/weather/durban.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/deyang</loc>
+    <loc>https://weatheza.me/weather/dushanbe.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/busan</loc>
+    <loc>https://weatheza.me/weather/ecatepec.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hechi</loc>
+    <loc>https://weatheza.me/weather/edmonton.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tangshan</loc>
+    <loc>https://weatheza.me/weather/el-alto.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lucknow</loc>
+    <loc>https://weatheza.me/weather/el-paso.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/san-francisco</loc>
+    <loc>https://weatheza.me/weather/enugu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/boankra</loc>
+    <loc>https://weatheza.me/weather/erbil.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dubai</loc>
+    <loc>https://weatheza.me/weather/esenyurt.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/anshan</loc>
+    <loc>https://weatheza.me/weather/eskiåÿehir.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guozhen</loc>
+    <loc>https://weatheza.me/weather/ezhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baojishi</loc>
+    <loc>https://weatheza.me/weather/eåÿfahän.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qinzhou</loc>
+    <loc>https://weatheza.me/weather/faisalabad.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guiyang</loc>
+    <loc>https://weatheza.me/weather/fangchenggang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuxi</loc>
+    <loc>https://weatheza.me/weather/farä«däbäd.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kannankulam</loc>
+    <loc>https://weatheza.me/weather/feicheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/caracas</loc>
+    <loc>https://weatheza.me/weather/fort-worth.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kotla-qasim-khan</loc>
+    <loc>https://weatheza.me/weather/fortaleza.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/casablanca</loc>
+    <loc>https://weatheza.me/weather/foshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hanzhong</loc>
+    <loc>https://weatheza.me/weather/freetown.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shiyan</loc>
+    <loc>https://weatheza.me/weather/fukuoka.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guangâ€™an</loc>
+    <loc>https://weatheza.me/weather/fuqing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/faisalabad</loc>
+    <loc>https://weatheza.me/weather/fushun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/changzhi</loc>
+    <loc>https://weatheza.me/weather/fuxin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tongren</loc>
+    <loc>https://weatheza.me/weather/fuyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bengbu</loc>
+    <loc>https://weatheza.me/weather/fuzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/leshan</loc>
+    <loc>https://weatheza.me/weather/fã¨s.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/santa-cruz-de-la-sierra</loc>
+    <loc>https://weatheza.me/weather/ganzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/neijiang</loc>
+    <loc>https://weatheza.me/weather/gaomi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhenjiang</loc>
+    <loc>https://weatheza.me/weather/gaoping.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qinhuangdao</loc>
+    <loc>https://weatheza.me/weather/gaozhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bursa</loc>
+    <loc>https://weatheza.me/weather/gaziantep.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tashkent</loc>
+    <loc>https://weatheza.me/weather/ghäziäbäd.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guayaquil</loc>
+    <loc>https://weatheza.me/weather/giza.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jaipur</loc>
+    <loc>https://weatheza.me/weather/goiã¢nia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lanzhou</loc>
+    <loc>https://weatheza.me/weather/gongzhuling.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ouagadougou</loc>
+    <loc>https://weatheza.me/weather/goyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/athens</loc>
+    <loc>https://weatheza.me/weather/gqeberha.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/san-diego</loc>
+    <loc>https://weatheza.me/weather/guadalajara.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guatemala-city</loc>
+    <loc>https://weatheza.me/weather/guangyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kuwait-city</loc>
+    <loc>https://weatheza.me/weather/guangzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qincheng</loc>
+    <loc>https://weatheza.me/weather/guangâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ä°zmir</loc>
+    <loc>https://weatheza.me/weather/guankou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/quezon-city</loc>
+    <loc>https://weatheza.me/weather/guarulhos.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kyiv</loc>
+    <loc>https://weatheza.me/weather/guatemala-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kottärasshä“ri</loc>
+    <loc>https://weatheza.me/weather/guayaquil.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/meishan</loc>
+    <loc>https://weatheza.me/weather/guigang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/incheon</loc>
+    <loc>https://weatheza.me/weather/guilin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ningde</loc>
+    <loc>https://weatheza.me/weather/guiping.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhongshan</loc>
+    <loc>https://weatheza.me/weather/guiyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/minneapolis</loc>
+    <loc>https://weatheza.me/weather/gujranwala.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tampa</loc>
+    <loc>https://weatheza.me/weather/gulou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/putian</loc>
+    <loc>https://weatheza.me/weather/guozhen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mbuji-mayi</loc>
+    <loc>https://weatheza.me/weather/gurgaon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tongliao</loc>
+    <loc>https://weatheza.me/weather/guwähäti.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chaoyang</loc>
+    <loc>https://weatheza.me/weather/guyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hohhot</loc>
+    <loc>https://weatheza.me/weather/gwalior.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pyongyang</loc>
+    <loc>https://weatheza.me/weather/gwangju.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shaoguan</loc>
+    <loc>https://weatheza.me/weather/gäzipura.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taichung</loc>
+    <loc>https://weatheza.me/weather/haicheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cali</loc>
+    <loc>https://weatheza.me/weather/haikou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/heyuan</loc>
+    <loc>https://weatheza.me/weather/haiphong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuzhou</loc>
+    <loc>https://weatheza.me/weather/haiâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pretoria</loc>
+    <loc>https://weatheza.me/weather/hamburg.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/suining</loc>
+    <loc>https://weatheza.me/weather/hanchuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/omdurman</loc>
+    <loc>https://weatheza.me/weather/handan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/weihai</loc>
+    <loc>https://weatheza.me/weather/hangzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rizhao</loc>
+    <loc>https://weatheza.me/weather/hanoi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/malang</loc>
+    <loc>https://weatheza.me/weather/hanzhong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/stuttgart</loc>
+    <loc>https://weatheza.me/weather/harare.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/daqing</loc>
+    <loc>https://weatheza.me/weather/harbin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rome</loc>
+    <loc>https://weatheza.me/weather/hargeysa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kaohsiung</loc>
+    <loc>https://weatheza.me/weather/hartford.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/brooklyn</loc>
+    <loc>https://weatheza.me/weather/havana.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xiangtan</loc>
+    <loc>https://weatheza.me/weather/hebi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bazhou</loc>
+    <loc>https://weatheza.me/weather/hechi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/handan</loc>
+    <loc>https://weatheza.me/weather/hefei.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/brisbane</loc>
+    <loc>https://weatheza.me/weather/hegang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jinzhou</loc>
+    <loc>https://weatheza.me/weather/helsinki.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/denver</loc>
+    <loc>https://weatheza.me/weather/hengshui.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xinzhou</loc>
+    <loc>https://weatheza.me/weather/hengyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nanping</loc>
+    <loc>https://weatheza.me/weather/hengzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gäzipura</loc>
+    <loc>https://weatheza.me/weather/hermosillo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shanwei</loc>
+    <loc>https://weatheza.me/weather/heyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/maracaibo</loc>
+    <loc>https://weatheza.me/weather/heze.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chaozhou</loc>
+    <loc>https://weatheza.me/weather/hezhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baotou</loc>
+    <loc>https://weatheza.me/weather/hiroshima.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/longyan</loc>
+    <loc>https://weatheza.me/weather/ho-chi-minh-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/weifang</loc>
+    <loc>https://weatheza.me/weather/hohhot.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huaiâ€™an</loc>
+    <loc>https://weatheza.me/weather/hong-kong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zibo</loc>
+    <loc>https://weatheza.me/weather/houston.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/attadappa</loc>
+    <loc>https://weatheza.me/weather/huaibei.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/munich</loc>
+    <loc>https://weatheza.me/weather/huaihua.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gulou</loc>
+    <loc>https://weatheza.me/weather/huainan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/birmingham</loc>
+    <loc>https://weatheza.me/weather/huaiyin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/valencia</loc>
+    <loc>https://weatheza.me/weather/huaiâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/damascus</loc>
+    <loc>https://weatheza.me/weather/huanggang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chattogram</loc>
+    <loc>https://weatheza.me/weather/huanglongsi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/brazzaville</loc>
+    <loc>https://weatheza.me/weather/huangshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yangjiang</loc>
+    <loc>https://weatheza.me/weather/huangshi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sanaa</loc>
+    <loc>https://weatheza.me/weather/huazhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/barmhän-kalän</loc>
+    <loc>https://weatheza.me/weather/hubli.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/medellã­n</loc>
+    <loc>https://weatheza.me/weather/huilong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dingxi</loc>
+    <loc>https://weatheza.me/weather/huizhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shaoxing</loc>
+    <loc>https://weatheza.me/weather/huludao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yantai</loc>
+    <loc>https://weatheza.me/weather/huzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huizhou</loc>
+    <loc>https://weatheza.me/weather/hwasu-dong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xuanzhou</loc>
+    <loc>https://weatheza.me/weather/hyderabad-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mirzäpur</loc>
+    <loc>https://weatheza.me/weather/hyderäbäd.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hamburg</loc>
+    <loc>https://weatheza.me/weather/häora.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taipei</loc>
+    <loc>https://weatheza.me/weather/ibadan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ankang</loc>
+    <loc>https://weatheza.me/weather/ikare.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zigong</loc>
+    <loc>https://weatheza.me/weather/ikeja.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sanming</loc>
+    <loc>https://weatheza.me/weather/ilorin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/toluca</loc>
+    <loc>https://weatheza.me/weather/incheon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huangshi</loc>
+    <loc>https://weatheza.me/weather/indianapolis.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yaoundã©</loc>
+    <loc>https://weatheza.me/weather/indore.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhuhai</loc>
+    <loc>https://weatheza.me/weather/ipoh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huludao</loc>
+    <loc>https://weatheza.me/weather/islamabad.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baoshan</loc>
+    <loc>https://weatheza.me/weather/istanbul.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mecca</loc>
+    <loc>https://weatheza.me/weather/jabalpur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/vancouver</loc>
+    <loc>https://weatheza.me/weather/jacksonville.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lianshan</loc>
+    <loc>https://weatheza.me/weather/jaipur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/beirut</loc>
+    <loc>https://weatheza.me/weather/jakarta.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/salvador</loc>
+    <loc>https://weatheza.me/weather/jalandhar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bucharest</loc>
+    <loc>https://weatheza.me/weather/jamshedpur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/longba</loc>
+    <loc>https://weatheza.me/weather/jeddah.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nägpur</loc>
+    <loc>https://weatheza.me/weather/jerusalem.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/queens</loc>
+    <loc>https://weatheza.me/weather/jiamusi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tieling</loc>
+    <loc>https://weatheza.me/weather/jiancheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yunfu</loc>
+    <loc>https://weatheza.me/weather/jiangguanchi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bekasi</loc>
+    <loc>https://weatheza.me/weather/jiangmen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/daegu</loc>
+    <loc>https://weatheza.me/weather/jianguang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ghäziäbäd</loc>
+    <loc>https://weatheza.me/weather/jiangyin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/luoyang</loc>
+    <loc>https://weatheza.me/weather/jiaozhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/luohe</loc>
+    <loc>https://weatheza.me/weather/jiaozuo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/algiers</loc>
+    <loc>https://weatheza.me/weather/jiaxing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/anshun</loc>
+    <loc>https://weatheza.me/weather/jieyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huainan</loc>
+    <loc>https://weatheza.me/weather/jinan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/depok</loc>
+    <loc>https://weatheza.me/weather/jincheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/konya</loc>
+    <loc>https://weatheza.me/weather/jingdezhen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/haiphong</loc>
+    <loc>https://weatheza.me/weather/jingling.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yanjiang</loc>
+    <loc>https://weatheza.me/weather/jinhua.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guangyuan</loc>
+    <loc>https://weatheza.me/weather/jining.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baku</loc>
+    <loc>https://weatheza.me/weather/jinzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yingkou</loc>
+    <loc>https://weatheza.me/weather/jiujiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mudanjiang</loc>
+    <loc>https://weatheza.me/weather/jixi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/riverside</loc>
+    <loc>https://weatheza.me/weather/jiâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fukuoka</loc>
+    <loc>https://weatheza.me/weather/jodhpur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nantong</loc>
+    <loc>https://weatheza.me/weather/johannesburg.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lincang</loc>
+    <loc>https://weatheza.me/weather/joã£o-pessoa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/las-vegas</loc>
+    <loc>https://weatheza.me/weather/juã¡rez.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/haikou</loc>
+    <loc>https://weatheza.me/weather/kabul.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yuxi</loc>
+    <loc>https://weatheza.me/weather/kaiyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tangerang</loc>
+    <loc>https://weatheza.me/weather/kalleli.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/supaul</loc>
+    <loc>https://weatheza.me/weather/kalyän.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/almaty</loc>
+    <loc>https://weatheza.me/weather/kampala.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/vienna</loc>
+    <loc>https://weatheza.me/weather/kananga.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/eåÿfahän</loc>
+    <loc>https://weatheza.me/weather/kannankulam.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xining</loc>
+    <loc>https://weatheza.me/weather/kano.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jincheng</loc>
+    <loc>https://weatheza.me/weather/kansas-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baltimore</loc>
+    <loc>https://weatheza.me/weather/kaohsiung.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dandong</loc>
+    <loc>https://weatheza.me/weather/karachi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yanâ€™an</loc>
+    <loc>https://weatheza.me/weather/karaj.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qinbaling</loc>
+    <loc>https://weatheza.me/weather/kashgar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gaoping</loc>
+    <loc>https://weatheza.me/weather/kathmandu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/awka</loc>
+    <loc>https://weatheza.me/weather/kawasaki.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taizhou</loc>
+    <loc>https://weatheza.me/weather/kayseri.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/maâ€™anshan</loc>
+    <loc>https://weatheza.me/weather/kazan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiamusi</loc>
+    <loc>https://weatheza.me/weather/kermänshäh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/perth</loc>
+    <loc>https://weatheza.me/weather/keã§iã¶ren.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gaziantep</loc>
+    <loc>https://weatheza.me/weather/kharkiv.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/phnom-penh</loc>
+    <loc>https://weatheza.me/weather/khartoum.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/st.-louis</loc>
+    <loc>https://weatheza.me/weather/khartoum-north.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mogadishu</loc>
+    <loc>https://weatheza.me/weather/khulna.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lishui</loc>
+    <loc>https://weatheza.me/weather/kibanseke-premiã¨re.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kowloon</loc>
+    <loc>https://weatheza.me/weather/kigali.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cã³rdoba</loc>
+    <loc>https://weatheza.me/weather/kinshasa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zamboanga-city</loc>
+    <loc>https://weatheza.me/weather/kirkuk.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rawalpindi</loc>
+    <loc>https://weatheza.me/weather/kisangani.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/havana</loc>
+    <loc>https://weatheza.me/weather/kitakyå«shå«.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chongzuo</loc>
+    <loc>https://weatheza.me/weather/klang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/portland</loc>
+    <loc>https://weatheza.me/weather/kolkäta.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/laibin</loc>
+    <loc>https://weatheza.me/weather/konya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/san-antonio</loc>
+    <loc>https://weatheza.me/weather/kota.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/vadodara</loc>
+    <loc>https://weatheza.me/weather/kotla-qasim-khan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qingyang</loc>
+    <loc>https://weatheza.me/weather/kottärasshä“ri.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/räjkot</loc>
+    <loc>https://weatheza.me/weather/kowloon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shangzhou</loc>
+    <loc>https://weatheza.me/weather/krasnodar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/vishäkhapatnam</loc>
+    <loc>https://weatheza.me/weather/krasnoyarsk.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shengli</loc>
+    <loc>https://weatheza.me/weather/kuaidamao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sanmenxia</loc>
+    <loc>https://weatheza.me/weather/kuala-lumpur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/warsaw</loc>
+    <loc>https://weatheza.me/weather/kumasi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gujranwala</loc>
+    <loc>https://weatheza.me/weather/kunming.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hezhou</loc>
+    <loc>https://weatheza.me/weather/kuwait-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/aleppo</loc>
+    <loc>https://weatheza.me/weather/kyiv.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tijuana</loc>
+    <loc>https://weatheza.me/weather/kyåto.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/puning</loc>
+    <loc>https://weatheza.me/weather/kåbe.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/indore</loc>
+    <loc>https://weatheza.me/weather/la-plata.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/minsk</loc>
+    <loc>https://weatheza.me/weather/lagos.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/karaj</loc>
+    <loc>https://weatheza.me/weather/lahore.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kananga</loc>
+    <loc>https://weatheza.me/weather/laibin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huaibei</loc>
+    <loc>https://weatheza.me/weather/laiwu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/peshawar</loc>
+    <loc>https://weatheza.me/weather/langfang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sacramento</loc>
+    <loc>https://weatheza.me/weather/lanzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sapporo</loc>
+    <loc>https://weatheza.me/weather/las-vegas.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tilburg</loc>
+    <loc>https://weatheza.me/weather/leiyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/austin</loc>
+    <loc>https://weatheza.me/weather/leizhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/orlando</loc>
+    <loc>https://weatheza.me/weather/leshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/davao</loc>
+    <loc>https://weatheza.me/weather/leã³n-de-los-aldama.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/songjiang</loc>
+    <loc>https://weatheza.me/weather/lhasa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yinchuan</loc>
+    <loc>https://weatheza.me/weather/liangshi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/abhepur</loc>
+    <loc>https://weatheza.me/weather/lianjiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/thäne</loc>
+    <loc>https://weatheza.me/weather/lianshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/multan</loc>
+    <loc>https://weatheza.me/weather/lianyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/port-harcourt</loc>
+    <loc>https://weatheza.me/weather/liaocheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fushun</loc>
+    <loc>https://weatheza.me/weather/liaoyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tainan</loc>
+    <loc>https://weatheza.me/weather/liaoyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pingliang</loc>
+    <loc>https://weatheza.me/weather/lilongwe.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/siping</loc>
+    <loc>https://weatheza.me/weather/lima.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/san-juan</loc>
+    <loc>https://weatheza.me/weather/lincang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pingxiang</loc>
+    <loc>https://weatheza.me/weather/linfen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bhopäl</loc>
+    <loc>https://weatheza.me/weather/lingcheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mosul</loc>
+    <loc>https://weatheza.me/weather/linhai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/diyarbakä±r</loc>
+    <loc>https://weatheza.me/weather/linyi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lubumbashi</loc>
+    <loc>https://weatheza.me/weather/lishui.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/benin-city</loc>
+    <loc>https://weatheza.me/weather/liuzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/curitiba</loc>
+    <loc>https://weatheza.me/weather/lomã©.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/san-jose</loc>
+    <loc>https://weatheza.me/weather/london.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shuyangzha</loc>
+    <loc>https://weatheza.me/weather/longba.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/adana</loc>
+    <loc>https://weatheza.me/weather/longyan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/quito</loc>
+    <loc>https://weatheza.me/weather/los-angeles.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ä€gra</loc>
+    <loc>https://weatheza.me/weather/loudi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/peyanvilai</loc>
+    <loc>https://weatheza.me/weather/louisville.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lusaka</loc>
+    <loc>https://weatheza.me/weather/luanda.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/indianapolis</loc>
+    <loc>https://weatheza.me/weather/lubumbashi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hyderabad-city</loc>
+    <loc>https://weatheza.me/weather/lucknow.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pimpri-chinchwad</loc>
+    <loc>https://weatheza.me/weather/ludhiäna.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/maracay</loc>
+    <loc>https://weatheza.me/weather/luocheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/masqaå£</loc>
+    <loc>https://weatheza.me/weather/luohe.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/montevideo</loc>
+    <loc>https://weatheza.me/weather/luoyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pittsburgh</loc>
+    <loc>https://weatheza.me/weather/lusaka.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cincinnati</loc>
+    <loc>https://weatheza.me/weather/luzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/manhattan</loc>
+    <loc>https://weatheza.me/weather/luâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kansas-city</loc>
+    <loc>https://weatheza.me/weather/maceiã³.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/budapest</loc>
+    <loc>https://weatheza.me/weather/macheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/patna</loc>
+    <loc>https://weatheza.me/weather/madrid.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kampala</loc>
+    <loc>https://weatheza.me/weather/madurai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/beihai</loc>
+    <loc>https://weatheza.me/weather/maiduguri.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sanzhou</loc>
+    <loc>https://weatheza.me/weather/makassar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cleveland</loc>
+    <loc>https://weatheza.me/weather/malang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/conakry</loc>
+    <loc>https://weatheza.me/weather/managua.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ximeicun</loc>
+    <loc>https://weatheza.me/weather/mandalay.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/caloocan-city</loc>
+    <loc>https://weatheza.me/weather/manhattan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ecatepec</loc>
+    <loc>https://weatheza.me/weather/manila.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yushan</loc>
+    <loc>https://weatheza.me/weather/maoming.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fuxin</loc>
+    <loc>https://weatheza.me/weather/maputo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/novosibirsk</loc>
+    <loc>https://weatheza.me/weather/maracaibo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/biläspur</loc>
+    <loc>https://weatheza.me/weather/maracay.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/semarang</loc>
+    <loc>https://weatheza.me/weather/marrakech.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jingdezhen</loc>
+    <loc>https://weatheza.me/weather/marseille.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ludhiäna</loc>
+    <loc>https://weatheza.me/weather/masbate.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/liaoyang</loc>
+    <loc>https://weatheza.me/weather/mashhad.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiangyin</loc>
+    <loc>https://weatheza.me/weather/masqaå£.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/valencia</loc>
+    <loc>https://weatheza.me/weather/matola.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shuozhou</loc>
+    <loc>https://weatheza.me/weather/maâ€™anshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/leã³n-de-los-aldama</loc>
+    <loc>https://weatheza.me/weather/mbandaka.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/columbus</loc>
+    <loc>https://weatheza.me/weather/mbuji-mayi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/puebla</loc>
+    <loc>https://weatheza.me/weather/mcallen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/biãªn-hã²a</loc>
+    <loc>https://weatheza.me/weather/mecca.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chengtangcun</loc>
+    <loc>https://weatheza.me/weather/medan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yopougon</loc>
+    <loc>https://weatheza.me/weather/medellã­n.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hebi</loc>
+    <loc>https://weatheza.me/weather/medina.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shä«räz</loc>
+    <loc>https://weatheza.me/weather/meerut.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dushanbe</loc>
+    <loc>https://weatheza.me/weather/meishan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/madurai</loc>
+    <loc>https://weatheza.me/weather/meizhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huzhou</loc>
+    <loc>https://weatheza.me/weather/melbourne.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/harare</loc>
+    <loc>https://weatheza.me/weather/memphis.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tabrä«z</loc>
+    <loc>https://weatheza.me/weather/mersin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jamshedpur</loc>
+    <loc>https://weatheza.me/weather/mexicali.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baicheng</loc>
+    <loc>https://weatheza.me/weather/mexico-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/san-josã©</loc>
+    <loc>https://weatheza.me/weather/miami.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shaoyang</loc>
+    <loc>https://weatheza.me/weather/mianyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/san-salvador</loc>
+    <loc>https://weatheza.me/weather/milan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/palembang</loc>
+    <loc>https://weatheza.me/weather/milwaukee.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kawasaki</loc>
+    <loc>https://weatheza.me/weather/minneapolis.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kåbe</loc>
+    <loc>https://weatheza.me/weather/minsk.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiaxing</loc>
+    <loc>https://weatheza.me/weather/mirzäpur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhangjiajie</loc>
+    <loc>https://weatheza.me/weather/mogadishu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baiyin</loc>
+    <loc>https://weatheza.me/weather/mombasa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guiping</loc>
+    <loc>https://weatheza.me/weather/monrovia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/changshu</loc>
+    <loc>https://weatheza.me/weather/monterrey.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jixi</loc>
+    <loc>https://weatheza.me/weather/montevideo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xushan</loc>
+    <loc>https://weatheza.me/weather/montrã©al.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lomã©</loc>
+    <loc>https://weatheza.me/weather/morelia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/niamey</loc>
+    <loc>https://weatheza.me/weather/morädäbäd.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gwangju</loc>
+    <loc>https://weatheza.me/weather/moscow.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/recife</loc>
+    <loc>https://weatheza.me/weather/mosul.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/näsik</loc>
+    <loc>https://weatheza.me/weather/mudanjiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/abu-dhabi</loc>
+    <loc>https://weatheza.me/weather/multan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/onitsha</loc>
+    <loc>https://weatheza.me/weather/mumbai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/amsterdam</loc>
+    <loc>https://weatheza.me/weather/munich.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/vijayaväda</loc>
+    <loc>https://weatheza.me/weather/muscat.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zapopan</loc>
+    <loc>https://weatheza.me/weather/mushin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/daejeon</loc>
+    <loc>https://weatheza.me/weather/mwanza.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bronx</loc>
+    <loc>https://weatheza.me/weather/mysore.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/auckland</loc>
+    <loc>https://weatheza.me/weather/mã¡laga.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yekaterinburg</loc>
+    <loc>https://weatheza.me/weather/mã©rida.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuwei</loc>
+    <loc>https://weatheza.me/weather/nada.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jinhua</loc>
+    <loc>https://weatheza.me/weather/nagoya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kyåto</loc>
+    <loc>https://weatheza.me/weather/nairobi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pizhou</loc>
+    <loc>https://weatheza.me/weather/najafgarh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yangshe</loc>
+    <loc>https://weatheza.me/weather/namangan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dakar</loc>
+    <loc>https://weatheza.me/weather/nanchang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/charlotte</loc>
+    <loc>https://weatheza.me/weather/nanchong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yucheng</loc>
+    <loc>https://weatheza.me/weather/nangandao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kayseri</loc>
+    <loc>https://weatheza.me/weather/nanjing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/virginia-beach</loc>
+    <loc>https://weatheza.me/weather/nanning.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ruiâ€™an</loc>
+    <loc>https://weatheza.me/weather/nanping.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/muscat</loc>
+    <loc>https://weatheza.me/weather/nantong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kharkiv</loc>
+    <loc>https://weatheza.me/weather/nanyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pointe-noire</loc>
+    <loc>https://weatheza.me/weather/naples.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/medina</loc>
+    <loc>https://weatheza.me/weather/narela.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sangereng</loc>
+    <loc>https://weatheza.me/weather/nashville.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/farä«däbäd</loc>
+    <loc>https://weatheza.me/weather/naucalpan-de-juã¡rez.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sofia</loc>
+    <loc>https://weatheza.me/weather/nay-pyi-taw.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ulaanbaatar</loc>
+    <loc>https://weatheza.me/weather/neijiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/adelaide</loc>
+    <loc>https://weatheza.me/weather/new-orleans.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/prague</loc>
+    <loc>https://weatheza.me/weather/new-york.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wenling</loc>
+    <loc>https://weatheza.me/weather/nezahualcã³yotl.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/copenhagen</loc>
+    <loc>https://weatheza.me/weather/niamey.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/najafgarh</loc>
+    <loc>https://weatheza.me/weather/ningbo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lianjiang</loc>
+    <loc>https://weatheza.me/weather/ningde.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/helsinki</loc>
+    <loc>https://weatheza.me/weather/ninh-bã¬nh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/samsun</loc>
+    <loc>https://weatheza.me/weather/nizhniy-novgorod.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/milan</loc>
+    <loc>https://weatheza.me/weather/nouakchott.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/antalya</loc>
+    <loc>https://weatheza.me/weather/novosibirsk.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/santiago</loc>
+    <loc>https://weatheza.me/weather/nädampälaiyam.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chizhou</loc>
+    <loc>https://weatheza.me/weather/nägpur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/makassar</loc>
+    <loc>https://weatheza.me/weather/näräyanganj.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/porto-alegre</loc>
+    <loc>https://weatheza.me/weather/näsik.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huangshan</loc>
+    <loc>https://weatheza.me/weather/odesa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gaozhou</loc>
+    <loc>https://weatheza.me/weather/ogbomoso.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/barranquilla</loc>
+    <loc>https://weatheza.me/weather/oklahoma-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/al-baåÿrah</loc>
+    <loc>https://weatheza.me/weather/omaha.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/benxi</loc>
+    <loc>https://weatheza.me/weather/omdurman.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/saitama</loc>
+    <loc>https://weatheza.me/weather/omsk.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ahväz</loc>
+    <loc>https://weatheza.me/weather/onitsha.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guarulhos</loc>
+    <loc>https://weatheza.me/weather/orlando.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/leizhou</loc>
+    <loc>https://weatheza.me/weather/osmangazi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/juã¡rez</loc>
+    <loc>https://weatheza.me/weather/ottawa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mandalay</loc>
+    <loc>https://weatheza.me/weather/ouagadougou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yangquan</loc>
+    <loc>https://weatheza.me/weather/owerri.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fuqing</loc>
+    <loc>https://weatheza.me/weather/palembang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xintai</loc>
+    <loc>https://weatheza.me/weather/panama-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wusong</loc>
+    <loc>https://weatheza.me/weather/paris.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tongling</loc>
+    <loc>https://weatheza.me/weather/patna.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/calgary</loc>
+    <loc>https://weatheza.me/weather/pekanbaru.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/meerut</loc>
+    <loc>https://weatheza.me/weather/perm.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jacksonville</loc>
+    <loc>https://weatheza.me/weather/perth.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kuaidamao</loc>
+    <loc>https://weatheza.me/weather/peshawar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huazhou</loc>
+    <loc>https://weatheza.me/weather/peyanvilai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/milwaukee</loc>
+    <loc>https://weatheza.me/weather/philadelphia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuzhong</loc>
+    <loc>https://weatheza.me/weather/phnom-penh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/belã©m</loc>
+    <loc>https://weatheza.me/weather/phoenix.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cacuaco</loc>
+    <loc>https://weatheza.me/weather/pietermaritzburg.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rosario</loc>
+    <loc>https://weatheza.me/weather/pimpri-chinchwad.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tangier</loc>
+    <loc>https://weatheza.me/weather/pingdingshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/antananarivo</loc>
+    <loc>https://weatheza.me/weather/pingdu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/canagatan</loc>
+    <loc>https://weatheza.me/weather/pingliang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/soweto</loc>
+    <loc>https://weatheza.me/weather/pingxiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/providence</loc>
+    <loc>https://weatheza.me/weather/pittsburgh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xiantao</loc>
+    <loc>https://weatheza.me/weather/pizhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jabalpur</loc>
+    <loc>https://weatheza.me/weather/pointe-noire.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huaiyin</loc>
+    <loc>https://weatheza.me/weather/port-au-prince.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yutan</loc>
+    <loc>https://weatheza.me/weather/port-harcourt.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kazan</loc>
+    <loc>https://weatheza.me/weather/portland.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bagam</loc>
+    <loc>https://weatheza.me/weather/porto-alegre.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dayan</loc>
+    <loc>https://weatheza.me/weather/portsmouth.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/comayagã¼ela</loc>
+    <loc>https://weatheza.me/weather/prague.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/brussels</loc>
+    <loc>https://weatheza.me/weather/prayagraj.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/laiwu</loc>
+    <loc>https://weatheza.me/weather/pretoria.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huazhou</loc>
+    <loc>https://weatheza.me/weather/providence.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sharjah</loc>
+    <loc>https://weatheza.me/weather/pudong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kalyän</loc>
+    <loc>https://weatheza.me/weather/puebla.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rucheng</loc>
+    <loc>https://weatheza.me/weather/pune.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/barquisimeto</loc>
+    <loc>https://weatheza.me/weather/puning.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yongcheng</loc>
+    <loc>https://weatheza.me/weather/putian.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sumedang</loc>
+    <loc>https://weatheza.me/weather/puyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cáº§n-thæ¡</loc>
+    <loc>https://weatheza.me/weather/pyongyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/suwon</loc>
+    <loc>https://weatheza.me/weather/pänä«pat.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yiwu</loc>
+    <loc>https://weatheza.me/weather/qianxi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/vasai-virar</loc>
+    <loc>https://weatheza.me/weather/qinbaling.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/campinas</loc>
+    <loc>https://weatheza.me/weather/qincheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dadukou</loc>
+    <loc>https://weatheza.me/weather/qingdao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lingcheng</loc>
+    <loc>https://weatheza.me/weather/qingping.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shuangyashan</loc>
+    <loc>https://weatheza.me/weather/qingyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nizhniy-novgorod</loc>
+    <loc>https://weatheza.me/weather/qingyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pänä«pat</loc>
+    <loc>https://weatheza.me/weather/qingzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qom</loc>
+    <loc>https://weatheza.me/weather/qinhuangdao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mombasa</loc>
+    <loc>https://weatheza.me/weather/qinzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hargeysa</loc>
+    <loc>https://weatheza.me/weather/qiqihar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baidoa</loc>
+    <loc>https://weatheza.me/weather/qom.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/väränasi</loc>
+    <loc>https://weatheza.me/weather/quanzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hiroshima</loc>
+    <loc>https://weatheza.me/weather/queens.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chiang-mai</loc>
+    <loc>https://weatheza.me/weather/quetta.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/belgrade</loc>
+    <loc>https://weatheza.me/weather/quezon-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/maiduguri</loc>
+    <loc>https://weatheza.me/weather/quito.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kalleli</loc>
+    <loc>https://weatheza.me/weather/qujing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/batam-centre</loc>
+    <loc>https://weatheza.me/weather/quzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pingdu</loc>
+    <loc>https://weatheza.me/weather/raipur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rongcheng</loc>
+    <loc>https://weatheza.me/weather/raleigh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mbandaka</loc>
+    <loc>https://weatheza.me/weather/rangapukur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xinyu</loc>
+    <loc>https://weatheza.me/weather/rangoon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/doha</loc>
+    <loc>https://weatheza.me/weather/rawalpindi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shymkent</loc>
+    <loc>https://weatheza.me/weather/recife.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tripoli</loc>
+    <loc>https://weatheza.me/weather/renqiu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/srä«nagar</loc>
+    <loc>https://weatheza.me/weather/richmond.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nashville</loc>
+    <loc>https://weatheza.me/weather/rio-de-janeiro.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chelyabinsk</loc>
+    <loc>https://weatheza.me/weather/riverside.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/aurangäbäd</loc>
+    <loc>https://weatheza.me/weather/riyadh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cilacap</loc>
+    <loc>https://weatheza.me/weather/rizhao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xinhualu</loc>
+    <loc>https://weatheza.me/weather/rome.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/salt-lake-city</loc>
+    <loc>https://weatheza.me/weather/rongcheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guankou</loc>
+    <loc>https://weatheza.me/weather/rongjiawan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bandar-lampung</loc>
+    <loc>https://weatheza.me/weather/rosario.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dhanbäd</loc>
+    <loc>https://weatheza.me/weather/rostov.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nay-pyi-taw</loc>
+    <loc>https://weatheza.me/weather/rucheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/aba</loc>
+    <loc>https://weatheza.me/weather/ruiâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jingling</loc>
+    <loc>https://weatheza.me/weather/räjkot.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhuji</loc>
+    <loc>https://weatheza.me/weather/ränchi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tegucigalpa</loc>
+    <loc>https://weatheza.me/weather/sacramento.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kigali</loc>
+    <loc>https://weatheza.me/weather/saint-petersburg.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/samara</loc>
+    <loc>https://weatheza.me/weather/saitama.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yingtan</loc>
+    <loc>https://weatheza.me/weather/sakai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/edmonton</loc>
+    <loc>https://weatheza.me/weather/sale.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/raleigh</loc>
+    <loc>https://weatheza.me/weather/salt-lake-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bishkek</loc>
+    <loc>https://weatheza.me/weather/saltillo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bujumbura</loc>
+    <loc>https://weatheza.me/weather/salvador.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guyuan</loc>
+    <loc>https://weatheza.me/weather/samara.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/leiyang</loc>
+    <loc>https://weatheza.me/weather/samarinda.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/krasnodar</loc>
+    <loc>https://weatheza.me/weather/samsun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rostov</loc>
+    <loc>https://weatheza.me/weather/san-antonio.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/maputo</loc>
+    <loc>https://weatheza.me/weather/san-diego.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bukavu</loc>
+    <loc>https://weatheza.me/weather/san-francisco.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/amritsar</loc>
+    <loc>https://weatheza.me/weather/san-jose.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shagamu</loc>
+    <loc>https://weatheza.me/weather/san-josã©.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/alä«garh</loc>
+    <loc>https://weatheza.me/weather/san-juan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhangye</loc>
+    <loc>https://weatheza.me/weather/san-salvador.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ufa</loc>
+    <loc>https://weatheza.me/weather/sanaa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/santo-domingo</loc>
+    <loc>https://weatheza.me/weather/sangereng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ulsan</loc>
+    <loc>https://weatheza.me/weather/sanmenxia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rongcheng</loc>
+    <loc>https://weatheza.me/weather/sanming.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tbilisi</loc>
+    <loc>https://weatheza.me/weather/santa-cruz-de-la-sierra.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/guwähäti</loc>
+    <loc>https://weatheza.me/weather/santiago.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fã¨s</loc>
+    <loc>https://weatheza.me/weather/santiago-del-estero.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yingchuan</loc>
+    <loc>https://weatheza.me/weather/santo-domingo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ninh-bã¬nh</loc>
+    <loc>https://weatheza.me/weather/santo-domingo-este.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yerevan</loc>
+    <loc>https://weatheza.me/weather/sanya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mwanza</loc>
+    <loc>https://weatheza.me/weather/sanzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/omsk</loc>
+    <loc>https://weatheza.me/weather/sapporo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mexicali</loc>
+    <loc>https://weatheza.me/weather/saratov.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sevilla</loc>
+    <loc>https://weatheza.me/weather/seattle.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ikare</loc>
+    <loc>https://weatheza.me/weather/seberang-jaya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dingzhou</loc>
+    <loc>https://weatheza.me/weather/semarang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tamale</loc>
+    <loc>https://weatheza.me/weather/sendai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yuyao</loc>
+    <loc>https://weatheza.me/weather/seoul.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/goiã¢nia</loc>
+    <loc>https://weatheza.me/weather/setagaya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/krasnoyarsk</loc>
+    <loc>https://weatheza.me/weather/sevilla.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cologne</loc>
+    <loc>https://weatheza.me/weather/shache.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ubungo</loc>
+    <loc>https://weatheza.me/weather/shagamu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yicheng</loc>
+    <loc>https://weatheza.me/weather/shanghai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/richmond</loc>
+    <loc>https://weatheza.me/weather/shangqiu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kisangani</loc>
+    <loc>https://weatheza.me/weather/shangrao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ezhou</loc>
+    <loc>https://weatheza.me/weather/shangzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/astana</loc>
+    <loc>https://weatheza.me/weather/shantou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhufeng</loc>
+    <loc>https://weatheza.me/weather/shanwei.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nezahualcã³yotl</loc>
+    <loc>https://weatheza.me/weather/shaoguan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nouakchott</loc>
+    <loc>https://weatheza.me/weather/shaoxing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/häora</loc>
+    <loc>https://weatheza.me/weather/shaoyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tongjin</loc>
+    <loc>https://weatheza.me/weather/sharjah.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ränchi</loc>
+    <loc>https://weatheza.me/weather/shengli.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ciudad-nezahualcã³yotl</loc>
+    <loc>https://weatheza.me/weather/shenyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gwalior</loc>
+    <loc>https://weatheza.me/weather/shenzhen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ottawa</loc>
+    <loc>https://weatheza.me/weather/shijiazhuang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/haicheng</loc>
+    <loc>https://weatheza.me/weather/shiyan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jianguang</loc>
+    <loc>https://weatheza.me/weather/shouguang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/goyang</loc>
+    <loc>https://weatheza.me/weather/shuangyashan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sendai</loc>
+    <loc>https://weatheza.me/weather/shubrä-al-khaymah.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xibeijie</loc>
+    <loc>https://weatheza.me/weather/shuizhai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chandä«garh</loc>
+    <loc>https://weatheza.me/weather/shuozhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/voronezh</loc>
+    <loc>https://weatheza.me/weather/shuyangzha.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/managua</loc>
+    <loc>https://weatheza.me/weather/shymkent.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhongwei</loc>
+    <loc>https://weatheza.me/weather/shä«räz.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiancheng</loc>
+    <loc>https://weatheza.me/weather/singapore.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mersin</loc>
+    <loc>https://weatheza.me/weather/siping.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shouguang</loc>
+    <loc>https://weatheza.me/weather/sofia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/liangshi</loc>
+    <loc>https://weatheza.me/weather/soläpur.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sã£o-luã­s</loc>
+    <loc>https://weatheza.me/weather/songjiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jodhpur</loc>
+    <loc>https://weatheza.me/weather/southampton.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/memphis</loc>
+    <loc>https://weatheza.me/weather/soweto.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/matola</loc>
+    <loc>https://weatheza.me/weather/srä«nagar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ogbomoso</loc>
+    <loc>https://weatheza.me/weather/st.-louis.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sanya</loc>
+    <loc>https://weatheza.me/weather/stockholm.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rangapukur</loc>
+    <loc>https://weatheza.me/weather/stuttgart.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ashgabat</loc>
+    <loc>https://weatheza.me/weather/suihua.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/enugu</loc>
+    <loc>https://weatheza.me/weather/suining.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/linhai</loc>
+    <loc>https://weatheza.me/weather/sumedang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/perm</loc>
+    <loc>https://weatheza.me/weather/supaul.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shubrä-al-khaymah</loc>
+    <loc>https://weatheza.me/weather/suqian.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/monrovia</loc>
+    <loc>https://weatheza.me/weather/surabaya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/islamabad</loc>
+    <loc>https://weatheza.me/weather/suwon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xinyi</loc>
+    <loc>https://weatheza.me/weather/suzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/thá»§-äá»©c</loc>
+    <loc>https://weatheza.me/weather/sydney.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ä€qchah</loc>
+    <loc>https://weatheza.me/weather/sã£o-bernardo-do-campo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/odesa</loc>
+    <loc>https://weatheza.me/weather/sã£o-gonã§alo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/raipur</loc>
+    <loc>https://weatheza.me/weather/sã£o-luã­s.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/namangan</loc>
+    <loc>https://weatheza.me/weather/sã£o-paulo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/changwon</loc>
+    <loc>https://weatheza.me/weather/sångnam.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/arequipa</loc>
+    <loc>https://weatheza.me/weather/så«rat.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tshikapa</loc>
+    <loc>https://weatheza.me/weather/tabrä«z.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/volgograd</loc>
+    <loc>https://weatheza.me/weather/tabå«k.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/morelia</loc>
+    <loc>https://weatheza.me/weather/taguig-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kota</loc>
+    <loc>https://weatheza.me/weather/taichung.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/quetta</loc>
+    <loc>https://weatheza.me/weather/tainan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/oklahoma-city</loc>
+    <loc>https://weatheza.me/weather/taipei.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/domaa-ahenkro</loc>
+    <loc>https://weatheza.me/weather/taishan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bareilly</loc>
+    <loc>https://weatheza.me/weather/taixing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/liaoyuan</loc>
+    <loc>https://weatheza.me/weather/taiyuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/stockholm</loc>
+    <loc>https://weatheza.me/weather/taizhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bordeaux</loc>
+    <loc>https://weatheza.me/weather/taiâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taixing</loc>
+    <loc>https://weatheza.me/weather/tamale.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lilongwe</loc>
+    <loc>https://weatheza.me/weather/tampa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/port-au-prince</loc>
+    <loc>https://weatheza.me/weather/tangerang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/esenyurt</loc>
+    <loc>https://weatheza.me/weather/tangier.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pekanbaru</loc>
+    <loc>https://weatheza.me/weather/tangshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bogor</loc>
+    <loc>https://weatheza.me/weather/tashkent.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ciudad-guayana</loc>
+    <loc>https://weatheza.me/weather/tbilisi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chiba</loc>
+    <loc>https://weatheza.me/weather/tegucigalpa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kirkuk</loc>
+    <loc>https://weatheza.me/weather/tehran.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shuizhai</loc>
+    <loc>https://weatheza.me/weather/teresina.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qianxi</loc>
+    <loc>https://weatheza.me/weather/thanh-hã³a.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hartford</loc>
+    <loc>https://weatheza.me/weather/thá»§-äá»©c.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dnipro</loc>
+    <loc>https://weatheza.me/weather/thäne.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/baishan</loc>
+    <loc>https://weatheza.me/weather/tianjin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/näräyanganj</loc>
+    <loc>https://weatheza.me/weather/tieling.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gqeberha</loc>
+    <loc>https://weatheza.me/weather/tijuana.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/huilong</loc>
+    <loc>https://weatheza.me/weather/tilburg.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mã¡laga</loc>
+    <loc>https://weatheza.me/weather/tiruppå«r.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/marrakech</loc>
+    <loc>https://weatheza.me/weather/tokyo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/louisville</loc>
+    <loc>https://weatheza.me/weather/toluca.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cebu-city</loc>
+    <loc>https://weatheza.me/weather/tongjin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/asmara</loc>
+    <loc>https://weatheza.me/weather/tongliao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/coimbatore</loc>
+    <loc>https://weatheza.me/weather/tongling.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/maceiã³</loc>
+    <loc>https://weatheza.me/weather/tongren.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/nada</loc>
+    <loc>https://weatheza.me/weather/tongshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fangchenggang</loc>
+    <loc>https://weatheza.me/weather/toronto.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/soläpur</loc>
+    <loc>https://weatheza.me/weather/trichinopoly.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/freetown</loc>
+    <loc>https://weatheza.me/weather/tripoli.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kaiyuan</loc>
+    <loc>https://weatheza.me/weather/trujillo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/buffalo</loc>
+    <loc>https://weatheza.me/weather/tshikapa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/santo-domingo-este</loc>
+    <loc>https://weatheza.me/weather/tucson.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/vientiane</loc>
+    <loc>https://weatheza.me/weather/turin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kermänshäh</loc>
+    <loc>https://weatheza.me/weather/tyumen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kibanseke-premiã¨re</loc>
+    <loc>https://weatheza.me/weather/ubungo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/seberang-jaya</loc>
+    <loc>https://weatheza.me/weather/ufa.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sale</loc>
+    <loc>https://weatheza.me/weather/ulaanbaatar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hubli</loc>
+    <loc>https://weatheza.me/weather/ulsan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/el-alto</loc>
+    <loc>https://weatheza.me/weather/vadodara.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ã‡ankaya</loc>
+    <loc>https://weatheza.me/weather/valencia.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hwasu-dong</loc>
+    <loc>https://weatheza.me/weather/vancouver.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yingcheng</loc>
+    <loc>https://weatheza.me/weather/vasai-virar.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/fort-worth</loc>
+    <loc>https://weatheza.me/weather/vienna.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/setagaya</loc>
+    <loc>https://weatheza.me/weather/vientiane.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/keã§iã¶ren</loc>
+    <loc>https://weatheza.me/weather/vijayaväda.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/luocheng</loc>
+    <loc>https://weatheza.me/weather/virginia-beach.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jerusalem</loc>
+    <loc>https://weatheza.me/weather/vishäkhapatnam.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/khartoum-north</loc>
+    <loc>https://weatheza.me/weather/volgograd.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/meishan</loc>
+    <loc>https://weatheza.me/weather/voronezh.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mushin</loc>
+    <loc>https://weatheza.me/weather/väränasi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/trujillo</loc>
+    <loc>https://weatheza.me/weather/wafangdian.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kitakyå«shå«</loc>
+    <loc>https://weatheza.me/weather/warsaw.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/aguascalientes</loc>
+    <loc>https://weatheza.me/weather/washington.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/khulna</loc>
+    <loc>https://weatheza.me/weather/weichanglu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/chihuahua</loc>
+    <loc>https://weatheza.me/weather/weifang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bridgeport</loc>
+    <loc>https://weatheza.me/weather/weihai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xinâ€™an</loc>
+    <loc>https://weatheza.me/weather/weinan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mysore</loc>
+    <loc>https://weatheza.me/weather/wenling.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kashgar</loc>
+    <loc>https://weatheza.me/weather/wenzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sångnam</loc>
+    <loc>https://weatheza.me/weather/wuchang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/new-orleans</loc>
+    <loc>https://weatheza.me/weather/wuchuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/trichinopoly</loc>
+    <loc>https://weatheza.me/weather/wuhan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cartagena</loc>
+    <loc>https://weatheza.me/weather/wuhu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qingzhou</loc>
+    <loc>https://weatheza.me/weather/wusong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/naples</loc>
+    <loc>https://weatheza.me/weather/wutong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/santiago-del-estero</loc>
+    <loc>https://weatheza.me/weather/wuwei.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/naucalpan-de-juã¡rez</loc>
+    <loc>https://weatheza.me/weather/wuxi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/masbate</loc>
+    <loc>https://weatheza.me/weather/wuzhong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/owerri</loc>
+    <loc>https://weatheza.me/weather/wuzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taishan</loc>
+    <loc>https://weatheza.me/weather/wuâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jiaozhou</loc>
+    <loc>https://weatheza.me/weather/xiamen.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuchuan</loc>
+    <loc>https://weatheza.me/weather/xiangtan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wafangdian</loc>
+    <loc>https://weatheza.me/weather/xiangyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/la-plata</loc>
+    <loc>https://weatheza.me/weather/xiantao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bobo-dioulasso</loc>
+    <loc>https://weatheza.me/weather/xianyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ad-dammäm</loc>
+    <loc>https://weatheza.me/weather/xiaoganzhan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hanchuan</loc>
+    <loc>https://weatheza.me/weather/xiaoxita.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/quzhou</loc>
+    <loc>https://weatheza.me/weather/xibeijie.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/donetsk</loc>
+    <loc>https://weatheza.me/weather/ximeicun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ashmå«n</loc>
+    <loc>https://weatheza.me/weather/xingtai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bunia</loc>
+    <loc>https://weatheza.me/weather/xinhualu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuchang</loc>
+    <loc>https://weatheza.me/weather/xining.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sã£o-gonã§alo</loc>
+    <loc>https://weatheza.me/weather/xinpu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hengzhou</loc>
+    <loc>https://weatheza.me/weather/xintai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/feicheng</loc>
+    <loc>https://weatheza.me/weather/xinyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bucaramanga</loc>
+    <loc>https://weatheza.me/weather/xinyi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cazenga</loc>
+    <loc>https://weatheza.me/weather/xinyu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mã©rida</loc>
+    <loc>https://weatheza.me/weather/xinzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hegang</loc>
+    <loc>https://weatheza.me/weather/xinâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/osmangazi</loc>
+    <loc>https://weatheza.me/weather/xishan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/morädäbäd</loc>
+    <loc>https://weatheza.me/weather/xiâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bangui</loc>
+    <loc>https://weatheza.me/weather/xuanzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/abeokuta</loc>
+    <loc>https://weatheza.me/weather/xushan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cancãºn</loc>
+    <loc>https://weatheza.me/weather/yancheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zaoyang</loc>
+    <loc>https://weatheza.me/weather/yangchun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dongtai</loc>
+    <loc>https://weatheza.me/weather/yangjiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/antipolo</loc>
+    <loc>https://weatheza.me/weather/yangquan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/taguig-city</loc>
+    <loc>https://weatheza.me/weather/yangshe.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tabå«k</loc>
+    <loc>https://weatheza.me/weather/yangzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/xishan</loc>
+    <loc>https://weatheza.me/weather/yanjiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhoushan</loc>
+    <loc>https://weatheza.me/weather/yantai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/panama-city</loc>
+    <loc>https://weatheza.me/weather/yanâ€™an.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tucson</loc>
+    <loc>https://weatheza.me/weather/yaoundã©.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yichun</loc>
+    <loc>https://weatheza.me/weather/yekaterinburg.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/as-sulaymänä«yah</loc>
+    <loc>https://weatheza.me/weather/yerevan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/klang</loc>
+    <loc>https://weatheza.me/weather/yibin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tiruppå«r</loc>
+    <loc>https://weatheza.me/weather/yicheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/marseille</loc>
+    <loc>https://weatheza.me/weather/yichun.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gurgaon</loc>
+    <loc>https://weatheza.me/weather/yinchuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yangchun</loc>
+    <loc>https://weatheza.me/weather/yingcheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ar-ramädä«</loc>
+    <loc>https://weatheza.me/weather/yingchuan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/haiâ€™an</loc>
+    <loc>https://weatheza.me/weather/yingkou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/jalandhar</loc>
+    <loc>https://weatheza.me/weather/yingtan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/daye</loc>
+    <loc>https://weatheza.me/weather/yiwu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/zhongxiang</loc>
+    <loc>https://weatheza.me/weather/yiyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gaomi</loc>
+    <loc>https://weatheza.me/weather/yokohama.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/teresina</loc>
+    <loc>https://weatheza.me/weather/yongcheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lhasa</loc>
+    <loc>https://weatheza.me/weather/yongzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ipoh</loc>
+    <loc>https://weatheza.me/weather/yopougon.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/saltillo</loc>
+    <loc>https://weatheza.me/weather/yucheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/aden</loc>
+    <loc>https://weatheza.me/weather/yuci.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/el-paso</loc>
+    <loc>https://weatheza.me/weather/yueyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/gongzhuling</loc>
+    <loc>https://weatheza.me/weather/yulin.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/lianyuan</loc>
+    <loc>https://weatheza.me/weather/yulinshi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ikeja</loc>
+    <loc>https://weatheza.me/weather/yuncheng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/tyumen</loc>
+    <loc>https://weatheza.me/weather/yunfu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cochabamba</loc>
+    <loc>https://weatheza.me/weather/yushan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/portsmouth</loc>
+    <loc>https://weatheza.me/weather/yushu.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/southampton</loc>
+    <loc>https://weatheza.me/weather/yutan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/hermosillo</loc>
+    <loc>https://weatheza.me/weather/yuxi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/cheongju</loc>
+    <loc>https://weatheza.me/weather/yuyao.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/shache</loc>
+    <loc>https://weatheza.me/weather/zamboanga-city.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/thanh-hã³a</loc>
+    <loc>https://weatheza.me/weather/zaoyang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/macheng</loc>
+    <loc>https://weatheza.me/weather/zaozhuang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/akure</loc>
+    <loc>https://weatheza.me/weather/zapopan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/ilorin</loc>
+    <loc>https://weatheza.me/weather/zhangjiajie.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/erbil</loc>
+    <loc>https://weatheza.me/weather/zhangjiakou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/kathmandu</loc>
+    <loc>https://weatheza.me/weather/zhangye.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/turin</loc>
+    <loc>https://weatheza.me/weather/zhangzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/anqiu</loc>
+    <loc>https://weatheza.me/weather/zhanjiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yuci</loc>
+    <loc>https://weatheza.me/weather/zhaoqing.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/dehui</loc>
+    <loc>https://weatheza.me/weather/zhaotong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/pietermaritzburg</loc>
+    <loc>https://weatheza.me/weather/zhengzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/durban</loc>
+    <loc>https://weatheza.me/weather/zhenjiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/saratov</loc>
+    <loc>https://weatheza.me/weather/zhongshan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bhubaneshwar</loc>
+    <loc>https://weatheza.me/weather/zhongwei.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/yushu</loc>
+    <loc>https://weatheza.me/weather/zhongxiang.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/joã£o-pessoa</loc>
+    <loc>https://weatheza.me/weather/zhoukou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/samarinda</loc>
+    <loc>https://weatheza.me/weather/zhoushan.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/omaha</loc>
+    <loc>https://weatheza.me/weather/zhufeng.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/qingping</loc>
+    <loc>https://weatheza.me/weather/zhuhai.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/rongjiawan</loc>
+    <loc>https://weatheza.me/weather/zhuji.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/weichanglu</loc>
+    <loc>https://weatheza.me/weather/zhumadian.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sakai</loc>
+    <loc>https://weatheza.me/weather/zhuzhou.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/eskiåÿehir</loc>
+    <loc>https://weatheza.me/weather/zibo.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/renqiu</loc>
+    <loc>https://weatheza.me/weather/zigong.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wutong</loc>
+    <loc>https://weatheza.me/weather/zunyi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/barcelona</loc>
+    <loc>https://weatheza.me/weather/ãœrã¼mqi.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/wuâ€™an</loc>
+    <loc>https://weatheza.me/weather/ã‡ankaya.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/sã£o-bernardo-do-campo</loc>
+    <loc>https://weatheza.me/weather/ä°zmir.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/mcallen</loc>
+    <loc>https://weatheza.me/weather/ä€gra.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/narela</loc>
+    <loc>https://weatheza.me/weather/ä€qchah.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weatherza.vercel.app/weather/bhayandar</loc>
+    <loc>https://weatheza.me/weather/åœsaka.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
-
 </urlset>
