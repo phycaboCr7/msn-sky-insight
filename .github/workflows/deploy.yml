@@ -1,9 +1,12 @@
 name: Deploy
 on:
   push:
-    branches: main
+    branches:
+      - main
+      - copilot/add-user-location-coordinates
   pull_request:
-    branches: main
+    branches:
+      - main
 
 jobs:
   deploy:
