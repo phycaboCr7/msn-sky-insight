@@ -3,8 +3,13 @@
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <sitemap>
-<loc>https://weatherza.vercel.app/sitemap-cities.xml</loc>
-<lastmod>2026-03-12</lastmod>
+<loc>https://weatheza.me/sitemap-main.xml</loc>
+<lastmod>2026-03-18</lastmod>
+</sitemap>
+
+<sitemap>
+<loc>https://weatheza.me/sitemap-cities.xml</loc>
+<lastmod>2026-03-18</lastmod>
 </sitemap>
 
 </sitemapindex>
